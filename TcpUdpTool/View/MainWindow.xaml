@@ -1,0 +1,45 @@
+﻿<Window x:Class="UdpTcpTool.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:UdpTcpTool"
+        xmlns:viewmodel="clr-namespace:UdpTcpTool.ViewModel"
+        xmlns:view="clr-namespace:UdpTcpTool.View"
+        mc:Ignorable="d"
+        Title="UdpTcpTool" Height="500" Width="450"
+        MinHeight="500" MinWidth="450"
+        Background="#FFE8E8E8">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+
+        <TabControl Margin="10">
+
+            <TabItem Header="TCP Client">
+                <view:TcpClientView  />
+            </TabItem>
+
+            <TabItem Header="TCP Server">
+                <view:TcpServerView />
+            </TabItem>
+
+            <TabItem Header="UDP">
+                
+            </TabItem>
+
+            <TabItem Header="Settings">
+                
+            </TabItem>
+            
+            <TabItem Header="Help">
+
+            </TabItem>
+        </TabControl>
+            
+    </Grid>
+</Window>

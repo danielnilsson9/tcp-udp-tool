@@ -5,22 +5,22 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
-using UdpTcpTool.Model;
+using TcpUdpTool.Model.Data;
 
-namespace UdpTcpTool.Impl
+namespace TcpUdpTool.Model
 {
-    public class MyTcpClient
+    public class TcpClient
     {
         public event Action<Piece> DataReceived;
         public event Action<bool> ConnectStatusChanged;
 
-        private TcpClient _tcpClient;
+        private System.Net.Sockets.TcpClient _tcpClient;
         private byte[] _buffer;
 
         
-        public MyTcpClient()
+        public TcpClient()
         {
-            _tcpClient = new TcpClient();
+            _tcpClient = new System.Net.Sockets.TcpClient();
             _buffer = new byte[8192];            
         }
 

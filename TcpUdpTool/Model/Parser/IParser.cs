@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TcpUdpTool.Model.Data;
 
-namespace UdpTcpTool.ViewModel
+namespace TcpUdpTool.Model.Parser
 {
-    class UdpPresenter
+    public interface IParser
     {
+        Piece Parse(string text);
     }
 }

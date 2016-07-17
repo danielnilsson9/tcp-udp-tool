@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace UdpTcpTool.View
+namespace TcpUdpTool.View
 {
     /// <summary>
     /// Interaction logic for TcpServerView.xaml

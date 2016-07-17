@@ -7,13 +7,28 @@
     <ProjectGuid>{C3FF0B8C-0EAF-41EF-AEF6-C8C597CF0A7F}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>UdpTcpTool</RootNamespace>
-    <AssemblyName>UdpTcpTool</AssemblyName>
+    <RootNamespace>TcpUdpTool</RootNamespace>
+    <AssemblyName>TcpUdpTool</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -55,17 +70,23 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Impl\MyTcpServer.cs" />
-    <Compile Include="Impl\MyUdpClientServer.cs" />
-    <Compile Include="Impl\TransmissionHistory.cs" />
-    <Compile Include="Model\Piece.cs" />
-    <Compile Include="Command\DelegateCommand.cs" />
-    <Compile Include="Model\ObservableObject.cs" />
-    <Compile Include="Impl\MyTcpClient.cs" />
-    <Compile Include="ViewModel\SettingsPresenter.cs" />
-    <Compile Include="ViewModel\TcpClientPresenter.cs" />
-    <Compile Include="ViewModel\TcpServerPresenter.cs" />
-    <Compile Include="ViewModel\UdpPresenter.cs" />
+    <Compile Include="Model\Formatter\HexFormatter.cs" />
+    <Compile Include="Model\Formatter\IFormatter.cs" />
+    <Compile Include="Model\Formatter\PlainTextFormatter.cs" />
+    <Compile Include="Model\Parser\HexParser.cs" />
+    <Compile Include="Model\Parser\PlainTextParser.cs" />
+    <Compile Include="Model\TcpServer.cs" />
+    <Compile Include="Model\UdpClientServer.cs" />
+    <Compile Include="Model\Parser\IParser.cs" />
+    <Compile Include="Model\TransmissionHistory.cs" />
+    <Compile Include="Model\Data\Piece.cs" />
+    <Compile Include="ViewModel\Command\DelegateCommand.cs" />
+    <Compile Include="ViewModel\ObservableObject.cs" />
+    <Compile Include="Model\TcpClient.cs" />
+    <Compile Include="ViewModel\Presenter\SettingsPresenter.cs" />
+    <Compile Include="ViewModel\Presenter\TcpClientPresenter.cs" />
+    <Compile Include="ViewModel\Presenter\TcpServerPresenter.cs" />
+    <Compile Include="ViewModel\Presenter\UdpPresenter.cs" />
     <Compile Include="View\HelpView.xaml.cs">
       <DependentUpon>HelpView.xaml</DependentUpon>
     </Compile>
@@ -148,7 +169,18 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.5.2">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.5.2 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

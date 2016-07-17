@@ -6,15 +6,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using UdpTcpTool.Impl;
-using UdpTcpTool.Model;
+using TcpUdpTool.Model;
+using TcpUdpTool.Model.Data;
+using TcpUdpTool.ViewModel.Command;
 
-namespace UdpTcpTool.ViewModel
+namespace TcpUdpTool.ViewModel.Presenter
 {
     public class TcpClientPresenter : ObservableObject
     {
         private TransmissionHistory _transmissionHistory;
-        private MyTcpClient _tcpClient;
+        private TcpClient _tcpClient;
 
 
         private string _conversationHistory;
@@ -112,7 +113,7 @@ namespace UdpTcpTool.ViewModel
         public TcpClientPresenter()
         {
             _transmissionHistory = new TransmissionHistory();
-            _tcpClient = new MyTcpClient();
+            _tcpClient = new TcpClient();
 
             _tcpClient.ConnectStatusChanged += 
                 (connected) => 

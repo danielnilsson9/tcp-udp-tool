@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using UdpTcpTool.Model;
 
-namespace UdpTcpTool.ViewModel
+namespace TcpUdpTool.ViewModel.Presenter
 {
     class TcpServerPresenter : ObservableObject
     {

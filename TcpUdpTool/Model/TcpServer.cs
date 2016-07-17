@@ -6,12 +6,12 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
-using UdpTcpTool.Model;
+using TcpUdpTool.Model.Data;
 
-namespace UdpTcpTool.Impl
+namespace TcpUdpTool.Model
 {
 
-    class MyTcpServer
+    class TcpServer
     {
         public event Action<Piece> DataReceived;
         public event Action<bool> StartedStatusChanged;
@@ -19,12 +19,12 @@ namespace UdpTcpTool.Impl
         
 
         private TcpListener _tcpServer;
-        private TcpClient _connectedClient;
+        private System.Net.Sockets.TcpClient _connectedClient;
         private bool _started = false;
         private byte[] _buffer;
 
 
-        public MyTcpServer()
+        public TcpServer()
         {
             _buffer = new byte[8192];
         }
@@ -113,7 +113,7 @@ namespace UdpTcpTool.Impl
                 }), null);
         }
 
-        private void Receive(TcpClient client)
+        private void Receive(System.Net.Sockets.TcpClient client)
         {
             if (!client.Connected)
                 return;

@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using UdpTcpTool.Model;
+using TcpUdpTool.Model.Data;
+using TcpUdpTool.Model.Formatter;
 
-namespace UdpTcpTool.Impl
+namespace TcpUdpTool.Model
 {
     class TransmissionHistory
     {
@@ -13,7 +14,7 @@ namespace UdpTcpTool.Impl
 
         private List<Piece> _history;
         private StringBuilder _cache;
-
+        private IFormatter _formatter;
 
         public TransmissionHistory()
         {
@@ -30,6 +31,13 @@ namespace UdpTcpTool.Impl
         {
             _history.Clear();
             _cache.Clear();
+            HistoryChanged?.Invoke();
+        }
+
+        public void SetFormatter(IFormatter formatter)
+        {
+            _formatter = formatter;
+            Invalidate();
             HistoryChanged?.Invoke();
         }
 

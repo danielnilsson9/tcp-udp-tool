@@ -127,7 +127,7 @@
                         IsEnabled="{Binding IsConnected}" />
 
                 <Label Grid.Column="0"
-                       Grid.Row="2"
+                       Grid.Row="1"
                        Padding="0"
                        VerticalAlignment="Center"
                        Margin="10 0 10 0"

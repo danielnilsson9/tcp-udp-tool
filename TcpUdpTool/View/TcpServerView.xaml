@@ -71,9 +71,20 @@
                         Width="80"
                         Height="21"
                         VerticalAlignment="Center"
-                        Content="Start"
                         Margin="10 10 0 10"
-                        Command="{Binding ConnectCommand}">
+                        Command="{Binding StartStopCommand}">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsStarted}" Value="True">
+                                    <Setter Property="Content" Value="Stop" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsStarted}" Value="False">
+                                    <Setter Property="Content" Value="Start" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
                 </Button>
 
             </Grid>
@@ -128,7 +139,7 @@
                         Margin="10"
                         Content="Send"
                         Command="{Binding SendCommand}"
-                        IsEnabled="{Binding IsConnected}" />
+                        IsEnabled="{Binding IsClientConnected}" />
 
                 <Label Grid.Column="0"
                        Grid.Row="1"
@@ -144,10 +155,16 @@
                             Margin="0 2 0 0">
 
                     <RadioButton Content="Text"
-                                 Margin="0 0 10 0"  />
+                                 Margin="0 0 10 0"
+                                 GroupName="TcpServerSendType"
+                                 Command="{Binding SendTypeChangedCommand}"
+                                 IsChecked="{Binding PlainTextSendTypeSelected, Mode=TwoWay}"/>
 
                     <RadioButton Content="Hex"
-                                 Margin="0 0 10 0" />
+                                 Margin="0 0 10 0"
+                                 GroupName="TcpServerSendType"
+                                 Command="{Binding SendTypeChangedCommand}"
+                                 IsChecked="{Binding HexSendTypeSelected, Mode=TwoWay}"/>
                 </StackPanel>
 
                 <Button Grid.Column="2"
@@ -157,6 +174,7 @@
                         Margin="10 0 10 0"
                         Content="Disconnect"
                         IsEnabled="{Binding IsClientConnected}"
+                        Command="{Binding DisconnectCommand}"
                         ToolTip="Force close the connection to the current client."/>
 
             </Grid>

@@ -154,15 +154,15 @@
 
                     <RadioButton Content="Text"
                                  Margin="0 0 10 0"
-                                 GroupName="SendType"
+                                 GroupName="TcpClientSendType"
                                  Command="{Binding SendTypeChangedCommand}"
-                                 IsChecked="{Binding PlainTextSendTypeSelected, Mode=TwoWay}"/>
+                                 IsChecked="{Binding PlainTextSendTypeSelected, Mode=TwoWay}" />
 
                     <RadioButton Content="Hex"
                                  Margin="0 0 10 0"
-                                 GroupName="SendType"
+                                 GroupName="TcpClientSendType"
                                  Command="{Binding SendTypeChangedCommand}"
-                                 IsChecked="{Binding HexSendTypeSelected, Mode=TwoWay}"/>
+                                 IsChecked="{Binding HexSendTypeSelected, Mode=TwoWay}" />
                 </StackPanel>
                 
             </Grid>

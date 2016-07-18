@@ -15,7 +15,7 @@ namespace TcpUdpTool.Model
     {
         public event Action<Piece> DataReceived;
         public event Action<bool> StartedStatusChanged;
-        public event Action<bool> ConnectionStatusChanged;
+        public event Action<bool, EndPoint> ConnectionStatusChanged;
         
 
         private TcpListener _tcpServer;
@@ -89,7 +89,7 @@ namespace TcpUdpTool.Model
                 _connectedClient = null;            
             }
 
-            ConnectionStatusChanged?.Invoke(false);
+            ConnectionStatusChanged?.Invoke(false, null);
         }
 
 
@@ -98,18 +98,32 @@ namespace TcpUdpTool.Model
             _tcpServer.BeginAcceptTcpClient(new AsyncCallback(
                 (ar) =>
                 {
+                    if (_tcpServer == null)
+                        return;
+
                     try
                     {
-                        _connectedClient = _tcpServer.EndAcceptTcpClient(ar);
-                        ConnectionStatusChanged?.Invoke(true);
-                        Receive(_connectedClient);
+                        System.Net.Sockets.TcpClient client = _tcpServer.EndAcceptTcpClient(ar);
+
+                        if(_connectedClient == null)
+                        {
+                            _connectedClient = client;
+                            ConnectionStatusChanged?.Invoke(true, _connectedClient.Client.RemoteEndPoint);
+                            Receive(_connectedClient);
+                        }
+                        else
+                        {
+                            // only one connection allowed, close this request.
+                            client.Close();
+                        }
+
+                        AcceptClient();
                     }
-                    catch(ObjectDisposedException )
+                    catch(ObjectDisposedException)
                     {
-                        // disconnected/stoppped
-                    }
-                    
-                    // do not accept a new client, only one allowed at a time.
+                        // stopped
+                    }             
+                          
                 }), null);
         }
 
@@ -121,6 +135,9 @@ namespace TcpUdpTool.Model
             client.GetStream().BeginRead(_buffer, 0, _buffer.Length, new AsyncCallback(
                 (ar) =>
                 {
+                    if (_connectedClient == null)
+                        return;
+
                     try
                     {
                         int read = client.GetStream().EndRead(ar);
@@ -141,7 +158,7 @@ namespace TcpUdpTool.Model
                         }
                     }
                     catch (Exception e)
-                    when (e is ObjectDisposedException || e is IOException)
+                    when (e is ObjectDisposedException || e is IOException || e is InvalidOperationException)
                     {
                         // disconnected
                         Disconnect();

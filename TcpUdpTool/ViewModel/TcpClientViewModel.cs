@@ -28,6 +28,49 @@ namespace TcpUdpTool.ViewModel
             get { return _historyViewModel; }
         }
 
+        private bool _isConnected;
+        public bool IsConnected
+        {
+            get { return _isConnected; }
+            set
+            {
+                _isConnected = value;
+                OnPropertyChanged("IsConnected");
+            }
+        }
+
+        private string _ipAddress;
+        public string IpAddress
+        {
+            get { return _ipAddress; }
+            set
+            {
+                _ipAddress = value;
+                OnPropertyChanged("IpAddress");
+            }
+        }
+
+        private int _port;
+        public int Port
+        {
+            get { return _port; }
+            set
+            {
+                _port = value;
+                OnPropertyChanged("Port");
+            }
+        }
+
+        private string _message;
+        public string Message
+        {
+            get { return _message; }
+            set
+            {
+                _message = value;
+                OnPropertyChanged("Message");
+            }
+        }
 
         private bool _plainTextSendTypeSelected;
         public bool PlainTextSendTypeSelected
@@ -58,54 +101,7 @@ namespace TcpUdpTool.ViewModel
         }
 
 
-        private string _ipAddress;
-        public string IpAddress
-        {
-            get { return _ipAddress; }
-            set
-            {
-                _ipAddress = value;
-                OnPropertyChanged("IpAddress");
-            }
-        }
-
-        private int _port;
-        public int Port
-        {
-            get { return _port; }
-            set
-            {
-                _port = value;
-                OnPropertyChanged("Port");
-            }
-        }
-
-
-        private bool _isConnected;
-        public bool IsConnected
-        {
-            get { return _isConnected; }
-            set
-            {
-                _isConnected = value;
-                OnPropertyChanged("IsConnected");
-            }
-        }
-
-
-        private string _message;
-        public string Message
-        {
-            get { return _message; }
-            set
-            {
-                _message = value;
-                OnPropertyChanged("Message");
-            }
-        }
-
-
-
+    
         public ICommand ConnectDisconnectCommand
         {
             get
@@ -146,7 +142,6 @@ namespace TcpUdpTool.ViewModel
                 (connected, remoteEp) => 
                 {
                     IsConnected = connected;
-
                     History.Header = "Connected to: < " + (connected ? remoteEp.ToString() : "NONE") + " >"; 
                 };
 

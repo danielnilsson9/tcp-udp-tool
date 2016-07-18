@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
-namespace TcpUdpTool.ViewModel.Command
+namespace TcpUdpTool.ViewModel.Reusable
 {
     public class DelegateCommand : ICommand
     {      

@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:TcpUdpTool.View"
              mc:Ignorable="d" >
     
-    <GroupBox Header="Connected To: &lt;NONE&gt;">
+    <GroupBox Header="{Binding History.Header}">
 
         <Grid Margin="10">
             <Grid.ColumnDefinitions>
@@ -20,7 +20,7 @@
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <TextBox Name="HistoryTextBox"
+            <TextBox x:Name="HistoryTextBox"
                      Grid.Column="0"
                      Grid.Row="0"
                      Grid.ColumnSpan="4"
@@ -28,7 +28,7 @@
                      Margin="0 0 0 10"
                      ScrollViewer.VerticalScrollBarVisibility="Visible"
                      TextWrapping="Wrap"
-                     Text="{Binding History}"
+                     Text="{Binding History.Conversation}"
                      FontFamily="Courier New" />
 
             <Label Grid.Column="0"
@@ -47,14 +47,14 @@
                 <RadioButton Content="Text" 
                              Margin="0 0 10 0"                           
                              GroupName="HistoryFormat"                            
-                             Command="{Binding HistoryViewChangedCommand}"
-                             IsChecked="{Binding PlainTextHistorySelected, Mode=TwoWay}" />
+                             Command="{Binding History.ViewChangedCommand}"
+                             IsChecked="{Binding History.PlainTextSelected, Mode=TwoWay}" />
 
                 <RadioButton Content="Hex" 
                              Margin="0 0 10 0"
                              GroupName="HistoryFormat"
-                             Command="{Binding HistoryViewChangedCommand}"
-                             IsChecked="{Binding HexHistorySelected, Mode=TwoWay}"/>
+                             Command="{Binding History.ViewChangedCommand}"
+                             IsChecked="{Binding History.HexSelected, Mode=TwoWay}"/>
             </StackPanel>
 
 
@@ -63,14 +63,17 @@
                     Height="21"
                     Width="60"
                     Margin="0 0 10 0"
-                    Content="Save" />
+                    Content="Save"
+                    VerticalContentAlignment="Center"
+                    Command="{Binding History.SaveCommand}"/>
 
             <Button Grid.Column="3"
                     Grid.Row="1"
                     Height="21"
                     Width="60"
                     Content="Clear"
-                    Command="{Binding ClearCommand}"/>
+                    VerticalContentAlignment="Center"
+                    Command="{Binding History.ClearCommand}"/>
 
         </Grid>
     </GroupBox>

@@ -11,55 +11,23 @@ using TcpUdpTool.Model;
 using TcpUdpTool.Model.Data;
 using TcpUdpTool.Model.Formatter;
 using TcpUdpTool.Model.Parser;
-using TcpUdpTool.ViewModel.Command;
+using TcpUdpTool.ViewModel.Reusable;
 
-namespace TcpUdpTool.ViewModel.Presenter
+namespace TcpUdpTool.ViewModel
 {
-    public class TcpClientPresenter : ObservableObject
+    public class TcpClientViewModel : ObservableObject
     {
-        private TransmissionHistory _transmissionHistory;
+       
         private IParser _parser;
         private TcpClient _tcpClient;
 
 
-        private string _conversationHistory;
-        public string ConversationHistory
+        private HistoryViewModel _historyViewModel = new HistoryViewModel();
+        public HistoryViewModel History
         {
-            get { return _conversationHistory; }
-            set
-            {
-                _conversationHistory = value;
-                OnPropertyChanged("ConversationHistory");
-            }
+            get { return _historyViewModel; }
         }
 
-        private bool _plainTextHistorySelected;
-        public bool PlainTextHistorySelected
-        {
-            get { return _plainTextHistorySelected; }
-            set
-            {
-                if(value != _plainTextHistorySelected)
-                {
-                    _plainTextHistorySelected = value;
-                    OnPropertyChanged("PlainTextHistorySelected");
-                }
-            }
-        }
-
-        private bool _hexHistorySelected;
-        public bool HexHistorySelected
-        {
-            get { return _hexHistorySelected; }
-            set
-            {
-                if (value != _hexHistorySelected)
-                {
-                    _hexHistorySelected = value;
-                    OnPropertyChanged("HextHistorySelected");
-                }
-            }
-        }
 
         private bool _plainTextSendTypeSelected;
         public bool PlainTextSendTypeSelected
@@ -125,12 +93,6 @@ namespace TcpUdpTool.ViewModel.Presenter
         }
 
 
-        public string History
-        {
-            get { return _transmissionHistory.Get(); }
-            set { }
-        }
-
         private string _message;
         public string Message
         {
@@ -144,36 +106,28 @@ namespace TcpUdpTool.ViewModel.Presenter
 
 
 
-
-        public ICommand ConnectCommand
+        public ICommand ConnectDisconnectCommand
         {
-            get { return new DelegateCommand(Connect); }
-
-        }
-
-        public ICommand DisconnectCommand
-        {
-            get { return new DelegateCommand(Disconnect); }
+            get
+            {
+                return new DelegateCommand(() =>
+                    {
+                        if (IsConnected)
+                        {
+                            Disconnect();
+                        }                         
+                        else
+                        {
+                            Connect();
+                        }                          
+                    }                  
+                );
+            }
         }
 
         public ICommand SendCommand
         {
             get { return new DelegateCommand(Send); }
-        }
-
-        public ICommand SaveCommand
-        {
-            get { return new DelegateCommand(Save); }
-        }
-
-        public ICommand ClearCommand
-        {
-            get { return new DelegateCommand(Clear); }
-        }
-
-        public ICommand HistoryViewChangedCommand
-        {
-            get { return new DelegateCommand(HistoryViewChanged); }
         }
 
         public ICommand SendTypeChangedCommand
@@ -183,34 +137,29 @@ namespace TcpUdpTool.ViewModel.Presenter
 
 
 
-        public TcpClientPresenter()
+        public TcpClientViewModel()
         {
-            _transmissionHistory = new TransmissionHistory();
             _tcpClient = new TcpClient();
+            _parser = new PlainTextParser();
 
             _tcpClient.ConnectStatusChanged += 
-                (connected) => 
+                (connected, remoteEp) => 
                 {
                     IsConnected = connected;
+
+                    History.Header = "Connected to: < " + (connected ? remoteEp.ToString() : "NONE") + " >"; 
                 };
 
             _tcpClient.DataReceived += 
                 (msg) =>
                 {
-                    _transmissionHistory.Append(msg);
+                    History.Transmissions.Append(msg);
                 };
 
-            _transmissionHistory.HistoryChanged += 
-                () =>
-                {
-                    // Trigger change event so view gets updated.
-                    OnPropertyChanged("History");
-                };
 
             IpAddress = "127.0.0.1";
-            PlainTextHistorySelected = true;
             PlainTextSendTypeSelected = true;
-            _parser = new PlainTextParser();
+            History.Header = "Connected to: < NONE >";   
         }
 
 
@@ -241,33 +190,11 @@ namespace TcpUdpTool.ViewModel.Presenter
             Piece msg = new Piece(data, Piece.EType.Sent, null);
 
             _tcpClient.Send(msg);
-            _transmissionHistory.Append(msg);
+            History.Transmissions.Append(msg);
 
             Message = "";
         }
 
-        private void Save()
-        {
-
-        }
-
-        private void Clear()
-        {
-            _transmissionHistory.Clear();
-        }
-
-
-        private void HistoryViewChanged()
-        {           
-            if(PlainTextHistorySelected)
-            {
-                _transmissionHistory.SetFormatter(new PlainTextFormatter());
-            }
-            else if(HexHistorySelected)
-            {
-                _transmissionHistory.SetFormatter(new HexFormatter());
-            }
-        }
 
         private void SendTypeChanged()
         {

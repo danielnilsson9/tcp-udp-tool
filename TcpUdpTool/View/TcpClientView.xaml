@@ -4,11 +4,11 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:TcpUdpTool.View"
-             xmlns:viewmodel="clr-namespace:TcpUdpTool.ViewModel.Presenter"
+             xmlns:viewmodel="clr-namespace:TcpUdpTool.ViewModel"
              mc:Ignorable="d" >
 
     <UserControl.DataContext>
-        <viewmodel:TcpClientPresenter />
+        <viewmodel:TcpClientViewModel />
     </UserControl.DataContext>
 
     <Grid>
@@ -70,9 +70,21 @@
                         Width="80"
                         Height="21"
                         VerticalAlignment="Center"
-                        Content="Connect"
+                        VerticalContentAlignment="Center"
                         Margin="10 10 0 10"
-                        Command="{Binding ConnectCommand}">
+                        Command="{Binding ConnectDisconnectCommand}">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsConnected}" Value="True">
+                                    <Setter Property="Content" Value="Disconnect" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsConnected}" Value="False">
+                                    <Setter Property="Content" Value="Connect" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
                 </Button>
             </Grid>
         </GroupBox>
@@ -123,6 +135,7 @@
                         Width="80"
                         Margin="10"
                         Content="Send"
+                        VerticalContentAlignment="Center"
                         Command="{Binding SendCommand}"
                         IsEnabled="{Binding IsConnected}" />
 

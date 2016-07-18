@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TcpUdpTool.ViewModel.Presenter
+namespace TcpUdpTool.ViewModel
 {
-    class SettingsPresenter
+    class UdpViewModel
     {
+
     }
 }

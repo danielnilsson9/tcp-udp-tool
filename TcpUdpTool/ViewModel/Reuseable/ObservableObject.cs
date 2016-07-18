@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TcpUdpTool.ViewModel
+namespace TcpUdpTool.ViewModel.Reusable
 {
     public class ObservableObject : INotifyPropertyChanged
     {

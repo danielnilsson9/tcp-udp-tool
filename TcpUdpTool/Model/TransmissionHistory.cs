@@ -8,7 +8,7 @@ using TcpUdpTool.Model.Formatter;
 
 namespace TcpUdpTool.Model
 {
-    class TransmissionHistory
+    public class TransmissionHistory
     {
         public event Action HistoryChanged;
 

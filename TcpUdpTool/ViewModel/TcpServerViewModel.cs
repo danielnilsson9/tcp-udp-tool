@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TcpUdpTool.ViewModel.Reusable;
 
-namespace TcpUdpTool.ViewModel.Presenter
+namespace TcpUdpTool.ViewModel
 {
-    class TcpServerPresenter : ObservableObject
+    public class TcpServerViewModel : ObservableObject
     {
 
         private string _test;
@@ -17,13 +18,10 @@ namespace TcpUdpTool.ViewModel.Presenter
         }
 
 
-        public TcpServerPresenter()
+        public TcpServerViewModel()
         {
             Test = "hej hej";
         }
-
-
-
 
 
     }

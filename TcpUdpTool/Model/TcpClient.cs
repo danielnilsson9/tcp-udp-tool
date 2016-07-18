@@ -13,32 +13,31 @@ namespace TcpUdpTool.Model
     public class TcpClient
     {
         public event Action<Piece> DataReceived;
-        public event Action<bool> ConnectStatusChanged;
+        public event Action<bool, EndPoint> ConnectStatusChanged;
 
         private System.Net.Sockets.TcpClient _tcpClient;
-        private IPEndPoint _remoteEndPoint;
         private byte[] _buffer;
 
         
         public TcpClient()
-        {
-            _tcpClient = new System.Net.Sockets.TcpClient();
+        {           
             _buffer = new byte[8192];            
         }
 
 
         public void Connect(string host, int port)
         {
-            if (_tcpClient.Connected)
+            if (_tcpClient != null && _tcpClient.Connected)
                 return; // already connected
 
+            _tcpClient = new System.Net.Sockets.TcpClient();
             _tcpClient.BeginConnect(host, port, new AsyncCallback((ar) =>
                 {
                     try
                     {
                         _tcpClient.EndConnect(ar);
 
-                        ConnectStatusChanged?.Invoke(true);
+                        ConnectStatusChanged?.Invoke(true, _tcpClient.Client.RemoteEndPoint);
 
                         Receive();
                     }
@@ -53,7 +52,7 @@ namespace TcpUdpTool.Model
         public void Disconnect()
         {
             _tcpClient.Close();
-            ConnectStatusChanged?.Invoke(false);
+            ConnectStatusChanged?.Invoke(false, null);
         }
 
         public void Send(Piece msg)
@@ -90,17 +89,14 @@ namespace TcpUdpTool.Model
                         else
                         {
                             // disconnect, server closed connection.
-                            ConnectStatusChanged?.Invoke(false);
+                            Disconnect();
                         }
                     }
                     catch(Exception e) 
-                    when (e is ObjectDisposedException || e is IOException) 
+                    when (e is ObjectDisposedException || e is IOException || e is InvalidOperationException) 
                     {
                         // disconnected
-                        if (_tcpClient.Connected)
-                        {
-                            ConnectStatusChanged?.Invoke(false);
-                        }
+                        Disconnect();
                     }                 
                 }
             ), null);       

@@ -48,7 +48,7 @@ namespace TcpUdpTool.Model
                 return;
             }
 
-            _tcpServer = new TcpListener(new System.Net.IPEndPoint(IPAddress.Parse(ip), port));
+            _tcpServer = new TcpListener(new IPEndPoint(IPAddress.Parse(ip), port));
             _tcpServer.Start(0);
             _started = true;
             StartedStatusChanged?.Invoke(true);
@@ -129,7 +129,7 @@ namespace TcpUdpTool.Model
                             byte[] data = new byte[read];
                             Array.Copy(_buffer, data, read);
 
-                            DataReceived?.Invoke(new Piece(data, Piece.EType.Received));
+                            DataReceived?.Invoke(new Piece(data, Piece.EType.Received, client.Client.RemoteEndPoint));
 
                             // read again
                             Receive(client);

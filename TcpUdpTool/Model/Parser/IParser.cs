@@ -9,6 +9,6 @@ namespace TcpUdpTool.Model.Parser
 {
     public interface IParser
     {
-        Piece Parse(string text);
+        byte[] Parse(string text);
     }
 }

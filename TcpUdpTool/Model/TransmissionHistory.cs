@@ -20,6 +20,7 @@ namespace TcpUdpTool.Model
         {
             _history = new List<Piece>();
             _cache = new StringBuilder();
+            _formatter = new PlainTextFormatter(); // default formatter
         }
 
         public string Get()
@@ -49,22 +50,23 @@ namespace TcpUdpTool.Model
         }
 
 
-
         private void AppendCache(Piece msg)
         {
             if (_cache.Length != 0)
             {
                 _cache.AppendLine();
             }
-        
-            _cache.AppendFormat("[{0}]{1}: ", msg.Timestamp.ToString("HH:mm:ss"), msg.IsSent ? "S" : "R");
-            _cache.Append(Encoding.UTF8.GetString(msg.Data));       
+
+            _formatter.Format(msg, _cache);     
         }
 
         private void Invalidate()
         {
-
+            _cache.Clear();
+            foreach(var msg in _history)
+            {
+                AppendCache(msg);
+            }
         }
-
     }
 }

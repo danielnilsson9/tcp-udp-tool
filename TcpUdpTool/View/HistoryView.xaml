@@ -28,7 +28,8 @@
                      Margin="0 0 0 10"
                      ScrollViewer.VerticalScrollBarVisibility="Visible"
                      TextWrapping="Wrap"
-                     Text="{Binding History}"/>
+                     Text="{Binding History}"
+                     FontFamily="Courier New" />
 
             <Label Grid.Column="0"
                    Grid.Row="1"
@@ -44,10 +45,16 @@
                         Margin="10 2 0 0">
 
                 <RadioButton Content="Text" 
-                             Margin="0 0 10 0" />
+                             Margin="0 0 10 0"                           
+                             GroupName="HistoryFormat"                            
+                             Command="{Binding HistoryViewChangedCommand}"
+                             IsChecked="{Binding PlainTextHistorySelected, Mode=TwoWay}" />
 
                 <RadioButton Content="Hex" 
-                             Margin="0 0 10 0" />
+                             Margin="0 0 10 0"
+                             GroupName="HistoryFormat"
+                             Command="{Binding HistoryViewChangedCommand}"
+                             IsChecked="{Binding HexHistorySelected, Mode=TwoWay}"/>
             </StackPanel>
 
 

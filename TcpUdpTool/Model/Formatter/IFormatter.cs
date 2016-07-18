@@ -9,6 +9,6 @@ namespace TcpUdpTool.Model.Formatter
 {
     public interface IFormatter
     {
-        string Format(Piece data);
+        void Format(Piece data, StringBuilder builder);
     }
 }

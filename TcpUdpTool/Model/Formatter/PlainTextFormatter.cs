@@ -9,9 +9,13 @@ namespace TcpUdpTool.Model.Formatter
 {
     class PlainTextFormatter : IFormatter
     {
-        public string Format(Piece data)
+
+        public void Format(Piece msg, StringBuilder builder)
         {
-            throw new NotImplementedException();
+            StringBuilder strb = new StringBuilder();
+
+            builder.AppendFormat("[{0}]{1}: ", msg.Timestamp.ToString("HH:mm:ss"), msg.IsSent ? "S" : "R");
+            builder.Append(Encoding.UTF8.GetString(msg.Data));
         }
     }
 }

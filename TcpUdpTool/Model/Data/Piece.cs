@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -13,6 +14,7 @@ namespace TcpUdpTool.Model.Data
         private byte[] _data;
         private EType _type;
         private DateTime _timestamp;
+        private EndPoint _origin;
 
 
         public byte[] Data
@@ -23,6 +25,11 @@ namespace TcpUdpTool.Model.Data
         public EType Type
         {
             get { return _type; }
+        }
+
+        public EndPoint Origin
+        {
+            get { return _origin; }
         }
 
         public DateTime Timestamp
@@ -46,10 +53,11 @@ namespace TcpUdpTool.Model.Data
         }
 
 
-        public Piece(byte[] data, EType type)
+        public Piece(byte[] data, EType type, EndPoint origin)
         {
             _data = data;
             _type = type;
+            _origin = origin;
             _timestamp = DateTime.Now;
         }
 

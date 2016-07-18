@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,6 +16,7 @@ namespace TcpUdpTool.Model
         public event Action<bool> ConnectStatusChanged;
 
         private System.Net.Sockets.TcpClient _tcpClient;
+        private IPEndPoint _remoteEndPoint;
         private byte[] _buffer;
 
         
@@ -80,7 +82,7 @@ namespace TcpUdpTool.Model
                             byte[] data = new byte[read];
                             Array.Copy(_buffer, data, read);
 
-                            DataReceived?.Invoke(new Piece(data, Piece.EType.Received));
+                            DataReceived?.Invoke(new Piece(data, Piece.EType.Received, _tcpClient.Client.RemoteEndPoint));
 
                             // read again
                             Receive();

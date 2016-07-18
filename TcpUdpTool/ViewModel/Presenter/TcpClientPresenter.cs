@@ -5,9 +5,12 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 using TcpUdpTool.Model;
 using TcpUdpTool.Model.Data;
+using TcpUdpTool.Model.Formatter;
+using TcpUdpTool.Model.Parser;
 using TcpUdpTool.ViewModel.Command;
 
 namespace TcpUdpTool.ViewModel.Presenter
@@ -15,6 +18,7 @@ namespace TcpUdpTool.ViewModel.Presenter
     public class TcpClientPresenter : ObservableObject
     {
         private TransmissionHistory _transmissionHistory;
+        private IParser _parser;
         private TcpClient _tcpClient;
 
 
@@ -28,6 +32,63 @@ namespace TcpUdpTool.ViewModel.Presenter
                 OnPropertyChanged("ConversationHistory");
             }
         }
+
+        private bool _plainTextHistorySelected;
+        public bool PlainTextHistorySelected
+        {
+            get { return _plainTextHistorySelected; }
+            set
+            {
+                if(value != _plainTextHistorySelected)
+                {
+                    _plainTextHistorySelected = value;
+                    OnPropertyChanged("PlainTextHistorySelected");
+                }
+            }
+        }
+
+        private bool _hexHistorySelected;
+        public bool HexHistorySelected
+        {
+            get { return _hexHistorySelected; }
+            set
+            {
+                if (value != _hexHistorySelected)
+                {
+                    _hexHistorySelected = value;
+                    OnPropertyChanged("HextHistorySelected");
+                }
+            }
+        }
+
+        private bool _plainTextSendTypeSelected;
+        public bool PlainTextSendTypeSelected
+        {
+            get { return _plainTextSendTypeSelected; }
+            set
+            {
+                if(value != _plainTextSendTypeSelected)
+                {
+                    _plainTextSendTypeSelected = value;
+                    OnPropertyChanged("PlainTextSendTypeSelected");
+                }
+            }
+        }
+
+        private bool _hexSendTypeSelected;
+        public bool HexSendTypeSelected
+        {
+            get { return _hexSendTypeSelected; }
+            set
+            {
+                if (value != _hexSendTypeSelected)
+                {
+                    _hexSendTypeSelected = value;
+                    OnPropertyChanged("HexSendTypeSelected");
+                }
+            }
+        }
+
 
         private string _ipAddress;
         public string IpAddress
@@ -83,6 +144,7 @@ namespace TcpUdpTool.ViewModel.Presenter
 
 
 
+
         public ICommand ConnectCommand
         {
             get { return new DelegateCommand(Connect); }
@@ -109,6 +171,17 @@ namespace TcpUdpTool.ViewModel.Presenter
             get { return new DelegateCommand(Clear); }
         }
 
+        public ICommand HistoryViewChangedCommand
+        {
+            get { return new DelegateCommand(HistoryViewChanged); }
+        }
+
+        public ICommand SendTypeChangedCommand
+        {
+            get { return new DelegateCommand(SendTypeChanged); }
+        }
+
+
 
         public TcpClientPresenter()
         {
@@ -127,7 +200,6 @@ namespace TcpUdpTool.ViewModel.Presenter
                     _transmissionHistory.Append(msg);
                 };
 
-
             _transmissionHistory.HistoryChanged += 
                 () =>
                 {
@@ -136,6 +208,9 @@ namespace TcpUdpTool.ViewModel.Presenter
                 };
 
             IpAddress = "127.0.0.1";
+            PlainTextHistorySelected = true;
+            PlainTextSendTypeSelected = true;
+            _parser = new PlainTextParser();
         }
 
 
@@ -152,7 +227,18 @@ namespace TcpUdpTool.ViewModel.Presenter
 
         private void Send()
         {
-            Piece msg = new Piece(Encoding.UTF8.GetBytes(Message), Piece.EType.Sent);
+            byte[] data = new byte[0];
+            try
+            {
+                data = _parser.Parse(Message);
+            }
+            catch(FormatException e)
+            {
+                MessageBox.Show(e.Message, "Error");
+                return;
+            }
+
+            Piece msg = new Piece(data, Piece.EType.Sent, null);
 
             _tcpClient.Send(msg);
             _transmissionHistory.Append(msg);
@@ -168,6 +254,31 @@ namespace TcpUdpTool.ViewModel.Presenter
         private void Clear()
         {
             _transmissionHistory.Clear();
+        }
+
+
+        private void HistoryViewChanged()
+        {           
+            if(PlainTextHistorySelected)
+            {
+                _transmissionHistory.SetFormatter(new PlainTextFormatter());
+            }
+            else if(HexHistorySelected)
+            {
+                _transmissionHistory.SetFormatter(new HexFormatter());
+            }
+        }
+
+        private void SendTypeChanged()
+        {
+            if(PlainTextSendTypeSelected)
+            {
+                _parser = new PlainTextParser();
+            }
+            else
+            {
+                _parser = new HexParser();
+            }
         }
 
     }

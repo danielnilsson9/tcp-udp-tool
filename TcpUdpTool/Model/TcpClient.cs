@@ -12,6 +12,7 @@ namespace TcpUdpTool.Model
 {
     public class TcpClient
     {
+
         public event Action<Piece> DataReceived;
         public event Action<bool, EndPoint> ConnectStatusChanged;
 

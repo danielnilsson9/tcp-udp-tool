@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,19 +12,17 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using TcpUdpTool.Model.Util;
 
-namespace TcpUdpTool
+namespace TcpUdpTool.View
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Interaction logic for UdpMulticastView.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class UdpMulticastView : UserControl
     {
-        public MainWindow()
+        public UdpMulticastView()
         {
             InitializeComponent();
         }
-
     }
 }

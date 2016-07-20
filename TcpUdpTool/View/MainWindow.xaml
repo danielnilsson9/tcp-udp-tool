@@ -7,7 +7,7 @@
         xmlns:viewmodel="clr-namespace:TcpUdpTool.ViewModel"
         xmlns:view="clr-namespace:TcpUdpTool.View"
         mc:Ignorable="d"
-        Title="TcpUdpTool" Height="500" Width="450"
+        Title="TcpUdpTool" Height="550" Width="450"
         MinHeight="500" MinWidth="460"
         Background="#FFE8E8E8">
     <Grid>
@@ -30,6 +30,10 @@
 
             <TabItem Header="UDP">
                 <view:UdpView />
+            </TabItem>
+
+            <TabItem Header="UDP Multicast">
+                <view:UdpMulticastView />
             </TabItem>
 
             <TabItem Header="Settings">

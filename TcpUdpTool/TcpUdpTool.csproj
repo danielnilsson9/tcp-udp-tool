@@ -80,6 +80,8 @@
     <Compile Include="Model\Parser\IParser.cs" />
     <Compile Include="Model\TransmissionHistory.cs" />
     <Compile Include="Model\Data\Piece.cs" />
+    <Compile Include="Model\UdpMulticast.cs" />
+    <Compile Include="Model\Util\InterfaceUtils.cs" />
     <Compile Include="ViewModel\Reuseable\DelegateCommand.cs" />
     <Compile Include="ViewModel\Reuseable\ObservableObject.cs" />
     <Compile Include="Model\TcpClient.cs" />
@@ -87,6 +89,7 @@
     <Compile Include="ViewModel\SettingsViewModel.cs" />
     <Compile Include="ViewModel\TcpClientViewModel.cs" />
     <Compile Include="ViewModel\TcpServerViewModel.cs" />
+    <Compile Include="ViewModel\UdpMulticastViewModel.cs" />
     <Compile Include="ViewModel\UdpViewModel.cs" />
     <Compile Include="View\HelpView.xaml.cs">
       <DependentUpon>HelpView.xaml</DependentUpon>
@@ -102,6 +105,9 @@
     </Compile>
     <Compile Include="View\TcpServerView.xaml.cs">
       <DependentUpon>TcpServerView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\UdpMulticastView.xaml.cs">
+      <DependentUpon>UdpMulticastView.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\UdpView.xaml.cs">
       <DependentUpon>UdpView.xaml</DependentUpon>
@@ -135,6 +141,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\TcpServerView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\UdpMulticastView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -45,14 +45,12 @@
                         Margin="10 2 0 0">
 
                 <RadioButton Content="Text" 
-                             Margin="0 0 10 0"                           
-                             GroupName="HistoryFormat"                            
+                             Margin="0 0 10 0"                                                 
                              Command="{Binding History.ViewChangedCommand}"
                              IsChecked="{Binding History.PlainTextSelected, Mode=TwoWay}" />
 
                 <RadioButton Content="Hex" 
                              Margin="0 0 10 0"
-                             GroupName="HistoryFormat"
                              Command="{Binding History.ViewChangedCommand}"
                              IsChecked="{Binding History.HexSelected, Mode=TwoWay}"/>
             </StackPanel>

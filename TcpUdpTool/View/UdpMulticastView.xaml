@@ -1,12 +1,12 @@
-﻿<UserControl x:Class="TcpUdpTool.View.UdpView"
+﻿<UserControl x:Class="TcpUdpTool.View.UdpMulticastView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:TcpUdpTool.View"
              xmlns:viewmodel="clr-namespace:TcpUdpTool.ViewModel"
-             mc:Ignorable="d">
-
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
 
     <UserControl.DataContext>
         <viewmodel:UdpViewModel />
@@ -22,7 +22,7 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <GroupBox Header="Listen"
+        <GroupBox Header="Join"
                   Margin="10">
 
             <Grid Grid.Row="0"
@@ -30,9 +30,11 @@
                   Margin="10 10 10 0">
 
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition />
-                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition />
@@ -41,50 +43,54 @@
 
                 <Label Grid.Row="0"
                        Grid.Column="0"
-                       Content="IP Address:"
+                       Content="Group (IP):"
                        Padding="0"
                        Margin="0 0 10 0"/>
 
-                <ComboBox Grid.Row="0"
+                <TextBox Grid.Row="0"
                          Grid.Column="1"           
-                         Grid.ColumnSpan="2"
                          Height="21"
                          VerticalAlignment="Center"
-                         IsEditable="True"
-                         Text="{Binding ListenIpAddress, UpdateSourceTrigger=PropertyChanged}"/>
-
-                <Label Grid.Row="1"
-                       Grid.Column="0"
+                         Text="{Binding MulticastGroup, UpdateSourceTrigger=PropertyChanged}"/>
+                
+                <Label Grid.Row="0"
+                       Grid.Column="2"
                        Content="Port:"
-                       Padding="0"
-                       Margin="0 10 10 10" />
+                       Padding="0"                      
+                       Margin="10 0 10 0" />
 
-                <TextBox Grid.Row="1"
-                         Grid.Column="1"
+                <TextBox Grid.Row="0"
+                         Grid.Column="3"
                          Height="21"
                          VerticalAlignment="Center"
                          VerticalContentAlignment="Center"
-                         Text="{Binding ListenPort, UpdateSourceTrigger=PropertyChanged}" />
+                         Text="{Binding Port, UpdateSourceTrigger=PropertyChanged}" />
+
+
+                <Label Grid.Column="0"
+                       Grid.Row="1"
+                       Content="Interface:"
+                       Padding="0" 
+                       Margin="0 0 10 0"
+                       VerticalAlignment="Center"/>
+
+                <ComboBox Grid.Column="1"
+                          Grid.Row="1"
+                          Grid.ColumnSpan="2"
+                          Height="21"
+                          VerticalAlignment="Center"
+                          Margin="0 0 10 0"
+                          Text="All" />
+
 
                 <Button Grid.Row="1"
-                        Grid.Column="2"
+                        Grid.Column="3"
                         Width="80"
                         Height="21"
+                        Margin="0 10 0 10"
                         VerticalAlignment="Center"
-                        Margin="10 10 0 10"
+                        Content="Join"
                         Command="{Binding StartStopCommand}">
-                    <Button.Style>
-                        <Style TargetType="Button">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsServerStarted}" Value="True">
-                                    <Setter Property="Content" Value="Stop" />
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding IsServerStarted}" Value="False">
-                                    <Setter Property="Content" Value="Start" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
                 </Button>
 
             </Grid>
@@ -96,11 +102,12 @@
                            Margin="10 0 10 10" />
 
 
+
         <GroupBox Header="Send"
                   Grid.Column="0"
                   Grid.Row="2"
                   Margin="10 0 10 10"
-                  Padding="0 10 0 10">
+                  Padding="0 0 0 10">
 
             <Grid Grid.Column="0"
                   Grid.Row="1">
@@ -115,11 +122,13 @@
                     <RowDefinition />
                     <RowDefinition />
                     <RowDefinition />
+                    <RowDefinition />
                 </Grid.RowDefinitions>
+
 
                 <Label Grid.Column="0"
                        Grid.Row="0"
-                       Content="IP Address:"
+                       Content="Group (IP):"
                        Margin="10 0 10 0"
                        Padding="0"
                        VerticalAlignment="Center" />
@@ -127,9 +136,9 @@
                 <TextBox Grid.Column="1"
                          Grid.Row="0"
                          Height="21"
+                         Margin="0 10 0 10"
                          VerticalAlignment="Center"
-                         VerticalContentAlignment="Center"
-                         Text="{Binding SendIpAddress, UpdateSourceTrigger=PropertyChanged}" />
+                         VerticalContentAlignment="Center" />
 
                 <Label Grid.Column="2"
                        Grid.Row="0"
@@ -143,18 +152,32 @@
                          Height="21"
                          VerticalAlignment="Center"
                          VerticalContentAlignment="Center"
-                         Margin="10 0 10 0"
-                         Text="{Binding SendPort, UpdateSourceTrigger=PropertyChanged}"/>
+                         Margin="10"/>
 
                 <Label Grid.Column="0"
                        Grid.Row="1"
+                       Height="21"
+                       VerticalContentAlignment="Center"
+                       Content="Interface:"
+                       Padding="0"
+                       Margin="10 0 0 8"/>
+
+                <ComboBox Grid.Column="1"
+                          Grid.Row="1"
+                          Grid.ColumnSpan="3"
+                          Height="21"
+                          Text="All"
+                          Margin="0 0 10 8"/>
+
+                <Label Grid.Column="0"
+                       Grid.Row="2"
                        Content="Message:"
                        Margin="10"
                        Padding="0"
-                       VerticalAlignment="Center" />
+                       VerticalAlignment="Center"/>
 
                 <TextBox Grid.Column="1"
-                         Grid.Row="1"
+                         Grid.Row="2"
                          Grid.ColumnSpan="2"
                          MinHeight="21"
                          MaxHeight="50"
@@ -165,7 +188,7 @@
                          Text="{Binding Message, UpdateSourceTrigger=PropertyChanged}" />
 
                 <Button Grid.Column="3"
-                        Grid.Row="1"                       
+                        Grid.Row="2"                       
                         Height="21"
                         Width="80"
                         Margin="10"
@@ -174,27 +197,23 @@
                         IsEnabled="{Binding IsConnected}" />
 
                 <Label Grid.Column="0"
-                       Grid.Row="2"
+                       Grid.Row="3"
                        Padding="0"
                        VerticalAlignment="Center"
                        Margin="10 0 10 0"
                        Content="Type:"/>
 
                 <StackPanel Grid.Column="1"
-                            Grid.Row="2"
+                            Grid.Row="3"
                             Orientation="Horizontal"
                             VerticalAlignment="Center"
                             Margin="0 2 0 0">
 
                     <RadioButton Content="Text"
-                                 Margin="0 0 10 0"
-                                 Command="{Binding SendTypeChangedCommand}"
-                                 IsChecked="{Binding PlainTextSendTypeSelected, Mode=TwoWay}" />
+                                 Margin="0 0 10 0"  />
 
                     <RadioButton Content="Hex"
-                                 Margin="0 0 10 0"
-                                 Command="{Binding SendTypeChangedCommand}"
-                                 IsChecked="{Binding HexSendTypeSelected, Mode=TwoWay}" />
+                                 Margin="0 0 10 0" />
                 </StackPanel>
 
             </Grid>
@@ -202,5 +221,5 @@
         </GroupBox>
 
     </Grid>
-    
+
 </UserControl>

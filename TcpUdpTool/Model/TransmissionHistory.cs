@@ -16,6 +16,8 @@ namespace TcpUdpTool.Model
         private StringBuilder _cache;
         private IFormatter _formatter;
 
+        private object _lock = new object();
+
         public TransmissionHistory()
         {
             _history = new List<Piece>();
@@ -30,23 +32,33 @@ namespace TcpUdpTool.Model
 
         public void Clear()
         {
-            _history.Clear();
-            _cache.Clear();
-            HistoryChanged?.Invoke();
+            lock(_lock)
+            {
+                _history.Clear();
+                _cache.Clear();
+                HistoryChanged?.Invoke();
+            }           
         }
 
         public void SetFormatter(IFormatter formatter)
         {
-            _formatter = formatter;
-            Invalidate();
-            HistoryChanged?.Invoke();
+            lock(_lock)
+            {
+                _formatter = formatter;
+                Invalidate();
+                HistoryChanged?.Invoke();
+            }
+            
         }
 
         public void Append(Piece msg)
         {
-            _history.Add(msg);
-            AppendCache(msg);
-            HistoryChanged?.Invoke();
+            lock(_lock)
+            {
+                _history.Add(msg);
+                AppendCache(msg);
+                HistoryChanged?.Invoke();
+            } 
         }
 
 
@@ -68,5 +80,6 @@ namespace TcpUdpTool.Model
                 AppendCache(msg);
             }
         }
+
     }
 }

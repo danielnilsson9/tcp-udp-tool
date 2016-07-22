@@ -167,7 +167,7 @@ namespace TcpUdpTool.ViewModel
             _udpClient.StatusChanged += 
                 (sender, arg) =>
                 {
-                    IsGroupJoined = arg.IsJoined;
+                    IsGroupJoined = arg.Joined;
                 };
 
             PlainTextSendTypeSelected = true;

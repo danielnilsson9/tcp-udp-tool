@@ -14,7 +14,7 @@ namespace TcpUdpTool.Model.Formatter
         {
             StringBuilder strb = new StringBuilder();
 
-            builder.AppendFormat("[{0}]{1}: ", msg.Timestamp.ToString("HH:mm:ss"), msg.IsSent ? "S" : "R");
+            builder.AppendFormat("[{0}]{1}: ", msg.Timestamp.ToString("HH:mm:ss.fff"), msg.IsSent ? "S" : "R");
             builder.Append(Encoding.UTF8.GetString(msg.Data));
         }
     }

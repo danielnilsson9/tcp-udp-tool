@@ -55,8 +55,29 @@ namespace TcpUdpTool.Model
         {
             lock(_lock)
             {
-                _history.Add(msg);
-                AppendCache(msg);
+                if(_history.Count > 0 && msg.Timestamp < _history.Last().Timestamp)
+                {
+                    int indexInsert = 0;
+                    // wrong order, insert at correct place and invalidate cache.
+                    for(int i = _history.Count; i > 0; i--)
+                    {
+                        if (_history[i - 1].Timestamp < msg.Timestamp)
+                        {
+                            indexInsert = i;
+                            break;
+                        }     
+                    }
+
+                    _history.Insert(indexInsert, msg);
+                    Invalidate();                       
+                }
+                else
+                {
+                    _history.Add(msg);
+                    AppendCache(msg);
+                }
+
+
                 HistoryChanged?.Invoke();
             } 
         }

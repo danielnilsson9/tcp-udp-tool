@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -8,6 +10,8 @@ using System.Windows.Input;
 using TcpUdpTool.Model;
 using TcpUdpTool.Model.Data;
 using TcpUdpTool.Model.Parser;
+using TcpUdpTool.Model.Util;
+using TcpUdpTool.ViewModel.Item;
 using TcpUdpTool.ViewModel.Reusable;
 
 namespace TcpUdpTool.ViewModel
@@ -18,11 +22,27 @@ namespace TcpUdpTool.ViewModel
         private IParser _parser;
 
 
+        private ObservableCollection<InterfaceItem> _localInterfaces;
+        public ObservableCollection<InterfaceItem> LocalInterfaces
+        {
+            get { return _localInterfaces; }
+            set
+            {
+                if(_localInterfaces != value)
+                {
+                    _localInterfaces = value;
+                    OnPropertyChanged(nameof(LocalInterfaces));
+                }                    
+            }
+        }
+
+
         private HistoryViewModel _historyViewModel = new HistoryViewModel();
         public HistoryViewModel History
         {
             get { return _historyViewModel; }
         }
+
 
         private bool _isStarted;
         public bool IsStarted
@@ -46,16 +66,20 @@ namespace TcpUdpTool.ViewModel
             }
         }
 
-        private string _ipAddress;
-        public string IpAddress
+        private InterfaceItem _selectedInterface;
+        public InterfaceItem SelectedInterface
         {
-            get { return _ipAddress; }
+            get { return _selectedInterface; }
             set
             {
-                _ipAddress = value;
-                OnPropertyChanged("IpAddress");
+                if(_selectedInterface != value)
+                {
+                    _selectedInterface = value;
+                    OnPropertyChanged(nameof(SelectedInterface));
+                }
             }
         }
+
 
         private int _port;
         public int Port
@@ -146,26 +170,27 @@ namespace TcpUdpTool.ViewModel
         {
             _tcpServer = new TcpServer();
             _parser = new PlainTextParser();
+            LocalInterfaces = new ObservableCollection<InterfaceItem>();
 
             _tcpServer.StatusChanged +=
                 (sender, arg) =>
                 {
-                    if(arg.Status == ServerStatusEventArgs.EServerStatus.Started)
+                    if(arg.Status == TcpServerStatusEventArgs.EServerStatus.Started)
                     {
                         IsStarted = true;
                         History.Header = "Listening on: < " + arg.ServerInfo.ToString() + " >";
                     }
-                    else if(arg.Status == ServerStatusEventArgs.EServerStatus.Stopped)
+                    else if(arg.Status == TcpServerStatusEventArgs.EServerStatus.Stopped)
                     {
                         History.Header = "Conversation History";
                         IsStarted = false;
                     }
-                    else if(arg.Status == ServerStatusEventArgs.EServerStatus.ClientConnected)
+                    else if(arg.Status == TcpServerStatusEventArgs.EServerStatus.ClientConnected)
                     {
                         History.Header = "Connected client: < " + arg.ClientInfo.ToString() + " >";
                         IsClientConnected = true;
                     }
-                    else if(arg.Status == ServerStatusEventArgs.EServerStatus.ClientDisconnected)
+                    else if(arg.Status == TcpServerStatusEventArgs.EServerStatus.ClientDisconnected)
                     {
                         History.Header = "Listening on: < " + arg.ServerInfo.ToString() + " >";
                         IsClientConnected = false;
@@ -179,9 +204,28 @@ namespace TcpUdpTool.ViewModel
                 };
 
 
-            IpAddress = "0.0.0.0";
             PlainTextSendTypeSelected = true;
             History.Header = "Conversation History";
+
+
+            // build interface list
+            LocalInterfaces.Add(new InterfaceItem(InterfaceItem.EInterfaceType.Any, IPAddress.Any));
+            LocalInterfaces.Add(new InterfaceItem(InterfaceItem.EInterfaceType.Any, IPAddress.IPv6Any));
+            foreach(var i in NetworkUtils.GetActiveInterfaces())
+            {
+
+                if(i.IPv4Address != null)
+                {
+                    LocalInterfaces.Add(new InterfaceItem(
+                        InterfaceItem.EInterfaceType.Specific, i.IPv4Address));
+                }
+
+                if(i.IPv6Address != null)
+                {
+                    LocalInterfaces.Add(new InterfaceItem(
+                        InterfaceItem.EInterfaceType.Specific, i.IPv6Address));
+                }              
+            }
         }
 
 
@@ -189,7 +233,7 @@ namespace TcpUdpTool.ViewModel
         {
             try
             {
-                _tcpServer.Start(IpAddress, Port);
+                _tcpServer.Start(SelectedInterface.Interface, Port);
             }
             catch(System.Net.Sockets.SocketException ex)
             {
@@ -197,11 +241,7 @@ namespace TcpUdpTool.ViewModel
 
                 if(ex.ErrorCode == 10013)
                 {
-                    message = "Unable to start server on port " + Port + ", already in use.";
-                }
-                else if(ex.ErrorCode == 10049)
-                {
-                    message = "Unable to bind to " + IpAddress + ", address is not valid on this computer.";
+                    message = "Port " + Port + " is already in use, unable to start server.";
                 }
 
                 MessageBox.Show(message, "Error");

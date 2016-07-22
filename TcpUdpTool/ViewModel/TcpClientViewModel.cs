@@ -152,8 +152,8 @@ namespace TcpUdpTool.ViewModel
             _tcpClient.StatusChanged += 
                 (sender, arg) => 
                 {
-                    IsConnected = arg.Status == ClientStatusEventArgs.EConnectStatus.Connected;
-                    IsConnecting = arg.Status == ClientStatusEventArgs.EConnectStatus.Connecting;
+                    IsConnected = arg.Status == TcpClientStatusEventArgs.EConnectStatus.Connected;
+                    IsConnecting = arg.Status == TcpClientStatusEventArgs.EConnectStatus.Connecting;
 
                     if(IsConnected)
                     {

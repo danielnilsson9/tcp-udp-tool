@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using TcpUdpTool.Model.Data;
 
-namespace TcpUdpTool.Model.EventArgs
+namespace TcpUdpTool.Model.EventArg
 {
-    public class ReceivedEventArgs : System.EventArgs
+    public class ReceivedEventArgs : EventArgs
     {
 
         public Piece Message { get; private set; }

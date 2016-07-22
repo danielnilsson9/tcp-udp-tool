@@ -8,7 +8,8 @@ using System.Text;
 using System.Threading.Tasks;
 using TcpUdpTool.Model.Data;
 using TcpUdpTool.Model.Util;
-using TcpUdpTool.Model.EventArgs;
+using TcpUdpTool.Model.EventArg;
+using static TcpUdpTool.Model.UdpMulticastClient;
 
 namespace TcpUdpTool.Model
 {
@@ -17,7 +18,7 @@ namespace TcpUdpTool.Model
         public enum EMulticastInterface { Default, All, Specific };
 
         public event EventHandler<ReceivedEventArgs> Received;
-        public event EventHandler<MulticastClientStatusEventArgs> StatusChanged;
+        public event EventHandler<UdpMulticastClientStatusEventArgs> StatusChanged;
      
         private UdpClient _udpClient;
 
@@ -29,7 +30,7 @@ namespace TcpUdpTool.Model
 
 
         public void Join(IPAddress groupIp, int port, 
-            EMulticastInterface minterface, IPAddress specificInterface = null)
+            EMulticastInterface iface, IPAddress specificIface = null)
         {
             if (_udpClient != null)
                 return; // already started.
@@ -41,7 +42,7 @@ namespace TcpUdpTool.Model
             _udpClient.Client.Bind(new IPEndPoint(IPAddress.Any, port));
 
 
-            if (minterface == EMulticastInterface.All)
+            if (iface == EMulticastInterface.All)
             {
                 NetworkUtils.GetMulticastInterfaces().ForEach(
                     (intrf) =>
@@ -58,22 +59,22 @@ namespace TcpUdpTool.Model
                     }
                 );               
             }
-            else if(minterface == EMulticastInterface.Specific)
+            else if(iface == EMulticastInterface.Specific)
             {
-                _udpClient.JoinMulticastGroup(groupIp, specificInterface);
+                _udpClient.JoinMulticastGroup(groupIp, specificIface);
             }
-            else if(minterface == EMulticastInterface.Default)
+            else if(iface == EMulticastInterface.Default)
             {
                 _udpClient.JoinMulticastGroup(groupIp);
             }
 
 
             StatusChanged?.Invoke(this, 
-                new MulticastClientStatusEventArgs(true)
+                new UdpMulticastClientStatusEventArgs(true)
                 {
                     MulticastGroup = new IPEndPoint(groupIp, port),
-                    MulticastInterface = minterface,
-                    SpecificInterface = specificInterface
+                    MulticastInterface = iface,
+                    SpecificInterface = specificIface
                 }
             );
 
@@ -86,9 +87,8 @@ namespace TcpUdpTool.Model
             {
                 _udpClient.Close();
                 _udpClient = null;
+                StatusChanged?.Invoke(this, new UdpMulticastClientStatusEventArgs(false));
             }
-
-            StatusChanged?.Invoke(this, new MulticastClientStatusEventArgs(false));
         }
 
         public async Task<PieceSendResult> SendAsync(Piece msg, IPAddress group, int port, 
@@ -161,7 +161,7 @@ namespace TcpUdpTool.Model
                     when(e is ObjectDisposedException || e is SocketException)
                     {
                         Leave();
-                        break; // end received;
+                        break; // end receive;
                     }                  
                 }
             });
@@ -169,16 +169,17 @@ namespace TcpUdpTool.Model
 
     }
 
-    public class MulticastClientStatusEventArgs : System.EventArgs
+    public class UdpMulticastClientStatusEventArgs : EventArgs
     {
-        public bool IsJoined {get; private set;}
+
+        public bool Joined {get; private set;}
         public IPEndPoint MulticastGroup { get; set; }
-        public UdpMulticastClient.EMulticastInterface MulticastInterface { get; set; }
+        public EMulticastInterface MulticastInterface { get; set; }
         public IPAddress SpecificInterface { get; set; }
 
-        public MulticastClientStatusEventArgs(bool joined)
+        public UdpMulticastClientStatusEventArgs(bool joined)
         {
-            IsJoined = joined;
+            Joined = joined;
         }
 
     }

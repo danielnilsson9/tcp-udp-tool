@@ -7,7 +7,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using TcpUdpTool.Model.Data;
-using TcpUdpTool.Model.EventArgs;
+using TcpUdpTool.Model.EventArg;
 
 namespace TcpUdpTool.Model
 {
@@ -15,7 +15,7 @@ namespace TcpUdpTool.Model
     class TcpServer
     {
         public event EventHandler<ReceivedEventArgs> Received;
-        public event EventHandler<ServerStatusEventArgs> StatusChanged;
+        public event EventHandler<TcpServerStatusEventArgs> StatusChanged;
 
 
         private TcpListener _tcpServer;
@@ -29,18 +29,16 @@ namespace TcpUdpTool.Model
         }
 
 
-        public void Start(string ip, int port)
+        public void Start(IPAddress ip, int port)
         {
             if(_tcpServer != null)
-            {
                 return;
-            }
-          
+                  
             try
             {
-                _tcpServer = new TcpListener(new IPEndPoint(IPAddress.Parse(ip), port));
+                _tcpServer = new TcpListener(new IPEndPoint(ip, port));
                 _tcpServer.Start(0);
-                OnStatusChanged(ServerStatusEventArgs.EServerStatus.Started);
+                OnStatusChanged(TcpServerStatusEventArgs.EServerStatus.Started);
             }
             catch(Exception)
             {
@@ -58,7 +56,7 @@ namespace TcpUdpTool.Model
             {
                 _tcpServer.Stop();
                 _tcpServer = null;
-                OnStatusChanged(ServerStatusEventArgs.EServerStatus.Stopped);
+                OnStatusChanged(TcpServerStatusEventArgs.EServerStatus.Stopped);
             }            
         }
 
@@ -85,7 +83,7 @@ namespace TcpUdpTool.Model
                 EndPoint info = _connectedClient.Client.RemoteEndPoint;
                 _connectedClient.Close();
                 _connectedClient = null;
-                OnStatusChanged(ServerStatusEventArgs.EServerStatus.ClientDisconnected);
+                OnStatusChanged(TcpServerStatusEventArgs.EServerStatus.ClientDisconnected);
             }  
         }
 
@@ -103,7 +101,7 @@ namespace TcpUdpTool.Model
                         if (_connectedClient == null)
                         {
                             _connectedClient = client;
-                            OnStatusChanged(ServerStatusEventArgs.EServerStatus.ClientConnected);
+                            OnStatusChanged(TcpServerStatusEventArgs.EServerStatus.ClientConnected);
                             StartReceive();
                         }
                         else
@@ -161,16 +159,16 @@ namespace TcpUdpTool.Model
             });    
         }
 
-        private void OnStatusChanged(ServerStatusEventArgs.EServerStatus status)
+        private void OnStatusChanged(TcpServerStatusEventArgs.EServerStatus status)
         {        
-            StatusChanged?.Invoke(this, new ServerStatusEventArgs(status, 
+            StatusChanged?.Invoke(this, new TcpServerStatusEventArgs(status, 
                 _tcpServer?.LocalEndpoint as IPEndPoint, 
                 _connectedClient?.Client.RemoteEndPoint as IPEndPoint));
         }
 
     }
 
-    public class ServerStatusEventArgs : System.EventArgs
+    public class TcpServerStatusEventArgs : EventArgs
     {
         public enum EServerStatus { Started, Stopped, ClientConnected, ClientDisconnected }
 
@@ -179,7 +177,7 @@ namespace TcpUdpTool.Model
         public IPEndPoint ClientInfo { get; private set; }
 
 
-        public ServerStatusEventArgs(EServerStatus status, IPEndPoint serverInfo, IPEndPoint clientInfo = null)
+        public TcpServerStatusEventArgs(EServerStatus status, IPEndPoint serverInfo, IPEndPoint clientInfo = null)
         {
             Status = status;
             ServerInfo = serverInfo;

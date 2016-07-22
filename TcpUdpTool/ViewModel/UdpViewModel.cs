@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -8,7 +11,10 @@ using System.Windows.Input;
 using TcpUdpTool.Model;
 using TcpUdpTool.Model.Data;
 using TcpUdpTool.Model.Parser;
+using TcpUdpTool.Model.Util;
+using TcpUdpTool.ViewModel.Item;
 using TcpUdpTool.ViewModel.Reusable;
+using static TcpUdpTool.Model.UdpClientServerStatusEventArgs;
 
 namespace TcpUdpTool.ViewModel
 {
@@ -18,26 +24,53 @@ namespace TcpUdpTool.ViewModel
         private UdpClientServer _udpClientServer;
         private IParser _parser;
 
+
+
+        private ObservableCollection<InterfaceItem> _localInterfaces;
+        public ObservableCollection<InterfaceItem> LocalInterfaces
+        {
+            get { return _localInterfaces; }
+            set
+            {
+                if (_localInterfaces != value)
+                {
+                    _localInterfaces = value;
+                    OnPropertyChanged(nameof(LocalInterfaces));
+                }
+            }
+        }
+
         private HistoryViewModel _historyViewModel = new HistoryViewModel();
         public HistoryViewModel History
         {
             get { return _historyViewModel; }
         }
 
-
+        private bool _isServerStarted;
         public bool IsServerStarted
         {
-            get { return _udpClientServer.IsStarted(); }
-        }
-
-        private string _listenIpAddress;
-        public string ListenIpAddress
-        {
-            get { return _listenIpAddress; }
+            get { return _isServerStarted; }
             set
             {
-                _listenIpAddress = value;
-                OnPropertyChanged("ListenIpAddress");
+                if(_isServerStarted != value)
+                {
+                    _isServerStarted = value;
+                    OnPropertyChanged(nameof(IsServerStarted));
+                }
+            }
+        }
+
+        private InterfaceItem _selectedInterface;
+        public InterfaceItem SelectedInterface
+        {
+            get { return _selectedInterface; }
+            set
+            {
+                if (_selectedInterface != value)
+                {
+                    _selectedInterface = value;
+                    OnPropertyChanged(nameof(SelectedInterface));
+                }
             }
         }
 
@@ -148,15 +181,16 @@ namespace TcpUdpTool.ViewModel
         {
             _udpClientServer = new UdpClientServer();
             _parser = new PlainTextParser();
+            LocalInterfaces = new ObservableCollection<InterfaceItem>();
 
-            _udpClientServer.ServerStatusChanged +=
-                (started, localEp) =>
+            _udpClientServer.StatusChanged +=
+                (sender, arg) =>
                 {
-                    OnPropertyChanged("IsServerStarted");
+                    IsServerStarted = (arg.ServerStatus == EServerStatus.Started);
 
-                    if (started)
+                    if (IsServerStarted)
                     {
-                        History.Header = "Listening on: < " + localEp.ToString() + " >";
+                        History.Header = "Listening on: < " + arg.ServerInfo.ToString() + " >";
                     }
                     else
                     {
@@ -164,23 +198,39 @@ namespace TcpUdpTool.ViewModel
                     }
                 };
 
-
-            _udpClientServer.DataReceived +=
-                (msg) =>
+            _udpClientServer.Received +=
+                (sender, arg) =>
                 {
-                    History.Transmissions.Append(msg);
+                    History.Transmissions.Append(arg.Message);
                 };
 
-            ListenIpAddress = "0.0.0.0";
             PlainTextSendTypeSelected = true;
-
             History.Header = "Conversation History";
+
+            // build interface list
+            LocalInterfaces.Add(new InterfaceItem(InterfaceItem.EInterfaceType.Any, IPAddress.Any));
+            LocalInterfaces.Add(new InterfaceItem(InterfaceItem.EInterfaceType.Any, IPAddress.IPv6Any));
+            foreach (var i in NetworkUtils.GetActiveInterfaces())
+            {
+
+                if (i.IPv4Address != null)
+                {
+                    LocalInterfaces.Add(new InterfaceItem(
+                        InterfaceItem.EInterfaceType.Specific, i.IPv4Address));
+                }
+
+                if (i.IPv6Address != null)
+                {
+                    LocalInterfaces.Add(new InterfaceItem(
+                        InterfaceItem.EInterfaceType.Specific, i.IPv6Address));
+                }
+            }
         }
 
 
         private void Start()
         {
-            _udpClientServer.Start(ListenIpAddress, ListenPort);
+            _udpClientServer.Start(SelectedInterface.Interface, ListenPort);
         }
 
         private void Stop()
@@ -195,18 +245,30 @@ namespace TcpUdpTool.ViewModel
             {
                 data = _parser.Parse(Message);
             }
-            catch (FormatException e)
+            catch (FormatException ex)
             {
-                MessageBox.Show(e.Message, "Error");
+                MessageBox.Show(ex.Message, "Error");
                 return;
             }
 
             Piece msg = new Piece(data, Piece.EType.Sent);
-            PieceSendResult res = await _udpClientServer.SendAsync(SendIpAddress, SendPort, msg);
-            msg.Origin = res.From;
-            msg.Destination = res.To;
 
-            History.Transmissions.Append(msg);
+            try
+            {
+                PieceSendResult res = await _udpClientServer.SendAsync(SendIpAddress, SendPort, msg);
+                if(res != null)
+                {
+                    msg.Origin = res.From;
+                    msg.Destination = res.To;
+
+                    History.Transmissions.Append(msg);
+                }
+            }
+            catch(InvalidOperationException ex)
+            {
+                MessageBox.Show(ex.Message, "Error");
+            }
+           
 
             Message = "";
         }
@@ -222,5 +284,6 @@ namespace TcpUdpTool.ViewModel
                 _parser = new HexParser();
             }
         }
+
     }
 }

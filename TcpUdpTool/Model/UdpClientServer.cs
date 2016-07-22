@@ -7,19 +7,18 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using TcpUdpTool.Model.Data;
+using TcpUdpTool.Model.EventArg;
 using TcpUdpTool.Model.Util;
 
 namespace TcpUdpTool.Model
 {
     public class UdpClientServer
-    { 
+    {
 
-        public event Action<Piece> DataReceived;
-        public event Action<bool, EndPoint> ServerStatusChanged;
-
+        public event EventHandler<ReceivedEventArgs> Received;
+        public event EventHandler<UdpClientServerStatusEventArgs> StatusChanged;
 
         private UdpClient _udpClient;
-        private bool _started = false;
 
 
         public UdpClientServer()
@@ -28,23 +27,19 @@ namespace TcpUdpTool.Model
         }
 
 
-        public void Start(string ip, int port)
+        public void Start(IPAddress ip, int port)
         {
             if (_udpClient != null)
                 return;
 
-            _udpClient = new UdpClient(new IPEndPoint(IPAddress.Parse(ip), port));
+            _udpClient = new UdpClient(new IPEndPoint(ip, port));
             _udpClient.EnableBroadcast = true;
-            _started = true;
 
-            ServerStatusChanged?.Invoke(true, _udpClient.Client.LocalEndPoint);
+            StatusChanged?.Invoke(this, new UdpClientServerStatusEventArgs(
+                UdpClientServerStatusEventArgs.EServerStatus.Started,
+                _udpClient.Client.LocalEndPoint as IPEndPoint));
 
-            Receive();
-        }
-
-        public bool IsStarted()
-        {
-            return _started;
+            StartReceive();
         }
 
         public void Stop()
@@ -53,20 +48,35 @@ namespace TcpUdpTool.Model
             {
                 _udpClient.Close();
                 _udpClient = null;
-            }
 
-            _started = false;
-            ServerStatusChanged?.Invoke(false, null);
+                StatusChanged?.Invoke(this, new UdpClientServerStatusEventArgs(
+                    UdpClientServerStatusEventArgs.EServerStatus.Stopped));
+            }
         }
         
         public async Task<PieceSendResult> SendAsync(string host, int port, Piece msg)
-        {
-            IPAddress addr = await NetworkUtils.DnsResolveAsync(host);
+        { 
+            // resolve, prefer ipv6 if currently in use.
+            IPAddress addr = await NetworkUtils.DnsResolveAsync(host, _udpClient != null && 
+                _udpClient.Client.LocalEndPoint.AddressFamily == AddressFamily.InterNetworkV6); 
+
             IPEndPoint from = null;
             IPEndPoint to = new IPEndPoint(addr, port);
 
             if(_udpClient != null)
             {
+                if(_udpClient.Client.AddressFamily != addr.AddressFamily)
+                {
+                    Func<AddressFamily, string> IpvToString = (family) =>
+                    {
+                        return family == AddressFamily.InterNetworkV6 ? "IPv6" : "IPv4";
+                    };
+
+                    throw new InvalidOperationException(
+                        "Cannot send UDP packet using " + IpvToString(addr.AddressFamily) + 
+                        " when bound to an " + IpvToString(_udpClient.Client.AddressFamily) + " interface.");
+                }
+
                 from = _udpClient.Client.LocalEndPoint as IPEndPoint;
                 await _udpClient.SendAsync(msg.Data, msg.Data.Length, to);
             }
@@ -86,39 +96,56 @@ namespace TcpUdpTool.Model
         }
 
 
-        private void Receive()
+        private void StartReceive()
         {
-            if (_udpClient == null)
-                return;
-
-            _udpClient.BeginReceive(
-                new AsyncCallback((ar) =>
+            Task.Run(async () =>
+            {
+                while (_udpClient != null)
                 {
-                    if (_udpClient == null)
-                        return;
-
                     try
                     {
-                        IPEndPoint from = new IPEndPoint(IPAddress.Any, 0);
-                        byte[] data = _udpClient.EndReceive(ar, ref from);
+                        UdpReceiveResult res = await _udpClient.ReceiveAsync();
 
-                        Piece msg = new Piece(data, Piece.EType.Received);
-                        msg.Origin = from;
+                        Piece msg = new Piece(res.Buffer, Piece.EType.Received);
+                        msg.Origin = res.RemoteEndPoint;
                         msg.Destination = _udpClient.Client.LocalEndPoint as IPEndPoint;
 
-                        DataReceived?.Invoke(msg);
-
-                        // receive again
-                        Receive();
+                        Received?.Invoke(this, new ReceivedEventArgs(msg));
                     }
-                    catch (Exception e)
-                    when (e is ObjectDisposedException || e is IOException || e is InvalidOperationException)
+                    catch (SocketException ex)
                     {
-                        // error, probably already stoppped.
-                        Stop();
+                        // Ignore this error, triggered after sending 
+                        // a packet to an unreachable port. UDP is not
+                        // reliable anyway, this can safetly be ignored.
+                        if(ex.ErrorCode != 10054)
+                        {
+                            Stop();
+                            break;
+                        }
                     }
-                }), null);
+                    catch(Exception)
+                    {                       
+                        Stop();
+                        break; // end receive;
+                    }
+                }
+            });
         }
 
     }
+
+    public class UdpClientServerStatusEventArgs : EventArgs
+    {
+        public enum EServerStatus { Started, Stopped };
+
+        public EServerStatus ServerStatus { get; private set; }
+        public IPEndPoint ServerInfo { get; private set; }
+
+        public UdpClientServerStatusEventArgs(EServerStatus status, IPEndPoint info = null)
+        {
+            ServerStatus = status;
+            ServerInfo = info;
+        }
+    }
+
 }

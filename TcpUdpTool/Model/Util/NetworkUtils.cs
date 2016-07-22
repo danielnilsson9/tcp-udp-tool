@@ -30,10 +30,13 @@ namespace TcpUdpTool.Model.Util
 
                 foreach (var uip in uips)
                 {
-                    if (uip.Address.AddressFamily == AddressFamily.InterNetwork ||
-                        uip.Address.AddressFamily == AddressFamily.InterNetworkV6)
+                    if (uip.Address.AddressFamily == AddressFamily.InterNetwork)
                     {
-                        //li.IpAddresses.Add(uip.Address);
+                        li.IPv4Address = uip.Address;
+                    }
+                    else if (uip.Address.AddressFamily == AddressFamily.InterNetworkV6)
+                    {
+                        li.IPv6Address = uip.Address;
                     }
                 }
 
@@ -98,16 +101,6 @@ namespace TcpUdpTool.Model.Util
             return -1;
         }
 
-
-        public static async Task<IPAddress> DnsResolveAsync(string hostOrAddress, bool favorIpV6 = false)
-        {
-            var favoredFamily = favorIpV6 ? AddressFamily.InterNetworkV6 : AddressFamily.InterNetwork;
-            var addrs = await Dns.GetHostAddressesAsync(hostOrAddress);
-            return addrs.FirstOrDefault(addr => addr.AddressFamily == favoredFamily)
-                 ?? addrs.FirstOrDefault();
-        }
-
-
         public static bool IsMulticast(IPAddress ipAddress)
         {
             bool isMulticast;
@@ -128,6 +121,15 @@ namespace TcpUdpTool.Model.Util
             return isMulticast;
         }
 
+
+        public static async Task<IPAddress> DnsResolveAsync(string hostOrAddress, bool favorIpV6 = false)
+        {
+            var favoredFamily = favorIpV6 ? AddressFamily.InterNetworkV6 : AddressFamily.InterNetwork;
+            var addrs = await Dns.GetHostAddressesAsync(hostOrAddress);
+            return addrs.FirstOrDefault(addr => addr.AddressFamily == favoredFamily)
+                 ?? addrs.FirstOrDefault();
+        }
+  
     }
 
     public class LocalInterface

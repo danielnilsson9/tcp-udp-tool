@@ -36,38 +36,54 @@ namespace TcpUdpTool.Model
                 return; // already started.
 
             _udpClient = new UdpClient(groupIp.AddressFamily);
+            Socket socket = _udpClient.Client;
 
-            _udpClient.Client.SetSocketOption(
+            socket.SetSocketOption(
                     SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-            _udpClient.Client.Bind(new IPEndPoint(IPAddress.Any, port));
+            socket.Bind(new IPEndPoint(
+                socket.AddressFamily == AddressFamily.InterNetworkV6 ? 
+                IPAddress.IPv6Any : IPAddress.Any, port));
 
+
+            var interfaceList = new List<int>();
 
             if (iface == EMulticastInterface.All)
             {
-                NetworkUtils.GetMulticastInterfaces().ForEach(
-                    (intrf) =>
-                    {
-                        // join on all interfaces
-                        try
-                        {
-                            _udpClient.JoinMulticastGroup(groupIp, intrf.IPv4Address);
-                        }
-                        catch (SocketException)
-                        {
-                            // ignore, not supported on this interface.
-                        }
-                    }
-                );               
+                foreach (var i in NetworkUtils.GetMulticastInterfaces())
+                {
+                    interfaceList.Add(i.Index);
+                }    
             }
             else if(iface == EMulticastInterface.Specific)
             {
-                _udpClient.JoinMulticastGroup(groupIp, specificIface);
+                int best = NetworkUtils.GetBestMulticastInterfaceIndex(specificIface);
+                if (best == -1) best = 0;
+                interfaceList.Add(best);
             }
             else if(iface == EMulticastInterface.Default)
             {
-                _udpClient.JoinMulticastGroup(groupIp);
+                interfaceList.Add(0); // 0 = default.
             }
 
+            foreach (int ifaceIndex in interfaceList)
+            {
+                if (socket.AddressFamily == AddressFamily.InterNetwork)
+                {
+                    MulticastOption opt = new MulticastOption(
+                        groupIp, ifaceIndex);
+
+                    socket.SetSocketOption(SocketOptionLevel.IP,
+                        SocketOptionName.AddMembership, opt);
+                }
+                else if (socket.AddressFamily == AddressFamily.InterNetworkV6)
+                {                
+                    IPv6MulticastOption optv6 = new IPv6MulticastOption(
+                        groupIp, ifaceIndex);
+
+                    socket.SetSocketOption(SocketOptionLevel.IPv6,
+                        SocketOptionName.AddMembership, optv6);
+                }
+            }
 
             StatusChanged?.Invoke(this, 
                 new UdpMulticastClientStatusEventArgs(true)
@@ -92,53 +108,52 @@ namespace TcpUdpTool.Model
         }
 
         public async Task<PieceSendResult> SendAsync(Piece msg, IPAddress group, int port, 
-            EMulticastInterface minterface, IPAddress specificInterface = null)
+            EMulticastInterface iface, IPAddress specificIface = null)
         {
             UdpClient sendClient = new UdpClient(group.AddressFamily);
 
+            sendClient.Client.Bind(new IPEndPoint(
+                sendClient.Client.AddressFamily == AddressFamily.InterNetworkV6 ?
+                IPAddress.IPv6Any : IPAddress.Any, 0));
+
+
             IPEndPoint from = sendClient.Client.LocalEndPoint as IPEndPoint;
             IPEndPoint to = new IPEndPoint(group, port);
+            var sendInterfaces = new List<int>();
 
-            var interfaces = new List<int>();
-
-            if(minterface == EMulticastInterface.All)
+            if(iface == EMulticastInterface.All)
             {
                 foreach(var i in NetworkUtils.GetMulticastInterfaces())
                 {
-                    interfaces.Add(i.Index);
+                    sendInterfaces.Add(i.Index);
                 }
             }
-            else if(minterface == EMulticastInterface.Specific)
+            else if(iface == EMulticastInterface.Specific)
             {
-                int ifindex = NetworkUtils.GetBestMulticastInterfaceIndex(specificInterface);
+                int idx = NetworkUtils.GetBestMulticastInterfaceIndex(specificIface);
+                if (idx == -1)
+                {
+                    idx = 0; // fall back default to default if not found.
+                }
 
-                if(ifindex != -1)
-                {
-                    System.Diagnostics.Debug.WriteLine("Sending multicast on specific interface: " + ifindex);
-                    interfaces.Add(ifindex);
-                }                
-            }
-                               
-            
-            if(interfaces.Any())
-            {
-                // send on specific interfaces.
-                foreach (int ifindex in interfaces)
-                {
-                    sendClient.Client.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.MulticastInterface, ifindex);
-                    await sendClient.SendAsync(msg.Data, msg.Data.Length, to);
-                }
+                sendInterfaces.Add(idx);
             }
             else
             {
-                // send using default interface.
+                sendInterfaces.Add(0); // use default interface.
+            }
+
+
+            foreach(var ifaceIndex in sendInterfaces)
+            {
+                SetSendInterface(sendClient, ifaceIndex);
                 await sendClient.SendAsync(msg.Data, msg.Data.Length, to);
             }
-       
-            return new PieceSendResult { From = from, To = to };      
+
+            return new PieceSendResult { From = from, To = to };    
         }
 
-
+        
         private void StartReceive()
         {
             Task.Run(async () =>
@@ -165,6 +180,37 @@ namespace TcpUdpTool.Model
                     }                  
                 }
             });
+        }
+        
+
+        private void SetSendInterface(UdpClient client, int ifaceIndex)
+        {
+            // Set the outgoing multicast interface
+            Socket socket = client.Client;
+
+            if (socket.AddressFamily == AddressFamily.InterNetwork)
+            {
+                // Interface index must be in network byte order for iPv4
+                // https://msdn.microsoft.com/en-us/library/windows/desktop/ms738586(v=vs.85).aspx
+
+                socket.SetSocketOption(
+                    SocketOptionLevel.IP,
+                    SocketOptionName.MulticastInterface,
+                    IPAddress.HostToNetworkOrder(ifaceIndex)
+                );
+            }
+            else
+            {
+                // Interface index must be in HOST BYTE ORDER for IPv6
+                // Many wasted houers here...
+                // https://msdn.microsoft.com/en-us/library/windows/desktop/ms738574(v=vs.85).aspx
+
+                socket.SetSocketOption(
+                    SocketOptionLevel.IPv6,
+                    SocketOptionName.MulticastInterface,
+                    ifaceIndex
+                );
+            }
         }
 
     }

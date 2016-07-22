@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -10,6 +11,7 @@ using TcpUdpTool.Model;
 using TcpUdpTool.Model.Data;
 using TcpUdpTool.Model.Parser;
 using TcpUdpTool.Model.Util;
+using TcpUdpTool.ViewModel.Item;
 using TcpUdpTool.ViewModel.Reusable;
 
 namespace TcpUdpTool.ViewModel
@@ -19,6 +21,20 @@ namespace TcpUdpTool.ViewModel
         private UdpMulticastClient _udpClient;
         private IParser _parser;
 
+
+        private ObservableCollection<InterfaceItem> _localInterfaces;
+        public ObservableCollection<InterfaceItem> LocalInterfaces
+        {
+            get { return _localInterfaces; }
+            set
+            {
+                if (_localInterfaces != value)
+                {
+                    _localInterfaces = value;
+                    OnPropertyChanged(nameof(LocalInterfaces));
+                }
+            }
+        }
 
         private HistoryViewModel _historyViewModel = new HistoryViewModel();
         public HistoryViewModel History
@@ -59,6 +75,21 @@ namespace TcpUdpTool.ViewModel
             }
         }
 
+        private InterfaceItem _selectedListenInterface;
+        public InterfaceItem SelectedListenInterface
+        {
+            get { return _selectedListenInterface; }
+            set
+            {
+                if (_selectedListenInterface != value)
+                {
+                    _selectedListenInterface = value;
+                    OnPropertyChanged(nameof(SelectedListenInterface));
+                }
+            }
+        }
+
+
         private string _sendMulticastGroup;
         public string SendMulticastGroup
         {
@@ -78,6 +109,20 @@ namespace TcpUdpTool.ViewModel
             {
                 _sendMulticastPort = value;
                 OnPropertyChanged(nameof(SendMulticastPort));
+            }
+        }
+
+        private InterfaceItem _selectedSendInterface;
+        public InterfaceItem SelectedSendInterface
+        {
+            get { return _selectedSendInterface; }
+            set
+            {
+                if (_selectedSendInterface != value)
+                {
+                    _selectedSendInterface = value;
+                    OnPropertyChanged(nameof(SelectedSendInterface));
+                }
             }
         }
 
@@ -157,6 +202,7 @@ namespace TcpUdpTool.ViewModel
         {
             _udpClient = new UdpMulticastClient();
             _parser = new PlainTextParser();
+            LocalInterfaces = new ObservableCollection<InterfaceItem>();
 
             _udpClient.Received +=
                 (sender, arg) =>
@@ -172,12 +218,30 @@ namespace TcpUdpTool.ViewModel
 
             PlainTextSendTypeSelected = true;
 
+            // build interface list
+            LocalInterfaces.Add(new InterfaceItem(InterfaceItem.EInterfaceType.Default));
+            LocalInterfaces.Add(new InterfaceItem(InterfaceItem.EInterfaceType.All));
+            foreach (var i in NetworkUtils.GetActiveInterfaces())
+            {
+                if (i.IPv4Address != null)
+                {
+                    LocalInterfaces.Add(new InterfaceItem(
+                        InterfaceItem.EInterfaceType.Specific, i.IPv4Address));
+                }
+
+                if(i.IPv6Address != null)
+                {
+                    LocalInterfaces.Add(new InterfaceItem(InterfaceItem.EInterfaceType.Specific, i.IPv6Address));
+                }
+            }
         }
 
 
         private void Join()
         {
-            _udpClient.Join(IPAddress.Parse(MulticastGroup), MulticastPort, UdpMulticastClient.EMulticastInterface.All);
+            _udpClient.Join(IPAddress.Parse(MulticastGroup), MulticastPort, 
+                ToEMulticastInterface(SelectedListenInterface.Type), 
+                SelectedListenInterface.Interface);
         }
 
         private void Leave()
@@ -199,8 +263,10 @@ namespace TcpUdpTool.ViewModel
             }
 
             Piece msg = new Piece(data, Piece.EType.Sent);
-            PieceSendResult res = await _udpClient.SendAsync(msg, IPAddress.Parse(SendMulticastGroup), 
-                SendMulticastPort, UdpMulticastClient.EMulticastInterface.All);
+            PieceSendResult res = await _udpClient.SendAsync(
+                msg, IPAddress.Parse(SendMulticastGroup), 
+                SendMulticastPort, ToEMulticastInterface(SelectedSendInterface.Type), 
+                SelectedSendInterface.Interface);
 
             if(res != null)
             {
@@ -222,6 +288,26 @@ namespace TcpUdpTool.ViewModel
             {
                 _parser = new HexParser();
             }
+        }
+
+
+        private UdpMulticastClient.EMulticastInterface ToEMulticastInterface(InterfaceItem.EInterfaceType type)
+        {
+            UdpMulticastClient.EMulticastInterface res;
+            switch (type)
+            {
+                case InterfaceItem.EInterfaceType.Default:
+                    res = UdpMulticastClient.EMulticastInterface.Default;
+                    break;
+                case InterfaceItem.EInterfaceType.All:
+                    res = UdpMulticastClient.EMulticastInterface.All;
+                    break;
+                default:
+                    res = UdpMulticastClient.EMulticastInterface.Specific;
+                    break;
+            }
+
+            return res;
         }
 
     }

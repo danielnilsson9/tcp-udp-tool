@@ -65,7 +65,7 @@ namespace TcpUdpTool.Model.Util
                 if (!aip.MulticastAddresses.Any())
                     continue;
 
-                LocalInterface li = new LocalInterface(IPAddress.HostToNetworkOrder(ipv4p.Index));
+                LocalInterface li = new LocalInterface(ipv4p.Index);
                 UnicastIPAddressInformationCollection uips = aip.UnicastAddresses;
 
                 foreach (var uip in uips)

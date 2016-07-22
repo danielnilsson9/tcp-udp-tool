@@ -188,7 +188,7 @@ namespace TcpUdpTool.ViewModel
             _udpClientServer.Stop();
         }
 
-        private void Send()
+        private async void Send()
         {
             byte[] data = new byte[0];
             try
@@ -201,9 +201,11 @@ namespace TcpUdpTool.ViewModel
                 return;
             }
 
-            Piece msg = new Piece(data, Piece.EType.Sent, null);
+            Piece msg = new Piece(data, Piece.EType.Sent);
+            PieceSendResult res = await _udpClientServer.SendAsync(SendIpAddress, SendPort, msg);
+            msg.Origin = res.From;
+            msg.Destination = res.To;
 
-            _udpClientServer.Send(SendIpAddress, SendPort, msg);
             History.Transmissions.Append(msg);
 
             Message = "";

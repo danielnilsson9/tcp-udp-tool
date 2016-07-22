@@ -24,14 +24,26 @@ namespace TcpUdpTool.ViewModel
             get { return _historyViewModel; }
         }
 
+        private bool _isStarted;
         public bool IsStarted
         {
-            get { return _tcpServer.IsStarted(); }
+            get { return _isStarted; }
+            set
+            {
+                _isStarted = value;
+                OnPropertyChanged(nameof(IsStarted));
+            }
         }
 
+        private bool _isClientConnected;
         public bool IsClientConnected
         {
-            get { return _tcpServer.IsClientConnected(); }
+            get { return _isClientConnected; }
+            set
+            {
+                _isClientConnected = value;
+                OnPropertyChanged(nameof(IsClientConnected));
+            }
         }
 
         private string _ipAddress;
@@ -135,35 +147,65 @@ namespace TcpUdpTool.ViewModel
             _tcpServer = new TcpServer();
             _parser = new PlainTextParser();
 
-            _tcpServer.StartedStatusChanged +=
-                (started) =>
+            _tcpServer.StatusChanged +=
+                (sender, arg) =>
                 {
-                    OnPropertyChanged("IsStarted");
+                    if(arg.Status == ServerStatusEventArgs.EServerStatus.Started)
+                    {
+                        IsStarted = true;
+                        History.Header = "Listening on: < " + arg.ServerInfo.ToString() + " >";
+                    }
+                    else if(arg.Status == ServerStatusEventArgs.EServerStatus.Stopped)
+                    {
+                        History.Header = "Conversation History";
+                        IsStarted = false;
+                    }
+                    else if(arg.Status == ServerStatusEventArgs.EServerStatus.ClientConnected)
+                    {
+                        History.Header = "Connected client: < " + arg.ClientInfo.ToString() + " >";
+                        IsClientConnected = true;
+                    }
+                    else if(arg.Status == ServerStatusEventArgs.EServerStatus.ClientDisconnected)
+                    {
+                        History.Header = "Listening on: < " + arg.ServerInfo.ToString() + " >";
+                        IsClientConnected = false;
+                    }               
                 };
 
-            _tcpServer.ConnectionStatusChanged +=
-                (connected, clientEp) =>
+            _tcpServer.Received +=
+                (sender, arg) =>
                 {
-                    OnPropertyChanged("IsClientConnected");
-                    History.Header = "Connected client: < " + (connected ? clientEp.ToString() : "NONE") + " >";
-                };
-
-            _tcpServer.DataReceived +=
-                (msg) =>
-                {
-                    History.Transmissions.Append(msg);
+                    History.Transmissions.Append(arg.Message);
                 };
 
 
             IpAddress = "0.0.0.0";
             PlainTextSendTypeSelected = true;
-            History.Header = "Connected client: < NONE >";
+            History.Header = "Conversation History";
         }
 
 
         private void Start()
         {
-            _tcpServer.Start(IpAddress, Port);
+            try
+            {
+                _tcpServer.Start(IpAddress, Port);
+            }
+            catch(System.Net.Sockets.SocketException ex)
+            {
+                String message = ex.Message;
+
+                if(ex.ErrorCode == 10013)
+                {
+                    message = "Unable to start server on port " + Port + ", already in use.";
+                }
+                else if(ex.ErrorCode == 10049)
+                {
+                    message = "Unable to bind to " + IpAddress + ", address is not valid on this computer.";
+                }
+
+                MessageBox.Show(message, "Error");
+            }
         }
 
         private void Stop()
@@ -171,7 +213,7 @@ namespace TcpUdpTool.ViewModel
             _tcpServer.Stop();
         }
 
-        private void Send()
+        private async void Send()
         {
             byte[] data = new byte[0];
             try
@@ -184,11 +226,16 @@ namespace TcpUdpTool.ViewModel
                 return;
             }
 
-            Piece msg = new Piece(data, Piece.EType.Sent, null);
+            Piece msg = new Piece(data, Piece.EType.Sent);
 
-            _tcpServer.Send(msg);
-            History.Transmissions.Append(msg);
-
+            PieceSendResult res = await _tcpServer.SendAsync(msg);
+            if(res != null)
+            {
+                msg.Origin = res.From;
+                msg.Destination = res.To;
+                History.Transmissions.Append(msg);
+            }
+            
             Message = "";
         }
 

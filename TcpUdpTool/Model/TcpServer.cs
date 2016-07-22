@@ -7,20 +7,19 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using TcpUdpTool.Model.Data;
+using TcpUdpTool.Model.EventArgs;
 
 namespace TcpUdpTool.Model
 {
 
     class TcpServer
     {
-        public event Action<Piece> DataReceived;
-        public event Action<bool> StartedStatusChanged;
-        public event Action<bool, EndPoint> ConnectionStatusChanged;
-        
+        public event EventHandler<ReceivedEventArgs> Received;
+        public event EventHandler<ServerStatusEventArgs> StatusChanged;
+
 
         private TcpListener _tcpServer;
         private System.Net.Sockets.TcpClient _connectedClient;
-        private bool _started = false;
         private byte[] _buffer;
 
 
@@ -30,142 +29,162 @@ namespace TcpUdpTool.Model
         }
 
 
-        public bool IsStarted()
-        {
-            return _started;
-        }
-
-        public bool IsClientConnected()
-        {
-            return _connectedClient != null && _connectedClient.Connected;
-        }
-
-
         public void Start(string ip, int port)
         {
             if(_tcpServer != null)
             {
                 return;
             }
-
-            _tcpServer = new TcpListener(new IPEndPoint(IPAddress.Parse(ip), port));
-            _tcpServer.Start(0);
-            _started = true;
-            StartedStatusChanged?.Invoke(true);
-
-            AcceptClient();
+          
+            try
+            {
+                _tcpServer = new TcpListener(new IPEndPoint(IPAddress.Parse(ip), port));
+                _tcpServer.Start(0);
+                OnStatusChanged(ServerStatusEventArgs.EServerStatus.Started);
+            }
+            catch(Exception)
+            {
+                Stop();
+                throw;
+            }
+            
+            StartAcceptClient();
         }
 
         public void Stop()
         {
             Disconnect();
-            if(IsStarted())
+            if(_tcpServer != null)
             {
-                _started = false;
                 _tcpServer.Stop();
-                _tcpServer = null;               
-            }
-
-            StartedStatusChanged?.Invoke(false);
+                _tcpServer = null;
+                OnStatusChanged(ServerStatusEventArgs.EServerStatus.Stopped);
+            }            
         }
 
-        public void Send(Piece msg)
+        public async Task<PieceSendResult> SendAsync(Piece msg)
         {
-            if(!IsClientConnected())
+            if(_connectedClient == null)
             {
-                return;
+                return null;
             }
 
-            _connectedClient.GetStream().WriteAsync(msg.Data, 0, msg.Length);
-        }
+            IPEndPoint from = _connectedClient.Client.LocalEndPoint as IPEndPoint;
+            IPEndPoint to = _connectedClient.Client.RemoteEndPoint as IPEndPoint;
 
+            await _connectedClient.GetStream().WriteAsync(msg.Data, 0, msg.Length);
+
+            return new PieceSendResult() { From = from, To = to };
+        }
 
         public void Disconnect()
         {
             // close client connection.
             if(_connectedClient != null)
             {
+                EndPoint info = _connectedClient.Client.RemoteEndPoint;
                 _connectedClient.Close();
-                _connectedClient = null;            
-            }
-
-            ConnectionStatusChanged?.Invoke(false, null);
+                _connectedClient = null;
+                OnStatusChanged(ServerStatusEventArgs.EServerStatus.ClientDisconnected);
+            }  
         }
 
 
-        private void AcceptClient()
+        private void StartAcceptClient()
         {
-            _tcpServer.BeginAcceptTcpClient(new AsyncCallback(
-                (ar) =>
+            Task.Run(async () =>
+            {
+                while(_tcpServer != null)
                 {
-                    if (_tcpServer == null)
-                        return;
-
                     try
                     {
-                        System.Net.Sockets.TcpClient client = _tcpServer.EndAcceptTcpClient(ar);
+                        System.Net.Sockets.TcpClient client = await _tcpServer.AcceptTcpClientAsync();
 
-                        if(_connectedClient == null)
+                        if (_connectedClient == null)
                         {
                             _connectedClient = client;
-                            ConnectionStatusChanged?.Invoke(true, _connectedClient.Client.RemoteEndPoint);
-                            Receive(_connectedClient);
+                            OnStatusChanged(ServerStatusEventArgs.EServerStatus.ClientConnected);
+                            StartReceive();
                         }
                         else
                         {
                             // only one connection allowed, close this request.
                             client.Close();
                         }
-
-                        AcceptClient();
                     }
-                    catch(ObjectDisposedException)
+                    catch(Exception ex)
+                    when(ex is SocketException || ex is ObjectDisposedException)
                     {
-                        // stopped
-                    }             
-                          
-                }), null);
+                        Stop();
+                        break;
+                    }
+                }
+            });
         }
 
-        private void Receive(System.Net.Sockets.TcpClient client)
+        private void StartReceive()
         {
-            if (!client.Connected)
-                return;
-
-            client.GetStream().BeginRead(_buffer, 0, _buffer.Length, new AsyncCallback(
-                (ar) =>
+            Task.Run(async () =>
+            {
+                while (_connectedClient != null)
                 {
-                    if (_connectedClient == null)
-                        return;
-
                     try
                     {
-                        int read = client.GetStream().EndRead(ar);
+                        int read = await _connectedClient.GetStream().ReadAsync(_buffer, 0, _buffer.Length);
+
                         if (read > 0)
                         {
                             byte[] data = new byte[read];
                             Array.Copy(_buffer, data, read);
 
-                            DataReceived?.Invoke(new Piece(data, Piece.EType.Received, client.Client.RemoteEndPoint));
 
-                            // read again
-                            Receive(client);
+                            Piece msg = new Piece(data, Piece.EType.Received);
+                            msg.Destination = _connectedClient.Client.LocalEndPoint as IPEndPoint;
+                            msg.Origin = _connectedClient.Client.RemoteEndPoint as IPEndPoint;
+
+                            Received?.Invoke(this, new ReceivedEventArgs(msg));
                         }
                         else
                         {
-                            // disconnect, server closed connection.
+                            // server closed connection.
                             Disconnect();
+                            break;
                         }
                     }
                     catch (Exception e)
-                    when (e is ObjectDisposedException || e is IOException || e is InvalidOperationException)
+                    when (e is ObjectDisposedException || e is InvalidOperationException)
                     {
-                        // disconnected
                         Disconnect();
+                        break;
                     }
+                }
+            });    
+        }
 
-                }), null);            
+        private void OnStatusChanged(ServerStatusEventArgs.EServerStatus status)
+        {        
+            StatusChanged?.Invoke(this, new ServerStatusEventArgs(status, 
+                _tcpServer?.LocalEndpoint as IPEndPoint, 
+                _connectedClient?.Client.RemoteEndPoint as IPEndPoint));
         }
 
     }
+
+    public class ServerStatusEventArgs : System.EventArgs
+    {
+        public enum EServerStatus { Started, Stopped, ClientConnected, ClientDisconnected }
+
+        public EServerStatus Status { get; private set; }
+        public IPEndPoint ServerInfo { get; private set; }
+        public IPEndPoint ClientInfo { get; private set; }
+
+
+        public ServerStatusEventArgs(EServerStatus status, IPEndPoint serverInfo, IPEndPoint clientInfo = null)
+        {
+            Status = status;
+            ServerInfo = serverInfo;
+            ClientInfo = clientInfo;
+        }
+    }
+
 }

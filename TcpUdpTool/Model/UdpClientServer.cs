@@ -7,6 +7,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using TcpUdpTool.Model.Data;
+using TcpUdpTool.Model.Util;
 
 namespace TcpUdpTool.Model
 {
@@ -18,14 +19,12 @@ namespace TcpUdpTool.Model
 
 
         private UdpClient _udpClient;
-        private UdpClient _sendUdpClient;
         private bool _started = false;
 
 
         public UdpClientServer()
         {
-            _sendUdpClient = new UdpClient();
-            _sendUdpClient.EnableBroadcast = true;
+
         }
 
 
@@ -60,9 +59,30 @@ namespace TcpUdpTool.Model
             ServerStatusChanged?.Invoke(false, null);
         }
         
-        public void Send(string ip, int port, Piece msg)
+        public async Task<PieceSendResult> SendAsync(string host, int port, Piece msg)
         {
-            _sendUdpClient.SendAsync(msg.Data, msg.Data.Length, ip, port);                   
+            IPAddress addr = await NetworkUtils.DnsResolveAsync(host);
+            IPEndPoint from = null;
+            IPEndPoint to = new IPEndPoint(addr, port);
+
+            if(_udpClient != null)
+            {
+                from = _udpClient.Client.LocalEndPoint as IPEndPoint;
+                await _udpClient.SendAsync(msg.Data, msg.Data.Length, to);
+            }
+            else
+            {
+                // send from new udp client, don't care about any response
+                // since we are not listening.
+                using (UdpClient tmpClient = new UdpClient(addr.AddressFamily))
+                {
+                    from = tmpClient.Client.LocalEndPoint as IPEndPoint;
+                    tmpClient.EnableBroadcast = true;
+                    await tmpClient.SendAsync(msg.Data, msg.Data.Length, to);
+                }
+            }
+
+            return new PieceSendResult() { From = from, To = to };            
         }
 
 
@@ -82,7 +102,11 @@ namespace TcpUdpTool.Model
                         IPEndPoint from = new IPEndPoint(IPAddress.Any, 0);
                         byte[] data = _udpClient.EndReceive(ar, ref from);
 
-                        DataReceived?.Invoke(new Piece(data, Piece.EType.Received, from));
+                        Piece msg = new Piece(data, Piece.EType.Received);
+                        msg.Origin = from;
+                        msg.Destination = _udpClient.Client.LocalEndPoint as IPEndPoint;
+
+                        DataReceived?.Invoke(msg);
 
                         // receive again
                         Receive();

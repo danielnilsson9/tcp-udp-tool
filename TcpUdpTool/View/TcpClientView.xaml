@@ -75,12 +75,14 @@
                         Command="{Binding ConnectDisconnectCommand}">
                     <Button.Style>
                         <Style TargetType="Button">
+                            <Setter Property="Content" Value="Connect" />
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding IsConnected}" Value="True">
                                     <Setter Property="Content" Value="Disconnect" />
                                 </DataTrigger>
-                                <DataTrigger Binding="{Binding IsConnected}" Value="False">
-                                    <Setter Property="Content" Value="Connect" />
+                                <DataTrigger Binding="{Binding IsConnecting}" Value="True">
+                                    <Setter Property="Content" Value="..." />
+                                    <Setter Property="IsEnabled" Value="False" />
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>

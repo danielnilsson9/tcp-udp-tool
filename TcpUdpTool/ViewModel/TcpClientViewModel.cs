@@ -35,7 +35,18 @@ namespace TcpUdpTool.ViewModel
             set
             {
                 _isConnected = value;
-                OnPropertyChanged("IsConnected");
+                OnPropertyChanged(nameof(IsConnected));
+            }
+        }
+
+        private bool _isConnecting;
+        public bool IsConnecting
+        {
+            get { return _isConnecting; }
+            set
+            {
+                _isConnecting = value;
+                OnPropertyChanged(nameof(IsConnecting));
             }
         }
 
@@ -138,30 +149,48 @@ namespace TcpUdpTool.ViewModel
             _tcpClient = new TcpClient();
             _parser = new PlainTextParser();
 
-            _tcpClient.ConnectStatusChanged += 
-                (connected, remoteEp) => 
+            _tcpClient.StatusChanged += 
+                (sender, arg) => 
                 {
-                    IsConnected = connected;
-                    History.Header = "Connected to: < " + (connected ? remoteEp.ToString() : "NONE") + " >"; 
+                    IsConnected = arg.Status == ClientStatusEventArgs.EConnectStatus.Connected;
+                    IsConnecting = arg.Status == ClientStatusEventArgs.EConnectStatus.Connecting;
+
+                    if(IsConnected)
+                    {
+                        History.Header = "Connected to: < " + arg.RemoteEndPoint.ToString() + " >";
+                    }
+                    else
+                    {
+                        History.Header = "Conversation History";
+                    }
+                  
                 };
 
-            _tcpClient.DataReceived += 
-                (msg) =>
+            _tcpClient.Received += 
+                (sender, arg) =>
                 {
-                    History.Transmissions.Append(msg);
+                    History.Transmissions.Append(arg.Message);
                 };
 
 
             IpAddress = "127.0.0.1";
             PlainTextSendTypeSelected = true;
-            History.Header = "Connected to: < NONE >";   
+            History.Header = "Conversation History";   
         }
 
 
 
-        private void Connect()
+        private async void Connect()
         {
-            _tcpClient.Connect(IpAddress, Port);
+            try
+            {
+                await _tcpClient.ConnectAsync(IpAddress, Port);
+            }
+            catch(Exception ex)
+            when(ex is System.Net.Sockets.SocketException || ex is TimeoutException)
+            {
+                MessageBox.Show(ex.Message, "Error");
+            }        
         }
 
         private void Disconnect()
@@ -169,7 +198,7 @@ namespace TcpUdpTool.ViewModel
             _tcpClient.Disconnect();
         }
 
-        private void Send()
+        private async void Send()
         {
             byte[] data = new byte[0];
             try
@@ -182,9 +211,11 @@ namespace TcpUdpTool.ViewModel
                 return;
             }
 
-            Piece msg = new Piece(data, Piece.EType.Sent, null);
+            Piece msg = new Piece(data, Piece.EType.Sent);
 
-            _tcpClient.Send(msg);
+            PieceSendResult res = await _tcpClient.SendAsync(msg);
+            msg.Origin = res.From;
+            msg.Destination = res.To;
             History.Transmissions.Append(msg);
 
             Message = "";

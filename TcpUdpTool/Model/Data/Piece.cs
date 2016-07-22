@@ -14,8 +14,8 @@ namespace TcpUdpTool.Model.Data
         private byte[] _data;
         private EType _type;
         private DateTime _timestamp;
-        private EndPoint _origin;
-
+        private IPEndPoint _origin;
+        private IPEndPoint _destination;
 
         public byte[] Data
         {
@@ -27,10 +27,18 @@ namespace TcpUdpTool.Model.Data
             get { return _type; }
         }
 
-        public EndPoint Origin
+        public IPEndPoint Origin
         {
             get { return _origin; }
+            set{ _origin = value; }
         }
+
+        public IPEndPoint Destination
+        {
+            get { return _destination; }
+            set { _destination = value; }
+        }
+
 
         public DateTime Timestamp
         {
@@ -53,11 +61,10 @@ namespace TcpUdpTool.Model.Data
         }
 
 
-        public Piece(byte[] data, EType type, EndPoint origin)
+        public Piece(byte[] data, EType type)
         {
             _data = data;
             _type = type;
-            _origin = origin;
             _timestamp = DateTime.Now;
         }
 

@@ -201,7 +201,7 @@ namespace TcpUdpTool.ViewModel
         public UdpMulticastViewModel()
         {
             _udpClient = new UdpMulticastClient();
-            _parser = new PlainTextParser();
+            _parser = new PlainTextParser(Encoding.Default);
             LocalInterfaces = new ObservableCollection<InterfaceItem>();
 
             _udpClient.Received +=
@@ -282,7 +282,7 @@ namespace TcpUdpTool.ViewModel
         {
             if (PlainTextSendTypeSelected)
             {
-                _parser = new PlainTextParser();
+                _parser = new PlainTextParser(Encoding.Default);
             }
             else
             {

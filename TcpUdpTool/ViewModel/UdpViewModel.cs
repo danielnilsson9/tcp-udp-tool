@@ -180,7 +180,7 @@ namespace TcpUdpTool.ViewModel
         public UdpViewModel()
         {
             _udpClientServer = new UdpClientServer();
-            _parser = new PlainTextParser();
+            _parser = new PlainTextParser(Encoding.Default);
             LocalInterfaces = new ObservableCollection<InterfaceItem>();
 
             _udpClientServer.StatusChanged +=
@@ -277,7 +277,7 @@ namespace TcpUdpTool.ViewModel
         {
             if (PlainTextSendTypeSelected)
             {
-                _parser = new PlainTextParser();
+                _parser = new PlainTextParser(Encoding.Default);
             }
             else
             {

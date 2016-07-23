@@ -33,5 +33,10 @@ namespace TcpUdpTool.Model.Parser
 
             return data;
         }
+
+        public void SetEncoding(Encoding encoding)
+        {
+            // has no meaning here, ignore.
+        }
     }
 }

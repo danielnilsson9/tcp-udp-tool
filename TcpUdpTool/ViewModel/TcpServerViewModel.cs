@@ -169,7 +169,7 @@ namespace TcpUdpTool.ViewModel
         public TcpServerViewModel()
         {
             _tcpServer = new TcpServer();
-            _parser = new PlainTextParser();
+            _parser = new PlainTextParser(Encoding.Default);
             LocalInterfaces = new ObservableCollection<InterfaceItem>();
 
             _tcpServer.StatusChanged +=
@@ -288,7 +288,7 @@ namespace TcpUdpTool.ViewModel
         {
             if (PlainTextSendTypeSelected)
             {
-                _parser = new PlainTextParser();
+                _parser = new PlainTextParser(Encoding.Default);
             }
             else
             {

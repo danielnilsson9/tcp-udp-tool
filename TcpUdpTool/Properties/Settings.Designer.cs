@@ -22,5 +22,29 @@ namespace TcpUdpTool.Properties {
                 return defaultInstance;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int Encoding {
+            get {
+                return ((int)(this["Encoding"]));
+            }
+            set {
+                this["Encoding"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool IPv6Support {
+            get {
+                return ((bool)(this["IPv6Support"]));
+            }
+            set {
+                this["IPv6Support"] = value;
+            }
+        }
     }
 }

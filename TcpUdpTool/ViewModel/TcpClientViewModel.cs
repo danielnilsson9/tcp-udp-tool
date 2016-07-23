@@ -147,7 +147,7 @@ namespace TcpUdpTool.ViewModel
         public TcpClientViewModel()
         {
             _tcpClient = new TcpClient();
-            _parser = new PlainTextParser();
+            _parser = new PlainTextParser(Encoding.Default);
 
             _tcpClient.StatusChanged += 
                 (sender, arg) => 
@@ -226,7 +226,7 @@ namespace TcpUdpTool.ViewModel
         {
             if(PlainTextSendTypeSelected)
             {
-                _parser = new PlainTextParser();
+                _parser = new PlainTextParser(Encoding.Default);
             }
             else
             {

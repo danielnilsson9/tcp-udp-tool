@@ -9,6 +9,7 @@ namespace TcpUdpTool.Model.Parser
 {
     public interface IParser
     {
+        void SetEncoding(Encoding encoding);
         byte[] Parse(string text);
     }
 }

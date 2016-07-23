@@ -18,43 +18,48 @@ namespace TcpUdpTool.Model.Parser
             _encoding = encoding;
             if(_encoding == null)
             {
-                _encoding = Encoding.Default;
+                _encoding = Encoding.UTF8;
             }
         }
 
         public byte[] Parse(string text)
         {
-            StringBuilder b = new StringBuilder();
+            List<byte> res = new List<byte>(text.Length * 2);
+            StringBuilder cache = new StringBuilder();
+            
 
             bool escape = false;
             bool escapeHex = false;
+            bool escapeUnicode = false;
             string hexStr = "";
             foreach(char c in text)
             {
                 if(escape)
                 {
                     if (c == '\\')
-                        b.Append('\\');
+                        cache.Append('\\');
                     else if (c == '0')
-                        b.Append('\0');
+                        cache.Append('\0');
                     else if (c == 'a')
-                        b.Append('\a');
+                        cache.Append('\a');
                     else if (c == 'b')
-                        b.Append('\b');
+                        cache.Append('\b');
                     else if (c == 'f')
-                        b.Append('\f');
+                        cache.Append('\f');
                     else if (c == 'n')
-                        b.Append('\n');
+                        cache.Append('\n');
                     else if (c == 'r')
-                        b.Append('\r');
+                        cache.Append('\r');
                     else if (c == 't')
-                        b.Append('\t');
+                        cache.Append('\t');
                     else if (c == 'v')
-                        b.Append('\v');
+                        cache.Append('\v');
                     else if (c == 'x')
                         escapeHex = true;
+                    else if (c == 'u')
+                        escapeUnicode = true;
                     else
-                        throw new FormatException("Incorrect escape sequence found, \\" 
+                        throw new FormatException("Incorrect escape sequence found, \\"
                             + c + " is not allowed.");
                     
                     escape = false;
@@ -67,15 +72,39 @@ namespace TcpUdpTool.Model.Parser
                     {
                         try
                         {
-                            b.Append((char)int.Parse(hexStr, NumberStyles.AllowHexSpecifier));
+                            // adding binary data that should not be character encoded,
+                            // encode and move previous data to result and clear cache.
+                            res.AddRange(_encoding.GetBytes(cache.ToString()));
+                            cache.Clear();
+                            res.Add((byte)int.Parse(hexStr, NumberStyles.AllowHexSpecifier));
                         }
                         catch(FormatException)
                         {
                             throw new FormatException("Incorrect escape sequence found, \\x" 
-                                + hexStr + " is not a hexadecimal number.");
+                                + hexStr + " is not a 8-bit hexadecimal number.");
                         }
 
                         escapeHex = false;
+                        hexStr = "";
+                    }
+                }
+                else if(escapeUnicode)
+                {
+                    hexStr += c;
+
+                    if(hexStr.Length == 4)
+                    {
+                        try
+                        {
+                            cache.Append(Convert.ToChar(int.Parse(hexStr, NumberStyles.AllowHexSpecifier)));
+                        }
+                        catch(FormatException)
+                        {
+                            throw new FormatException("Incorrect escape sequence found, \\u"
+                               + hexStr + " is not a 16-bit hexadecimal unicode character code.");
+                        }
+
+                        escapeUnicode = false;
                         hexStr = "";
                     }
                 }
@@ -88,12 +117,13 @@ namespace TcpUdpTool.Model.Parser
                     }
                     else
                     {
-                        b.Append(c);
+                        cache.Append(c);
                     }
                 }              
             }
-            
-            return _encoding.GetBytes(b.ToString());
+
+            res.AddRange(_encoding.GetBytes(cache.ToString()));
+            return res.ToArray();
         }
 
     }

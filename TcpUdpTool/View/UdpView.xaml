@@ -55,12 +55,14 @@
                        Margin="0 0 10 0"/>
 
                 <ComboBox Grid.Row="0"
-                         Grid.Column="1"           
-                         Grid.ColumnSpan="2"
-                         Height="21"
-                         VerticalAlignment="Center"
-                         ItemsSource="{Binding Source={StaticResource SortedLocalInterfaces}}"
-                         SelectedItem="{Binding SelectedInterface}"/>
+                          Grid.Column="1"           
+                          Grid.ColumnSpan="2"
+                          Height="21"
+                          VerticalAlignment="Center"
+                          IsEditable="True"
+                          IsReadOnly="True"
+                          ItemsSource="{Binding Source={StaticResource SortedLocalInterfaces}}"
+                          SelectedItem="{Binding SelectedInterface}"/>
 
                 <Label Grid.Row="1"
                        Grid.Column="0"

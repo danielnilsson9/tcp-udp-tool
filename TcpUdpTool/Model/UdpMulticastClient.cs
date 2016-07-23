@@ -15,6 +15,7 @@ namespace TcpUdpTool.Model
 {
     public class UdpMulticastClient
     {
+
         public enum EMulticastInterface { Default, All, Specific };
 
         public event EventHandler<ReceivedEventArgs> Received;
@@ -32,6 +33,8 @@ namespace TcpUdpTool.Model
         public void Join(IPAddress groupIp, int port, 
             EMulticastInterface iface, IPAddress specificIface = null)
         {
+            Validadate(groupIp, port);
+
             if (_udpClient != null)
                 return; // already started.
 
@@ -39,33 +42,39 @@ namespace TcpUdpTool.Model
             Socket socket = _udpClient.Client;
 
             socket.SetSocketOption(
-                    SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+                SocketOptionLevel.Socket, 
+                SocketOptionName.ReuseAddress, 
+                true
+            );
+
             socket.Bind(new IPEndPoint(
                 socket.AddressFamily == AddressFamily.InterNetworkV6 ? 
-                IPAddress.IPv6Any : IPAddress.Any, port));
+                IPAddress.IPv6Any : 
+                IPAddress.Any, port)
+            );
 
 
-            var interfaceList = new List<int>();
+            var joinInterfaces = new List<int>();
 
             if (iface == EMulticastInterface.All)
             {
                 foreach (var i in NetworkUtils.GetMulticastInterfaces())
                 {
-                    interfaceList.Add(i.Index);
+                    joinInterfaces.Add(i.Index);
                 }    
             }
             else if(iface == EMulticastInterface.Specific)
             {
                 int best = NetworkUtils.GetBestMulticastInterfaceIndex(specificIface);
                 if (best == -1) best = 0;
-                interfaceList.Add(best);
+                joinInterfaces.Add(best);
             }
             else if(iface == EMulticastInterface.Default)
             {
-                interfaceList.Add(0); // 0 = default.
+                joinInterfaces.Add(0); // 0 = default.
             }
 
-            foreach (int ifaceIndex in interfaceList)
+            foreach (int ifaceIndex in joinInterfaces)
             {
                 if (socket.AddressFamily == AddressFamily.InterNetwork)
                 {
@@ -107,10 +116,12 @@ namespace TcpUdpTool.Model
             }
         }
 
-        public async Task<PieceSendResult> SendAsync(Piece msg, IPAddress group, int port, 
+        public async Task<PieceSendResult> SendAsync(Piece msg, IPAddress groupIp, int port, 
             EMulticastInterface iface, IPAddress specificIface = null)
         {
-            UdpClient sendClient = new UdpClient(group.AddressFamily);
+            Validadate(groupIp, port);
+
+            UdpClient sendClient = new UdpClient(groupIp.AddressFamily);
 
             sendClient.Client.Bind(new IPEndPoint(
                 sendClient.Client.AddressFamily == AddressFamily.InterNetworkV6 ?
@@ -118,7 +129,7 @@ namespace TcpUdpTool.Model
 
 
             IPEndPoint from = sendClient.Client.LocalEndPoint as IPEndPoint;
-            IPEndPoint to = new IPEndPoint(group, port);
+            IPEndPoint to = new IPEndPoint(groupIp, port);
             var sendInterfaces = new List<int>();
 
             if(iface == EMulticastInterface.All)
@@ -169,11 +180,19 @@ namespace TcpUdpTool.Model
                         msg.Destination = _udpClient.Client.LocalEndPoint as IPEndPoint;
 
                         Received?.Invoke(this, new ReceivedEventArgs(msg));
-
-                        System.Diagnostics.Debug.WriteLine("Received " + res.Buffer.Length + " bytes from " + msg.Origin.ToString());
                     }
-                    catch(Exception e)
-                    when(e is ObjectDisposedException || e is SocketException)
+                    catch(SocketException ex)
+                    {
+                        // Ignore this error, triggered after sending 
+                        // a packet to an unreachable port. UDP is not
+                        // reliable anyway, this can safetly be ignored.
+                        if (ex.ErrorCode != 10054)
+                        {
+                            Leave();
+                            break;
+                        }
+                    }               
+                    catch(Exception)
                     {
                         Leave();
                         break; // end receive;
@@ -182,7 +201,6 @@ namespace TcpUdpTool.Model
             });
         }
         
-
         private void SetSendInterface(UdpClient client, int ifaceIndex)
         {
             // Set the outgoing multicast interface
@@ -190,7 +208,7 @@ namespace TcpUdpTool.Model
 
             if (socket.AddressFamily == AddressFamily.InterNetwork)
             {
-                // Interface index must be in network byte order for iPv4
+                // Interface index must be in network byte order for IPv4
                 // https://msdn.microsoft.com/en-us/library/windows/desktop/ms738586(v=vs.85).aspx
 
                 socket.SetSocketOption(
@@ -210,6 +228,19 @@ namespace TcpUdpTool.Model
                     SocketOptionName.MulticastInterface,
                     ifaceIndex
                 );
+            }
+        }
+
+        private void Validadate(IPAddress multicastGroup, int port)
+        {
+            if (!NetworkUtils.IsMulticast(multicastGroup))
+            {
+                throw new ArgumentException(multicastGroup + " is not a vaild multicast address.");
+            }
+
+            if (port < 1 || port > 65535)
+            {
+                throw new ArgumentException(port + " is not a valid multicast port number.");
             }
         }
 

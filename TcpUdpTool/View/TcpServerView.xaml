@@ -60,7 +60,8 @@
                          Grid.ColumnSpan="2"
                          Height="21"
                          VerticalAlignment="Center"
-                         IsEditable="False"
+                         IsEditable="True"
+                         IsReadOnly="True"
                          VerticalContentAlignment="Center"
                          SelectedItem="{Binding SelectedInterface}"
                          ItemsSource="{Binding Source={StaticResource SortedLocalInterfaces}}"/>

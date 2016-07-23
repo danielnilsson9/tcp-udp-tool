@@ -33,7 +33,7 @@ namespace TcpUdpTool.Model
         public void Join(IPAddress groupIp, int port, 
             EMulticastInterface iface, IPAddress specificIface = null)
         {
-            Validadate(groupIp, port);
+            Validate(groupIp, port);
 
             if (_udpClient != null)
                 return; // already started.
@@ -119,7 +119,7 @@ namespace TcpUdpTool.Model
         public async Task<PieceSendResult> SendAsync(Piece msg, IPAddress groupIp, int port, 
             EMulticastInterface iface, IPAddress specificIface = null)
         {
-            Validadate(groupIp, port);
+            Validate(groupIp, port);
 
             UdpClient sendClient = new UdpClient(groupIp.AddressFamily);
 
@@ -231,7 +231,7 @@ namespace TcpUdpTool.Model
             }
         }
 
-        private void Validadate(IPAddress multicastGroup, int port)
+        private void Validate(IPAddress multicastGroup, int port)
         {
             if (!NetworkUtils.IsMulticast(multicastGroup))
             {

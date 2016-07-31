@@ -84,6 +84,7 @@
     <Compile Include="Model\UdpMulticastClient.cs" />
     <Compile Include="Model\Util\NetworkUtils.cs" />
     <Compile Include="Model\EventArg\ReceivedEventArgs.cs" />
+    <Compile Include="Model\Util\SettingsUtils.cs" />
     <Compile Include="ViewModel\Item\InterfaceItem.cs" />
     <Compile Include="ViewModel\Reuseable\DelegateCommand.cs" />
     <Compile Include="ViewModel\Reuseable\ObservableObject.cs" />

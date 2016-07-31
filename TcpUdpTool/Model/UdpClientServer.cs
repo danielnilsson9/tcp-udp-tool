@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading.Tasks;
 using TcpUdpTool.Model.Data;
 using TcpUdpTool.Model.EventArg;
@@ -32,8 +28,16 @@ namespace TcpUdpTool.Model
             if (_udpClient != null)
                 return;
 
-            _udpClient = new UdpClient(new IPEndPoint(ip, port));
+            _udpClient = new UdpClient(ip.AddressFamily);            
             _udpClient.EnableBroadcast = true;
+
+            _udpClient.Client.SetSocketOption(
+                SocketOptionLevel.Socket, 
+                SocketOptionName.ReuseAddress, 
+                true
+            );
+
+            _udpClient.Client.Bind(new IPEndPoint(ip, port));
 
             StatusChanged?.Invoke(this, new UdpClientServerStatusEventArgs(
                 UdpClientServerStatusEventArgs.EServerStatus.Started,

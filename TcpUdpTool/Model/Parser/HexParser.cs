@@ -1,17 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using TcpUdpTool.Model.Data;
 
 namespace TcpUdpTool.Model.Parser
 {
     public class HexParser : IParser
     {
-        public byte[] Parse(string text)
+        public byte[] Parse(string text, Encoding encoding = null)
         {
             string[] parts = text.Split(new char[0], StringSplitOptions.RemoveEmptyEntries);
             byte[] data = new byte[parts.Length];
@@ -34,9 +29,5 @@ namespace TcpUdpTool.Model.Parser
             return data;
         }
 
-        public void SetEncoding(Encoding encoding)
-        {
-            // has no meaning here, ignore.
-        }
     }
 }

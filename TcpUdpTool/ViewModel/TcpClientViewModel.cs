@@ -1,16 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using TcpUdpTool.Model;
 using TcpUdpTool.Model.Data;
-using TcpUdpTool.Model.Formatter;
 using TcpUdpTool.Model.Parser;
+using TcpUdpTool.Model.Util;
 using TcpUdpTool.ViewModel.Reusable;
 
 namespace TcpUdpTool.ViewModel
@@ -57,7 +51,7 @@ namespace TcpUdpTool.ViewModel
             set
             {
                 _ipAddress = value;
-                OnPropertyChanged("IpAddress");
+                OnPropertyChanged(nameof(IpAddress));
             }
         }
 
@@ -68,7 +62,7 @@ namespace TcpUdpTool.ViewModel
             set
             {
                 _port = value;
-                OnPropertyChanged("Port");
+                OnPropertyChanged(nameof(Port));
             }
         }
 
@@ -79,7 +73,7 @@ namespace TcpUdpTool.ViewModel
             set
             {
                 _message = value;
-                OnPropertyChanged("Message");
+                OnPropertyChanged(nameof(Message));
             }
         }
 
@@ -92,7 +86,7 @@ namespace TcpUdpTool.ViewModel
                 if(value != _plainTextSendTypeSelected)
                 {
                     _plainTextSendTypeSelected = value;
-                    OnPropertyChanged("PlainTextSendTypeSelected");
+                    OnPropertyChanged(nameof(PlainTextSendTypeSelected));
                 }
             }
         }
@@ -106,7 +100,7 @@ namespace TcpUdpTool.ViewModel
                 if (value != _hexSendTypeSelected)
                 {
                     _hexSendTypeSelected = value;
-                    OnPropertyChanged("HexSendTypeSelected");
+                    OnPropertyChanged(nameof(HexSendTypeSelected));
                 }
             }
         }
@@ -147,7 +141,7 @@ namespace TcpUdpTool.ViewModel
         public TcpClientViewModel()
         {
             _tcpClient = new TcpClient();
-            _parser = new PlainTextParser(Encoding.Default);
+            _parser = new PlainTextParser();
 
             _tcpClient.StatusChanged += 
                 (sender, arg) => 
@@ -203,7 +197,7 @@ namespace TcpUdpTool.ViewModel
             byte[] data = new byte[0];
             try
             {
-                data = _parser.Parse(Message);
+                data = _parser.Parse(Message, SettingsUtils.GetEncoding());
             }
             catch(FormatException e)
             {
@@ -214,10 +208,13 @@ namespace TcpUdpTool.ViewModel
             Piece msg = new Piece(data, Piece.EType.Sent);
 
             PieceSendResult res = await _tcpClient.SendAsync(msg);
-            msg.Origin = res.From;
-            msg.Destination = res.To;
-            History.Transmissions.Append(msg);
-
+            if(res != null)
+            {
+                msg.Origin = res.From;
+                msg.Destination = res.To;
+                History.Transmissions.Append(msg);
+            }
+                   
             Message = "";
         }
 
@@ -226,7 +223,7 @@ namespace TcpUdpTool.ViewModel
         {
             if(PlainTextSendTypeSelected)
             {
-                _parser = new PlainTextParser(Encoding.Default);
+                _parser = new PlainTextParser();
             }
             else
             {

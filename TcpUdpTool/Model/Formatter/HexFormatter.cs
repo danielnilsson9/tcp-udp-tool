@@ -1,18 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text;
 using TcpUdpTool.Model.Data;
 
 namespace TcpUdpTool.Model.Formatter
 {
-    class HexFormatter : IFormatter
+    public class HexFormatter : IFormatter
     {
 
-
-
-        public void Format(Piece msg, StringBuilder builder)
+        public void Format(Piece msg, StringBuilder builder, Encoding encoding = null)
         {
             builder.AppendFormat("[{0}]{1}: ", msg.Timestamp.ToString("HH:mm:ss"), msg.IsSent ? "S" : "R");
             builder.AppendLine();
@@ -32,6 +26,7 @@ namespace TcpUdpTool.Model.Formatter
                 }
             }
 
+            builder.AppendLine();
             builder.AppendLine();
         }
 

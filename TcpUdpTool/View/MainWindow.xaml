@@ -37,7 +37,7 @@
             </TabItem>
 
             <TabItem Header="Settings">
-                
+                <view:SettingsView />
             </TabItem>
             
             <TabItem Header="Help">

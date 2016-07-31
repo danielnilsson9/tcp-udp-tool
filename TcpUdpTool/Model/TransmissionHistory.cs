@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using TcpUdpTool.Model.Data;
 using TcpUdpTool.Model.Formatter;
+using TcpUdpTool.Model.Util;
 
 namespace TcpUdpTool.Model
 {
@@ -12,17 +11,27 @@ namespace TcpUdpTool.Model
     {
         public event Action HistoryChanged;
 
-        private List<Piece> _history;
+        private LinkedList<Piece> _history;
         private StringBuilder _cache;
+        private Dictionary<Piece, int> _lengthMap;
         private IFormatter _formatter;
-
+        private int _maxSize = 5;
+   
         private object _lock = new object();
+
 
         public TransmissionHistory()
         {
-            _history = new List<Piece>();
+            _history = new LinkedList<Piece>();
             _cache = new StringBuilder();
             _formatter = new PlainTextFormatter(); // default formatter
+            _lengthMap = new Dictionary<Piece, int>();
+        }
+
+
+        public void SetMaxSize(int size)
+        {
+            _maxSize = size;
         }
 
         public string Get()
@@ -36,6 +45,7 @@ namespace TcpUdpTool.Model
             {
                 _history.Clear();
                 _cache.Clear();
+                _lengthMap.Clear();
                 HistoryChanged?.Invoke();
             }           
         }
@@ -47,33 +57,47 @@ namespace TcpUdpTool.Model
                 _formatter = formatter;
                 Invalidate();
                 HistoryChanged?.Invoke();
-            }
-            
+            }            
         }
 
         public void Append(Piece msg)
         {
+            if(_maxSize == 0)
+            {
+                if (_history.Count > 0) Clear();
+                return;
+            }
+
             lock(_lock)
             {
-                if(_history.Count > 0 && msg.Timestamp < _history.Last().Timestamp)
+               
+                if(_history.Count > 0 && msg.Timestamp < _history.Last.Value.Timestamp)
                 {
-                    int indexInsert = 0;
-                    // wrong order, insert at correct place and invalidate cache.
-                    for(int i = _history.Count; i > 0; i--)
+                    // remove if history larger than max size
+                    while (_history.Count >= _maxSize)
                     {
-                        if (_history[i - 1].Timestamp < msg.Timestamp)
-                        {
-                            indexInsert = i;
-                            break;
-                        }     
+                        _lengthMap.Remove(_history.First.Value);
+                        _history.RemoveFirst();                     
                     }
 
-                    _history.Insert(indexInsert, msg);
+                    // wrong order, insert before last
+                    _history.AddBefore(_history.Last, msg);
+
                     Invalidate();                       
                 }
                 else
                 {
-                    _history.Add(msg);
+                    // remove if history larger than max size
+                    while (_history.Count >= _maxSize)
+                    {
+                        Piece head = _history.First.Value;
+                        _history.RemoveFirst();
+                        _cache.Remove(0, _lengthMap[head]);
+                        _lengthMap.Remove(head);
+                    }
+
+
+                    _history.AddLast(msg);
                     AppendCache(msg);
                 }
 
@@ -85,17 +109,18 @@ namespace TcpUdpTool.Model
 
         private void AppendCache(Piece msg)
         {
-            if (_cache.Length != 0)
-            {
-                _cache.AppendLine();
-            }
+            int preLen = _cache.Length;
 
-            _formatter.Format(msg, _cache);     
+            _formatter.Format(msg, _cache, SettingsUtils.GetEncoding());
+
+            // save length of formatted message in map.
+            _lengthMap.Add(msg, _cache.Length - preLen);
         }
 
         private void Invalidate()
         {
             _cache.Clear();
+            _lengthMap.Clear();
             foreach(var msg in _history)
             {
                 AppendCache(msg);

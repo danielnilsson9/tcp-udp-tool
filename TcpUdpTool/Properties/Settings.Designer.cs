@@ -46,5 +46,17 @@ namespace TcpUdpTool.Properties {
                 this["IPv6Support"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("100")]
+        public int HistoryEntries {
+            get {
+                return ((int)(this["HistoryEntries"]));
+            }
+            set {
+                this["HistoryEntries"] = value;
+            }
+        }
     }
 }

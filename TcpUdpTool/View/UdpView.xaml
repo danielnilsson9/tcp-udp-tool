@@ -186,6 +186,7 @@
 
                 <Label Grid.Column="0"
                        Grid.Row="2"
+                       Height="21"
                        Padding="0"
                        VerticalAlignment="Center"
                        Margin="10 0 10 0"
@@ -194,8 +195,7 @@
                 <StackPanel Grid.Column="1"
                             Grid.Row="2"
                             Orientation="Horizontal"
-                            VerticalAlignment="Center"
-                            Margin="0 2 0 0">
+                            VerticalAlignment="Center">
 
                     <RadioButton Content="Text"
                                  Margin="0 0 10 0"

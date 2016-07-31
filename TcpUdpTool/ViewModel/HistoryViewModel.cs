@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 using TcpUdpTool.Model;
 using TcpUdpTool.Model.Formatter;
@@ -85,7 +81,7 @@ namespace TcpUdpTool.ViewModel
         public HistoryViewModel()
         {
             _transmissionHistory = new TransmissionHistory();
-
+            _transmissionHistory.SetMaxSize(Properties.Settings.Default.HistoryEntries);
             _transmissionHistory.HistoryChanged +=
                () =>
                {
@@ -94,8 +90,17 @@ namespace TcpUdpTool.ViewModel
                };
 
             PlainTextSelected = true;
-        }
 
+            Properties.Settings.Default.SettingChanging +=
+                (sender, e) =>
+                {
+                    if(e.SettingName == nameof(Properties.Settings.Default.HistoryEntries))
+                    {
+                        _transmissionHistory.SetMaxSize((int)e.NewValue);
+                    }
+                };
+
+        }
 
         private void Clear()
         {

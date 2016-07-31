@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using TcpUdpTool.Model;
@@ -169,7 +165,7 @@ namespace TcpUdpTool.ViewModel
         public TcpServerViewModel()
         {
             _tcpServer = new TcpServer();
-            _parser = new PlainTextParser(Encoding.Default);
+            _parser = new PlainTextParser();
             LocalInterfaces = new ObservableCollection<InterfaceItem>();
 
             _tcpServer.StatusChanged +=
@@ -207,25 +203,18 @@ namespace TcpUdpTool.ViewModel
             PlainTextSendTypeSelected = true;
             History.Header = "Conversation History";
 
+            BuildInterfaceList(Properties.Settings.Default.IPv6Support);
 
-            // build interface list
-            LocalInterfaces.Add(new InterfaceItem(InterfaceItem.EInterfaceType.Any, IPAddress.Any));
-            LocalInterfaces.Add(new InterfaceItem(InterfaceItem.EInterfaceType.Any, IPAddress.IPv6Any));
-            foreach(var i in NetworkUtils.GetActiveInterfaces())
-            {
 
-                if(i.IPv4Address != null)
+            Properties.Settings.Default.SettingChanging +=
+                (sender, e) =>
                 {
-                    LocalInterfaces.Add(new InterfaceItem(
-                        InterfaceItem.EInterfaceType.Specific, i.IPv4Address));
-                }
+                    if(e.SettingName == nameof(Properties.Settings.Default.IPv6Support))
+                    {
+                        BuildInterfaceList((bool)e.NewValue);
+                    }
+                };
 
-                if(i.IPv6Address != null)
-                {
-                    LocalInterfaces.Add(new InterfaceItem(
-                        InterfaceItem.EInterfaceType.Specific, i.IPv6Address));
-                }              
-            }
         }
 
 
@@ -258,7 +247,7 @@ namespace TcpUdpTool.ViewModel
             byte[] data = new byte[0];
             try
             {
-                data = _parser.Parse(Message);
+                data = _parser.Parse(Message, SettingsUtils.GetEncoding());
             }
             catch (FormatException e)
             {
@@ -288,11 +277,35 @@ namespace TcpUdpTool.ViewModel
         {
             if (PlainTextSendTypeSelected)
             {
-                _parser = new PlainTextParser(Encoding.Default);
+                _parser = new PlainTextParser();
             }
             else
             {
                 _parser = new HexParser();
+            }
+        }
+
+
+        private void BuildInterfaceList(bool ipv6)
+        {
+            LocalInterfaces.Clear();
+            // build interface list
+            LocalInterfaces.Add(new InterfaceItem(InterfaceItem.EInterfaceType.Any, IPAddress.Any));
+            if(ipv6) LocalInterfaces.Add(new InterfaceItem(InterfaceItem.EInterfaceType.Any, IPAddress.IPv6Any));
+            foreach (var i in NetworkUtils.GetActiveInterfaces())
+            {
+
+                if (i.IPv4Address != null)
+                {
+                    LocalInterfaces.Add(new InterfaceItem(
+                        InterfaceItem.EInterfaceType.Specific, i.IPv4Address));
+                }
+
+                if (i.IPv6Address != null && ipv6)
+                {
+                    LocalInterfaces.Add(new InterfaceItem(
+                        InterfaceItem.EInterfaceType.Specific, i.IPv6Address));
+                }
             }
         }
 

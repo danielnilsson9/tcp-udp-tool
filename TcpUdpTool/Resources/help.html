@@ -1,0 +1,34 @@
+<html>
+	<head></head>
+	<body>
+		<h1>TcpUdpTool</h1>
+		<b>Version:</b> 1.0<br />
+		<b>Autor:</b> Daniel Nilsson
+
+		<h2>Usage</h2>
+		<p>TcpUdpTool is a tool that could be useful during development of network applications.</p>
+		
+		<h3>TCP Client</h3>
+		<p>Allows for connection and direct communication with a TCP server. Any data that is received will be displayed in chunks as they are passed up by the network interface, since TCP is a streaming protocol this may not correspond to how messages are defined by the user protocol being used.</p>
+		
+		<p><b>Note:</b> The field <code>IP Address</code> can be either a regular IP address or a domain name which will be automatically resolved to and IP address.</p>
+		
+		<h3>TCP Server</h3>
+		<p>Start a TCP server which a client can connect to. Only a single client is allowed to connect at a time, communication with the connected client is allowed.</h3>
+		
+		<p><b>Note:</b> If 0 is specified as <code>port</code> a random port in the dynamic range will be used.</p>
+		<p><b>Note:</b> To bind to a local IPv6 interface IPv6 must be enabled in settings.</p>
+		
+		<h3>UDP</h3>
+		<p>Send and/or receive UDP packets.
+		
+		<p><b>Note:</b> It is possible to send broadcasts by specifying a broadcast address as the destination <code>IP Address</code></p>
+		<p><b>Note:</b> The destination <code>IP Address</code> field can be either a regular IP address or a domain name which will be automatically resolved to an IP Address.</p>
+		
+		<h3>UDP Multicast</h3>
+		<p>Participate in communication in UDP multicast groups. Multicast traffic is if nothing else is specified only received on the default network interface. You may select which interface to listen to in the <code>Interface</code> list. You can listen to all interfaces simultainiously by selecting <code>All</code>. The same is true when sending multicast packets.</p>
+		
+		
+		
+	</body>
+</html>

@@ -41,7 +41,7 @@
             </TabItem>
             
             <TabItem Header="Help">
-
+                <view:HelpView />
             </TabItem>
         </TabControl>
             

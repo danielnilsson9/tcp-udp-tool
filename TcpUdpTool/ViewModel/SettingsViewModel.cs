@@ -1,6 +1,8 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Text;
 using TcpUdpTool.ViewModel.Reusable;
+using System.Linq;
 
 namespace TcpUdpTool.ViewModel
 {
@@ -78,14 +80,12 @@ namespace TcpUdpTool.ViewModel
             Encodings = new ObservableCollection<EncodingItem>();
 
             Encodings.Add(new EncodingItem(Encoding.Default, true));
-            foreach(EncodingInfo e in Encoding.GetEncodings())
-            {
-                Encodings.Add(new EncodingItem(e.GetEncoding(), false));
-            }
 
+            Encoding.GetEncodings().OrderBy(o => o.Name).ToList()
+                .ForEach(o => Encodings.Add(new EncodingItem(o.GetEncoding(), false)));
+ 
             IPv6SupportEnabled = Properties.Settings.Default.IPv6Support;
             HistoryEntries = Properties.Settings.Default.HistoryEntries;
-
 
             int selected = Properties.Settings.Default.Encoding;
             foreach(var e in Encodings)
@@ -104,6 +104,11 @@ namespace TcpUdpTool.ViewModel
     {
         private bool _default;
         private Encoding _encoding;
+
+        public string Name
+        {
+            get { return ToString(); }
+        }
 
 
         public EncodingItem(Encoding encoding, bool isDefault)

@@ -16,6 +16,5 @@ namespace TcpUdpTool.Model.Util
             return Encoding.GetEncoding(codePage);
         }
 
-
     }
 }

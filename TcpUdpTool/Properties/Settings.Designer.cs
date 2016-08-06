@@ -25,7 +25,7 @@ namespace TcpUdpTool.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        [global::System.Configuration.DefaultSettingValueAttribute("65001")]
         public int Encoding {
             get {
                 return ((int)(this["Encoding"]));

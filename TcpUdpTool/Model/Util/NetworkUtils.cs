@@ -87,10 +87,13 @@ namespace TcpUdpTool.Model.Util
         public static int GetBestMulticastInterfaceIndex(IPAddress localInterface)
         {
             var interfaces = GetMulticastInterfaces();
-
             foreach(var intf in interfaces)
             {
-                if(intf.IPv4Address.Equals(localInterface) || intf.IPv6Address.Equals(localInterface))
+                if(intf.IPv4Address != null && intf.IPv4Address.Equals(localInterface))
+                {
+                    return intf.Index;
+                }
+                else if(intf.IPv6Address != null && intf.IPv6Address.Equals(localInterface))
                 {
                     return intf.Index;
                 }

@@ -1,12 +1,17 @@
 <html>
 	<head>
 		<style>
+		body,table
+		{
+			font-family: Segoe UI;
+			font-size: 90%;
+		}
+		
 		body
 		{
 			background: #F9F9F9;
 			padding: 10px;
-			font-family: Segoe UI;
-			font-size: 90%;
+			
 		}
 		
 		p 
@@ -84,10 +89,10 @@
 		
 		<h2>Infomation</h2>
 		
-		<p style="margin-top: 10px;">TcpUdpTool is a tool that aims to be useful during development of network applications and lets you quickly test your network communication.</p>
+		<p style="margin-top: 10px;">TcpUdpTool is a tool that aims to be useful during development of network applications and lets you quickly test and verify network communication.</p>
 	
 		<h3>TCP Client</h3>
-		<p>Allows for connection and direct communication with a TCP server. Any data that is received will be displayed in chunks as they are passed up by the network interface, since TCP is a streaming protocol this may not correspond to how messages are defined by the user protocol being used.</p>
+		<p>Allows for connection and direct communication with a TCP server. Any data that is received will be displayed in chunks as they are passed up by the network interface, since TCP is a streaming protocol this may not correspond to how messages are defined by the application layer protocol in use.</p>
 		
 		<div class="notes">
 			<p><b>Note:</b> The field <code>IP Address</code> can be either a regular IP address or a domain name which will be automatically resolved to an IP address.</p>
@@ -105,7 +110,7 @@
 		<p>Send and/or receive UDP packets.
 		
 		<div class="notes">
-			<p><b>Note:</b> It's possible to send broadcasts by specifying a broadcast address as the destination <code>IP Address</code> field.</p>
+			<p><b>Note:</b> It's possible to send broadcasts by specifying a broadcast address in the destination <code>IP Address</code> field.</p>
 			<p><b>Note:</b> The destination <code>IP Address</code> field can be either a regular IP address or a domain name which will be automatically resolved to an IP Address.</p>
 		</div>
 		

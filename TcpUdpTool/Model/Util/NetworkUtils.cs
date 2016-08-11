@@ -122,6 +122,10 @@ namespace TcpUdpTool.Model.Util
             return isMulticast;
         }
 
+        public static bool IsValidPort(int port, bool allowZero = false)
+        {
+            return (port >= (allowZero ? 0 : 1)) && port < 65536;
+        }
 
         public static async Task<IPAddress> DnsResolveAsync(string hostOrAddress, bool favorIpV6 = false)
         {

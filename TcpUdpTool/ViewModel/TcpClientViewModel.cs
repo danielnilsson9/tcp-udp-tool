@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
 using TcpUdpTool.Model;
@@ -11,10 +13,15 @@ namespace TcpUdpTool.ViewModel
 {
     public class TcpClientViewModel : ObservableObject
     {
-       
+
+        #region Private Members
+
         private IParser _parser;
         private TcpClient _tcpClient;
 
+        #endregion
+
+        #region Public Properties
 
         private HistoryViewModel _historyViewModel = new HistoryViewModel();
         public HistoryViewModel History
@@ -50,8 +57,21 @@ namespace TcpUdpTool.ViewModel
             get { return _ipAddress; }
             set
             {
-                _ipAddress = value;
-                OnPropertyChanged(nameof(IpAddress));
+                if(_ipAddress != value)
+                {
+                    _ipAddress = value;
+                        
+                    if(String.IsNullOrWhiteSpace(_ipAddress))
+                    {
+                        AddError(nameof(IpAddress), "IP address cannot be empty.");
+                    }
+                    else
+                    {
+                        RemoveError(nameof(IpAddress));
+                    }
+                      
+                    OnPropertyChanged(nameof(IpAddress));
+                }
             }
         }
 
@@ -61,7 +81,20 @@ namespace TcpUdpTool.ViewModel
             get { return _port; }
             set
             {
-                _port = value;
+                if(_port != value)
+                {
+                    _port = value;
+
+                    if(!NetworkUtils.IsValidPort(_port))
+                    {
+                        AddError(nameof(Port), "Port must be between 1 and 65535.");
+                    }
+                    else
+                    {
+                        RemoveError(nameof(Port));
+                    }
+                }
+
                 OnPropertyChanged(nameof(Port));
             }
         }
@@ -105,8 +138,10 @@ namespace TcpUdpTool.ViewModel
             }
         }
 
+        #endregion
 
-    
+        #region Public Commands
+
         public ICommand ConnectDisconnectCommand
         {
             get
@@ -136,7 +171,9 @@ namespace TcpUdpTool.ViewModel
             get { return new DelegateCommand(SendTypeChanged); }
         }
 
+        #endregion
 
+        #region Constructors
 
         public TcpClientViewModel()
         {
@@ -172,18 +209,22 @@ namespace TcpUdpTool.ViewModel
             History.Header = "Conversation History";   
         }
 
+        #endregion
 
+        #region Private Functions
 
         private async void Connect()
         {
+            if (!ValidateConnect())
+                return;
+
             try
             {
                 await _tcpClient.ConnectAsync(IpAddress, Port);
             }
             catch(Exception ex)
-            when(ex is System.Net.Sockets.SocketException || ex is TimeoutException)
             {
-                MessageBox.Show(ex.Message, "Error");
+                DialogUtils.ShowErrorDialog(ex.Message);
             }        
         }
 
@@ -218,7 +259,6 @@ namespace TcpUdpTool.ViewModel
             Message = "";
         }
 
-
         private void SendTypeChanged()
         {
             if(PlainTextSendTypeSelected)
@@ -230,6 +270,25 @@ namespace TcpUdpTool.ViewModel
                 _parser = new HexParser();
             }
         }
+
+        private bool ValidateConnect()
+        {
+            string error = null;
+            if (HasError(nameof(IpAddress)))
+                error = GetError(nameof(IpAddress));
+            else if (HasError(nameof(Port)))
+                error = GetError(nameof(Port));
+
+            if(error != null)
+            {
+                DialogUtils.ShowErrorDialog(error);
+                return false;
+            }
+           
+            return true;
+        }
+
+        #endregion
 
     }
 }

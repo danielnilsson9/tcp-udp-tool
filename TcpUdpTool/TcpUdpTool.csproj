@@ -82,6 +82,7 @@
     <Compile Include="Model\TransmissionHistory.cs" />
     <Compile Include="Model\Data\Piece.cs" />
     <Compile Include="Model\UdpMulticastClient.cs" />
+    <Compile Include="Model\Util\DialogUtils.cs" />
     <Compile Include="Model\Util\NetworkUtils.cs" />
     <Compile Include="Model\EventArg\ReceivedEventArgs.cs" />
     <Compile Include="Model\Util\SettingsUtils.cs" />

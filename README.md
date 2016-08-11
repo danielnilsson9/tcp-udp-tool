@@ -2,6 +2,6 @@
 work in progress
 
 todo:
-- input validation
+- input validation - use IDataNotifyErrorInfo
 - error handling
 - save function

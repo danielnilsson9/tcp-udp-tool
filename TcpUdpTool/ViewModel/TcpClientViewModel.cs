@@ -85,7 +85,7 @@ namespace TcpUdpTool.ViewModel
                 {
                     _port = value;
 
-                    if(!NetworkUtils.IsValidPort(_port))
+                    if(!NetworkUtils.IsValidPort(_port, false))
                     {
                         AddError(nameof(Port), "Port must be between 1 and 65535.");
                     }
@@ -240,23 +240,30 @@ namespace TcpUdpTool.ViewModel
             {
                 data = _parser.Parse(Message, SettingsUtils.GetEncoding());
             }
-            catch(FormatException e)
+            catch(FormatException ex)
             {
-                MessageBox.Show(e.Message, "Error");
+                DialogUtils.ShowErrorDialog(ex.Message);
                 return;
             }
 
-            Piece msg = new Piece(data, Piece.EType.Sent);
-
-            PieceSendResult res = await _tcpClient.SendAsync(msg);
-            if(res != null)
+            try
             {
-                msg.Origin = res.From;
-                msg.Destination = res.To;
-                History.Transmissions.Append(msg);
+                Piece msg = new Piece(data, Piece.EType.Sent);
+
+                PieceSendResult res = await _tcpClient.SendAsync(msg);
+                if (res != null)
+                {
+                    msg.Origin = res.From;
+                    msg.Destination = res.To;
+                    History.Transmissions.Append(msg);
+                }
+
+                Message = "";
             }
-                   
-            Message = "";
+            catch(Exception ex)
+            {
+                DialogUtils.ShowErrorDialog(ex.Message);
+            }
         }
 
         private void SendTypeChanged()

@@ -14,9 +14,15 @@ namespace TcpUdpTool.ViewModel
 {
     public class TcpServerViewModel : ObservableObject
     {
+
+        #region Private members
+
         private TcpServer _tcpServer;
         private IParser _parser;
 
+        #endregion
+
+        #region Public propterties
 
         private ObservableCollection<InterfaceItem> _localInterfaces;
         public ObservableCollection<InterfaceItem> LocalInterfaces
@@ -31,7 +37,6 @@ namespace TcpUdpTool.ViewModel
                 }                    
             }
         }
-
 
         private HistoryViewModel _historyViewModel = new HistoryViewModel();
         public HistoryViewModel History
@@ -83,8 +88,21 @@ namespace TcpUdpTool.ViewModel
             get { return _port; }
             set
             {
-                _port = value;
-                OnPropertyChanged("Port");
+                if(_port != value)
+                {
+                    _port = value;
+
+                    if(!NetworkUtils.IsValidPort(_port, true))
+                    {
+                        AddError(nameof(Port), "Port must be between 0 and 65535.");
+                    }
+                    else
+                    {
+                        RemoveError(nameof(Port));
+                    }
+
+                    OnPropertyChanged(nameof(Port));
+                }
             }
         }
 
@@ -94,8 +112,11 @@ namespace TcpUdpTool.ViewModel
             get { return _message; }
             set
             {
-                _message = value;
-                OnPropertyChanged("Message");
+                if(_message != value)
+                {
+                    _message = value;
+                    OnPropertyChanged(nameof(Message));
+                }                
             }
         }
 
@@ -105,10 +126,10 @@ namespace TcpUdpTool.ViewModel
             get { return _plainTextSendTypeSelected; }
             set
             {
-                if (value != _plainTextSendTypeSelected)
+                if (_plainTextSendTypeSelected != value)
                 {
                     _plainTextSendTypeSelected = value;
-                    OnPropertyChanged("PlainTextSendTypeSelected");
+                    OnPropertyChanged(nameof(PlainTextSendTypeSelected));
                 }
             }
         }
@@ -119,14 +140,17 @@ namespace TcpUdpTool.ViewModel
             get { return _hexSendTypeSelected; }
             set
             {
-                if (value != _hexSendTypeSelected)
+                if (_hexSendTypeSelected != value)
                 {
                     _hexSendTypeSelected = value;
-                    OnPropertyChanged("HexSendTypeSelected");
+                    OnPropertyChanged(nameof(HexSendTypeSelected));
                 }
             }
         }
 
+        #endregion
+
+        #region Public commands
 
         public ICommand StartStopCommand
         {
@@ -161,6 +185,9 @@ namespace TcpUdpTool.ViewModel
             get { return new DelegateCommand(SendTypeChanged); }
         }
 
+        #endregion
+
+        #region Constructors
 
         public TcpServerViewModel()
         {
@@ -217,9 +244,15 @@ namespace TcpUdpTool.ViewModel
 
         }
 
+        #endregion
+
+        #region Private functions
 
         private void Start()
         {
+            if (!ValidateStart())
+                return;
+
             try
             {
                 _tcpServer.Start(SelectedInterface.Interface, Port);
@@ -227,13 +260,12 @@ namespace TcpUdpTool.ViewModel
             catch(System.Net.Sockets.SocketException ex)
             {
                 String message = ex.Message;
-
                 if(ex.ErrorCode == 10013)
                 {
                     message = "Port " + Port + " is already in use, unable to start server.";
                 }
 
-                MessageBox.Show(message, "Error");
+                DialogUtils.ShowErrorDialog(message);
             }
         }
 
@@ -249,23 +281,30 @@ namespace TcpUdpTool.ViewModel
             {
                 data = _parser.Parse(Message, SettingsUtils.GetEncoding());
             }
-            catch (FormatException e)
+            catch (FormatException ex)
             {
-                MessageBox.Show(e.Message, "Error");
+                DialogUtils.ShowErrorDialog(ex.Message);
                 return;
             }
 
-            Piece msg = new Piece(data, Piece.EType.Sent);
-
-            PieceSendResult res = await _tcpServer.SendAsync(msg);
-            if(res != null)
+            try
             {
-                msg.Origin = res.From;
-                msg.Destination = res.To;
-                History.Transmissions.Append(msg);
+                Piece msg = new Piece(data, Piece.EType.Sent);
+
+                PieceSendResult res = await _tcpServer.SendAsync(msg);
+                if (res != null)
+                {
+                    msg.Origin = res.From;
+                    msg.Destination = res.To;
+                    History.Transmissions.Append(msg);
+                }
+
+                Message = "";
             }
-            
-            Message = "";
+            catch(Exception ex)
+            {
+                DialogUtils.ShowErrorDialog(ex.Message);
+            }
         }
 
         private void Disconnect()
@@ -283,6 +322,22 @@ namespace TcpUdpTool.ViewModel
             {
                 _parser = new HexParser();
             }
+        }
+
+        private bool ValidateStart()
+        {
+            string error = null;
+            if (HasError(nameof(Port)))
+                error = GetError(nameof(Port));
+
+
+            if (error != null)
+            {
+                DialogUtils.ShowErrorDialog(error);
+                return false;
+            }
+
+            return true;
         }
 
 
@@ -308,6 +363,8 @@ namespace TcpUdpTool.ViewModel
                 }
             }
         }
+
+        #endregion
 
     }
 }

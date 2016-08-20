@@ -75,8 +75,8 @@ namespace TcpUdpTool.ViewModel
             }
         }
 
-        private int _port;
-        public int Port
+        private int? _port;
+        public int? Port
         {
             get { return _port; }
             set
@@ -85,7 +85,7 @@ namespace TcpUdpTool.ViewModel
                 {
                     _port = value;
 
-                    if(!NetworkUtils.IsValidPort(_port, false))
+                    if(!NetworkUtils.IsValidPort(_port.HasValue ? _port.Value : -1, false))
                     {
                         AddError(nameof(Port), "Port must be between 1 and 65535.");
                     }
@@ -204,7 +204,8 @@ namespace TcpUdpTool.ViewModel
                 };
 
 
-            IpAddress = "127.0.0.1";
+            IpAddress = "localhost";
+            Port = 0;
             PlainTextSendTypeSelected = true;
             History.Header = "Conversation History";
             Message = "";
@@ -221,7 +222,7 @@ namespace TcpUdpTool.ViewModel
 
             try
             {
-                await _tcpClient.ConnectAsync(IpAddress, Port);
+                await _tcpClient.ConnectAsync(IpAddress, Port.Value);
             }
             catch(Exception ex)
             {

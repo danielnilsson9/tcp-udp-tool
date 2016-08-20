@@ -55,8 +55,9 @@ namespace TcpUdpTool.Model
             {
                 _tcpClient.Close();
                 _tcpClient = null;
-                OnConnectStatusChanged(TcpClientStatusEventArgs.EConnectStatus.Disconnected);
             }
+
+            OnConnectStatusChanged(TcpClientStatusEventArgs.EConnectStatus.Disconnected);
         }
 
         public async Task<PieceSendResult> SendAsync(Piece msg)

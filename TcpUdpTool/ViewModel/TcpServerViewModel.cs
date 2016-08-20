@@ -82,8 +82,8 @@ namespace TcpUdpTool.ViewModel
         }
 
 
-        private int _port;
-        public int Port
+        private int? _port;
+        public int? Port
         {
             get { return _port; }
             set
@@ -92,7 +92,7 @@ namespace TcpUdpTool.ViewModel
                 {
                     _port = value;
 
-                    if(!NetworkUtils.IsValidPort(_port, true))
+                    if(!NetworkUtils.IsValidPort(_port.HasValue ? _port.Value : -1, true))
                     {
                         AddError(nameof(Port), "Port must be between 0 and 65535.");
                     }
@@ -227,6 +227,7 @@ namespace TcpUdpTool.ViewModel
                 };
 
 
+            Port = 0;
             PlainTextSendTypeSelected = true;
             History.Header = "Conversation History";
             Message = "";
@@ -256,7 +257,7 @@ namespace TcpUdpTool.ViewModel
 
             try
             {
-                _tcpServer.Start(SelectedInterface.Interface, Port);
+                _tcpServer.Start(SelectedInterface.Interface, Port.Value);
             }
             catch(System.Net.Sockets.SocketException ex)
             {
@@ -267,6 +268,10 @@ namespace TcpUdpTool.ViewModel
                 }
 
                 DialogUtils.ShowErrorDialog(message);
+            }
+            catch(Exception ex)
+            {
+                DialogUtils.ShowErrorDialog(ex.Message);
             }
         }
 

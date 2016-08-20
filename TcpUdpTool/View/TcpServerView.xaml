@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:system="clr-namespace:System;assembly=mscorlib"
              xmlns:local="clr-namespace:TcpUdpTool.View"
              xmlns:viewmodel="clr-namespace:TcpUdpTool.ViewModel"
              mc:Ignorable="d" >
@@ -30,7 +31,6 @@
             <RowDefinition />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-
 
         <GroupBox Header="Listen"
                   Margin="10">
@@ -77,8 +77,9 @@
                          Height="21"
                          VerticalAlignment="Center"
                          VerticalContentAlignment="Center"
-                         Text="{Binding Port, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, NotifyOnValidationError=True}" />
-                
+                         Validation.ErrorTemplate="{x:Null}"
+                         Text="{Binding Port, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, TargetNullValue={x:Static system:String.Empty}}" />
+
                 <Button Grid.Row="1"
                         Grid.Column="2"
                         Width="80"
@@ -99,7 +100,7 @@
                         </Style>
                     </Button.Style>
                 </Button>
-
+                
             </Grid>
             
         </GroupBox>

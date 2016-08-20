@@ -229,6 +229,7 @@ namespace TcpUdpTool.ViewModel
 
             PlainTextSendTypeSelected = true;
             History.Header = "Conversation History";
+            Message = "";
 
             BuildInterfaceList(Properties.Settings.Default.IPv6Support);
 

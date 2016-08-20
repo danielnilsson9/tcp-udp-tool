@@ -10,18 +10,16 @@ namespace TcpUdpTool.Model
 {
     public class UdpClientServer
     {
+        private UdpClient _udpClient;
 
         public event EventHandler<ReceivedEventArgs> Received;
         public event EventHandler<UdpClientServerStatusEventArgs> StatusChanged;
 
-        private UdpClient _udpClient;
-
-
+      
         public UdpClientServer()
         {
-
+            
         }
-
 
         public void Start(IPAddress ip, int port)
         {

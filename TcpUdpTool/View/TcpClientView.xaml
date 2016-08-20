@@ -50,7 +50,7 @@
                          Height="21"
                          VerticalAlignment="Center"
                          VerticalContentAlignment="Center"
-                         Text="{Binding IpAddress, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, NotifyOnValidationError=True}"/>
+                         Text="{Binding IpAddress, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, NotifyOnValidationError=False}"/>
 
                 <Label Grid.Row="1"
                        Grid.Column="0"

@@ -16,10 +16,14 @@ namespace TcpUdpTool.ViewModel
     public class UdpViewModel : ObservableObject
     {
 
+        #region Private members
+
         private UdpClientServer _udpClientServer;
         private IParser _parser;
 
+        #endregion
 
+        #region Public properties
 
         private ObservableCollection<InterfaceItem> _localInterfaces;
         public ObservableCollection<InterfaceItem> LocalInterfaces
@@ -69,17 +73,29 @@ namespace TcpUdpTool.ViewModel
             }
         }
 
-        private int _listenPort;
-        public int ListenPort
+        private int? _listenPort;
+        public int? ListenPort
         {
             get { return _listenPort; }
             set
             {
-                _listenPort = value;
-                OnPropertyChanged("ListenPort");
+                if(_listenPort != value)
+                {
+                    _listenPort = value;
+
+                    if(!NetworkUtils.IsValidPort(_listenPort.HasValue ? _listenPort.Value : -1, true))
+                    {
+                        AddError(nameof(ListenPort), "Port must be between 0 and 65535.");
+                    }
+                    else
+                    {
+                        RemoveError(nameof(ListenPort));
+                    }
+
+                    OnPropertyChanged(nameof(ListenPort));
+                }
             }
         }
-
 
         private string _sendIpAddress;
         public string SendIpAddress
@@ -87,19 +103,45 @@ namespace TcpUdpTool.ViewModel
             get { return _sendIpAddress; }
             set
             {
-                _sendIpAddress = value;
-                OnPropertyChanged("SendIpAddress");
+                if(_sendIpAddress != value)
+                {
+                    _sendIpAddress = value;
+
+                    if(String.IsNullOrWhiteSpace(_sendIpAddress))
+                    {
+                        AddError(nameof(SendIpAddress), "IP address cannot be empty.");
+                    }
+                    else
+                    {
+                        RemoveError(nameof(SendIpAddress));
+                    }
+
+                    OnPropertyChanged(nameof(SendIpAddress));
+                }
             }
         }
 
-        private int _sendPort;
-        public int SendPort
+        private int? _sendPort;
+        public int? SendPort
         {
             get { return _sendPort; }
             set
             {
-                _sendPort = value;
-                OnPropertyChanged("SendPort");
+                if(_sendPort != value)
+                {
+                    _sendPort = value;
+
+                    if(!NetworkUtils.IsValidPort(_sendPort.HasValue ? _sendPort.Value : -1, false))
+                    {
+                        AddError(nameof(SendPort), "Port must be between 1 and 65535.");
+                    }
+                    else
+                    {
+                        RemoveError(nameof(SendPort));
+                    }
+
+                    OnPropertyChanged(nameof(SendPort));
+                }        
             }
         }
 
@@ -142,6 +184,9 @@ namespace TcpUdpTool.ViewModel
             }
         }
 
+        #endregion
+
+        #region Public commands
 
         public ICommand StartStopCommand
         {
@@ -171,6 +216,9 @@ namespace TcpUdpTool.ViewModel
             get { return new DelegateCommand(SendTypeChanged); }
         }
 
+        #endregion
+
+        #region Constructors
 
         public UdpViewModel()
         {
@@ -199,8 +247,12 @@ namespace TcpUdpTool.ViewModel
                     History.Transmissions.Append(arg.Message);
                 };
 
+            ListenPort = 0;
             PlainTextSendTypeSelected = true;
             History.Header = "Conversation History";
+            Message = "";
+            SendIpAddress = "";
+            SendPort = 0;
 
             BuildInterfaceList(Properties.Settings.Default.IPv6Support);
 
@@ -214,10 +266,23 @@ namespace TcpUdpTool.ViewModel
                 };           
         }
 
+        #endregion
+
+        #region Private functions
 
         private void Start()
         {
-            _udpClientServer.Start(SelectedInterface.Interface, ListenPort);
+            if (!ValidateStart())
+                return;
+
+            try
+            {
+                _udpClientServer.Start(SelectedInterface.Interface, ListenPort.Value);
+            }
+            catch(Exception ex)
+            {
+                DialogUtils.ShowErrorDialog(ex.Message);
+            }         
         }
 
         private void Stop()
@@ -227,6 +292,9 @@ namespace TcpUdpTool.ViewModel
 
         private async void Send()
         {
+            if (!ValidateSend())
+                return;
+
             byte[] data = new byte[0];
             try
             {
@@ -234,7 +302,7 @@ namespace TcpUdpTool.ViewModel
             }
             catch (FormatException ex)
             {
-                MessageBox.Show(ex.Message, "Error");
+                DialogUtils.ShowErrorDialog(ex.Message);
                 return;
             }
 
@@ -242,7 +310,7 @@ namespace TcpUdpTool.ViewModel
 
             try
             {
-                PieceSendResult res = await _udpClientServer.SendAsync(SendIpAddress, SendPort, msg);
+                PieceSendResult res = await _udpClientServer.SendAsync(SendIpAddress, SendPort.Value, msg);
                 if(res != null)
                 {
                     msg.Origin = res.From;
@@ -251,12 +319,11 @@ namespace TcpUdpTool.ViewModel
                     History.Transmissions.Append(msg);
                 }
             }
-            catch(InvalidOperationException ex)
+            catch(Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error");
+                DialogUtils.ShowErrorDialog(ex.Message);
             }
            
-
             Message = "";
         }
 
@@ -272,6 +339,38 @@ namespace TcpUdpTool.ViewModel
             }
         }
 
+
+        private bool ValidateStart()
+        {
+            string error = null;
+            if (HasError(nameof(ListenPort)))
+                error = GetError(nameof(ListenPort));
+
+            if (error != null)
+            {
+                DialogUtils.ShowErrorDialog(error);
+                return false;
+            }
+
+            return true;
+        }
+
+        private bool ValidateSend()
+        {
+            string error = null;
+            if (HasError(nameof(SendIpAddress)))
+                error = GetError(nameof(SendIpAddress));
+            else if (HasError(nameof(SendPort)))
+                error = GetError(nameof(SendPort));
+
+            if (error != null)
+            {
+                DialogUtils.ShowErrorDialog(error);
+                return false;
+            }
+
+            return true;
+        }
 
         private void BuildInterfaceList(bool ipv6)
         {
@@ -296,6 +395,8 @@ namespace TcpUdpTool.ViewModel
                 }
             }
         }
+
+        #endregion
 
     }
 }

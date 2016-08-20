@@ -206,7 +206,8 @@ namespace TcpUdpTool.ViewModel
 
             IpAddress = "127.0.0.1";
             PlainTextSendTypeSelected = true;
-            History.Header = "Conversation History";   
+            History.Header = "Conversation History";
+            Message = "";
         }
 
         #endregion

@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:system="clr-namespace:System;assembly=mscorlib"
              xmlns:local="clr-namespace:TcpUdpTool.View"
              xmlns:viewmodel="clr-namespace:TcpUdpTool.ViewModel"
              mc:Ignorable="d">
@@ -74,8 +75,9 @@
                          Grid.Column="1"
                          Height="21"
                          VerticalAlignment="Center"
-                         VerticalContentAlignment="Center"
-                         Text="{Binding ListenPort, UpdateSourceTrigger=PropertyChanged}" />
+                         VerticalContentAlignment="Center"   
+                         Validation.ErrorTemplate="{x:Null}"
+                         Text="{Binding ListenPort, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, TargetNullValue={x:Static system:String.Empty}}" />
 
                 <Button Grid.Row="1"
                         Grid.Column="2"
@@ -140,7 +142,8 @@
                          Height="21"
                          VerticalAlignment="Center"
                          VerticalContentAlignment="Center"
-                         Text="{Binding SendIpAddress, UpdateSourceTrigger=PropertyChanged}" />
+                         Validation.ErrorTemplate="{x:Null}"
+                         Text="{Binding SendIpAddress, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
                 <Label Grid.Column="2"
                        Grid.Row="0"
@@ -155,7 +158,8 @@
                          VerticalAlignment="Center"
                          VerticalContentAlignment="Center"
                          Margin="10 0 10 0"
-                         Text="{Binding SendPort, UpdateSourceTrigger=PropertyChanged}"/>
+                         Validation.ErrorTemplate="{x:Null}"
+                         Text="{Binding SendPort, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, TargetNullValue={x:Static system:String.Empty}}"/>
 
                 <Label Grid.Column="0"
                        Grid.Row="1"

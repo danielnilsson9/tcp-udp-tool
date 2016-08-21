@@ -295,36 +295,25 @@ namespace TcpUdpTool.ViewModel
             if (!ValidateSend())
                 return;
 
-            byte[] data = new byte[0];
             try
             {
-                data = _parser.Parse(Message, SettingsUtils.GetEncoding());
-            }
-            catch (FormatException ex)
-            {
-                DialogUtils.ShowErrorDialog(ex.Message);
-                return;
-            }
+                var data = _parser.Parse(Message, SettingsUtils.GetEncoding());
 
-            Piece msg = new Piece(data, Piece.EType.Sent);
-
-            try
-            {
-                PieceSendResult res = await _udpClientServer.SendAsync(SendIpAddress, SendPort.Value, msg);
-                if(res != null)
+                var msg = new Piece(data, Piece.EType.Sent);
+                var res = await _udpClientServer.SendAsync(SendIpAddress, SendPort.Value, msg);
+                if (res != null)
                 {
                     msg.Origin = res.From;
                     msg.Destination = res.To;
 
                     History.Transmissions.Append(msg);
+                    Message = "";
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 DialogUtils.ShowErrorDialog(ex.Message);
             }
-           
-            Message = "";
         }
 
         private void SendTypeChanged()

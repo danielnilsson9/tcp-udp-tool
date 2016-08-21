@@ -14,9 +14,15 @@ namespace TcpUdpTool.ViewModel
 {
     public class UdpMulticastViewModel : ObservableObject
     {
+
+        #region Private members
+
         private UdpMulticastClient _udpClient;
         private IParser _parser;
 
+        #endregion
+
+        #region Public properties
 
         private ObservableCollection<InterfaceItem> _localInterfaces;
         public ObservableCollection<InterfaceItem> LocalInterfaces
@@ -55,19 +61,62 @@ namespace TcpUdpTool.ViewModel
             get { return _multicastGroup; }
             set
             {
-                _multicastGroup = value;
-                OnPropertyChanged(nameof(MulticastGroup));
+                if(_multicastGroup != value)
+                {
+                    _multicastGroup = value;
+
+                    try
+                    {
+                        var addr = IPAddress.Parse(_multicastGroup);
+
+                        if (!NetworkUtils.IsMulticast(addr))
+                        {
+                            throw new Exception();
+                        }
+                        else
+                        {
+                            RemoveError(nameof(MulticastGroup));
+                        }
+                    }
+                    catch(Exception)
+                    {
+                        if(String.IsNullOrWhiteSpace(_multicastGroup))
+                        {
+                            AddError(nameof(MulticastGroup), "Multicast address cannot be empty.");
+                        }
+                        else
+                        {
+                            AddError(nameof(MulticastGroup), 
+                                String.Format("\"{0}\" is not a valid multicast address.", _multicastGroup));
+                        }                      
+                    }
+
+                    OnPropertyChanged(nameof(MulticastGroup));
+                }
             }
         }
 
-        private int _multicastPort;
-        public int MulticastPort
+        private int? _multicastPort;
+        public int? MulticastPort
         {
             get { return _multicastPort; }
             set
             {
-                _multicastPort = value;
-                OnPropertyChanged(nameof(MulticastPort));
+                if(_multicastPort != value)
+                {
+                    _multicastPort = value;
+
+                    if(!NetworkUtils.IsValidPort(_multicastPort.HasValue ? _multicastPort.Value : -1, false))
+                    {
+                        AddError(nameof(MulticastPort), "Port must be between 1 and 65535.");
+                    }
+                    else
+                    {
+                        RemoveError(nameof(MulticastPort));
+                    }
+
+                    OnPropertyChanged(nameof(MulticastPort));
+                }  
             }
         }
 
@@ -92,19 +141,62 @@ namespace TcpUdpTool.ViewModel
             get { return _sendMulticastGroup; }
             set
             {
-                _sendMulticastGroup = value;
-                OnPropertyChanged(nameof(SendMulticastGroup));
+                if(_sendMulticastGroup != value)
+                {
+                    _sendMulticastGroup = value;
+
+                    try
+                    {
+                        var addr = IPAddress.Parse(_sendMulticastGroup);
+
+                        if (!NetworkUtils.IsMulticast(addr))
+                        {
+                            throw new Exception();
+                        }
+                        else
+                        {
+                            RemoveError(nameof(SendMulticastGroup));
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        if (String.IsNullOrWhiteSpace(_sendMulticastGroup))
+                        {
+                            AddError(nameof(SendMulticastGroup), "Multicast address cannot be empty.");
+                        }
+                        else
+                        {
+                            AddError(nameof(SendMulticastGroup),
+                                String.Format("\"{0}\" is not a valid multicast address.", _sendMulticastGroup));
+                        }
+                    }
+
+                    OnPropertyChanged(nameof(SendMulticastGroup));
+                }  
             }
         }
 
-        private int _sendMulticastPort;
-        public int SendMulticastPort
+        private int? _sendMulticastPort;
+        public int? SendMulticastPort
         {
             get { return _sendMulticastPort; }
             set
             {
-                _sendMulticastPort = value;
-                OnPropertyChanged(nameof(SendMulticastPort));
+                if(_sendMulticastPort != value)
+                {
+                    _sendMulticastPort = value;
+
+                    if(!NetworkUtils.IsValidPort(_sendMulticastPort.HasValue ? _sendMulticastPort.Value : -1, false))
+                    {
+                        AddError(nameof(SendMulticastPort), "Port must be between 1 and 65535.");
+                    }
+                    else
+                    {
+                        RemoveError(nameof(SendMulticastPort));
+                    }
+
+                    OnPropertyChanged(nameof(SendMulticastPort));
+                }
             }
         }
 
@@ -161,8 +253,9 @@ namespace TcpUdpTool.ViewModel
             }
         }
 
+        #endregion
 
-
+        #region Public commands
 
         public ICommand JoinLeaveCommand
         {
@@ -192,7 +285,9 @@ namespace TcpUdpTool.ViewModel
             get { return new DelegateCommand(SendTypeChanged); }
         }
 
+        #endregion
 
+        #region Constructors
 
         public UdpMulticastViewModel()
         {
@@ -212,6 +307,12 @@ namespace TcpUdpTool.ViewModel
                     IsGroupJoined = arg.Joined;
                 };
 
+
+            MulticastGroup = "";
+            MulticastPort = 0;
+            SendMulticastGroup = "";
+            SendMulticastPort = 0;
+            Message = "";
             PlainTextSendTypeSelected = true;
 
             BuildInterfaceList(Properties.Settings.Default.IPv6Support);
@@ -226,12 +327,25 @@ namespace TcpUdpTool.ViewModel
                 };
         }
 
+        #endregion
+
+        #region Private functions
 
         private void Join()
         {
-            _udpClient.Join(IPAddress.Parse(MulticastGroup), MulticastPort, 
-                ToEMulticastInterface(SelectedListenInterface.Type), 
-                SelectedListenInterface.Interface);
+            if (!ValidateJoin())
+                return;
+
+            try
+            {
+                _udpClient.Join(IPAddress.Parse(MulticastGroup), MulticastPort.Value,
+                                ToEMulticastInterface(SelectedListenInterface.Type),
+                                SelectedListenInterface.Interface);
+            }
+            catch(Exception ex)
+            {
+                DialogUtils.ShowErrorDialog(ex.Message);
+            }          
         }
 
         private void Leave()
@@ -241,31 +355,31 @@ namespace TcpUdpTool.ViewModel
 
         private async void Send()
         {
-            byte[] data = new byte[0];
+            if (!ValidateSend())
+                return;
+
             try
             {
-                data = _parser.Parse(Message, SettingsUtils.GetEncoding());
+                var data = _parser.Parse(Message, SettingsUtils.GetEncoding());
+
+                var msg = new Piece(data, Piece.EType.Sent);
+                var res = await _udpClient.SendAsync(
+                    msg, IPAddress.Parse(SendMulticastGroup),
+                    SendMulticastPort.Value, ToEMulticastInterface(SelectedSendInterface.Type),
+                    SelectedSendInterface.Interface);
+
+                if (res != null)
+                {
+                    msg.Origin = res.From;
+                    msg.Destination = res.To;
+                    History.Transmissions.Append(msg);
+                    Message = "";
+                }
             }
-            catch (FormatException e)
+            catch (Exception ex)
             {
-                MessageBox.Show(e.Message, "Error");
-                return;
+                DialogUtils.ShowErrorDialog(ex.Message);
             }
-
-            Piece msg = new Piece(data, Piece.EType.Sent);
-            PieceSendResult res = await _udpClient.SendAsync(
-                msg, IPAddress.Parse(SendMulticastGroup), 
-                SendMulticastPort, ToEMulticastInterface(SelectedSendInterface.Type), 
-                SelectedSendInterface.Interface);
-
-            if(res != null)
-            {
-                msg.Origin = res.From;
-                msg.Destination = res.To;
-                History.Transmissions.Append(msg);
-            }
-
-            Message = "";
         }
 
         private void SendTypeChanged()
@@ -280,6 +394,39 @@ namespace TcpUdpTool.ViewModel
             }
         }
 
+        private bool ValidateJoin()
+        {
+            string error = null;
+            if (HasError(nameof(MulticastGroup)))
+                error = GetError(nameof(MulticastGroup));
+            else if (HasError(nameof(MulticastPort)))
+                error = GetError(nameof(MulticastPort));
+
+            if (error != null)
+            {
+                DialogUtils.ShowErrorDialog(error);
+                return false;
+            }
+
+            return true;
+        }
+
+        private bool ValidateSend()
+        {
+            string error = null;
+            if (HasError(nameof(SendMulticastGroup)))
+                error = GetError(nameof(SendMulticastGroup));
+            else if (HasError(nameof(SendMulticastPort)))
+                error = GetError(nameof(SendMulticastPort));
+
+            if (error != null)
+            {
+                DialogUtils.ShowErrorDialog(error);
+                return false;
+            }
+
+            return true;
+        }
 
         private UdpMulticastClient.EMulticastInterface ToEMulticastInterface(InterfaceItem.EInterfaceType type)
         {
@@ -320,6 +467,8 @@ namespace TcpUdpTool.ViewModel
                 }
             }
         }
+
+        #endregion
 
     }
 }

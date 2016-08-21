@@ -23,7 +23,7 @@ namespace TcpUdpTool.ViewModel
             set
             {
                 _header = value;
-                OnPropertyChanged("Header");
+                OnPropertyChanged(nameof(Header));
             }
         }
 
@@ -42,7 +42,7 @@ namespace TcpUdpTool.ViewModel
                 if (value != _plainTextSelected)
                 {
                     _plainTextSelected = value;
-                    OnPropertyChanged("PlainTextSelected");
+                    OnPropertyChanged(nameof(PlainTextSelected));
                 }
             }
         }
@@ -56,7 +56,7 @@ namespace TcpUdpTool.ViewModel
                 if (value != _hexSelected)
                 {
                     _hexSelected = value;
-                    OnPropertyChanged("HexSelected");
+                    OnPropertyChanged(nameof(HexSelected));
                 }
             }
         }
@@ -65,11 +65,6 @@ namespace TcpUdpTool.ViewModel
         public ICommand ClearCommand
         {
             get { return new DelegateCommand(Clear); }
-        }
-
-        public ICommand SaveCommand
-        {
-            get { return new DelegateCommand(Save); }
         }
 
         public ICommand ViewChangedCommand
@@ -86,7 +81,7 @@ namespace TcpUdpTool.ViewModel
                () =>
                {
                     // Trigger change event so view gets updated.
-                    OnPropertyChanged("Conversation");
+                    OnPropertyChanged(nameof(Conversation));
                };
 
             PlainTextSelected = true;
@@ -99,17 +94,11 @@ namespace TcpUdpTool.ViewModel
                         _transmissionHistory.SetMaxSize((int)e.NewValue);
                     }
                 };
-
         }
 
         private void Clear()
         {
             Transmissions.Clear();
-        }
-
-        private void Save()
-        {
-            throw new NotImplementedException();
         }
 
         private void ViewChanged()

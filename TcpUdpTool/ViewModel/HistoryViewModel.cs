@@ -41,13 +41,6 @@ namespace TcpUdpTool.ViewModel
             }
         }
 
-
-        /*public string Conversation
-        {
-            get { return _transmissionHistory.Get(); }
-            set { }
-        }*/
-
         private bool _plainTextSelected;
         public bool PlainTextSelected
         {

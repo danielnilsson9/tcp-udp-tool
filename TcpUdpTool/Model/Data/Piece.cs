@@ -3,15 +3,26 @@ using System.Net;
 
 namespace TcpUdpTool.Model.Data
 {
-    public class Piece
+    public class Piece : IEquatable<Piece>, IComparable<Piece>
     {
+        private static ulong _counter = 0;
+        private static object _lock = new object();
+
+
         public enum EType { Sent, Received };
 
+        private ulong _sequenceNr;
         private byte[] _data;
         private EType _type;
         private DateTime _timestamp;
         private IPEndPoint _origin;
         private IPEndPoint _destination;
+
+
+        public ulong SequenceNr
+        {
+            get { return _sequenceNr; }
+        }
 
         public byte[] Data
         {
@@ -59,10 +70,48 @@ namespace TcpUdpTool.Model.Data
 
         public Piece(byte[] data, EType type)
         {
+            lock(_lock)
+            {
+                _sequenceNr = _counter++;
+            }
+
             _data = data;
             _type = type;
             _timestamp = DateTime.Now;
         }
 
+        public bool Equals(Piece other)
+        {
+            if(other != null)
+            {
+                return SequenceNr == other.SequenceNr;
+            }
+
+            return false;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as Piece);
+        }
+
+        public override int GetHashCode()
+        {
+            return (int)SequenceNr;
+        }
+
+        public int CompareTo(Piece other)
+        {
+            if(SequenceNr > other.SequenceNr)
+            {
+                return 1;
+            }
+            else if(SequenceNr < other.SequenceNr)
+            {
+                return -1;
+            }
+
+            return 0;
+        }
     }
 }

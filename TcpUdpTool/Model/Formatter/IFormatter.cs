@@ -9,6 +9,10 @@ namespace TcpUdpTool.Model.Formatter
 {
     public interface IFormatter
     {
+        void SetPrintIP(bool printIp);
+
+        void SetPrintTime(bool printTime);
+
         void Format(Piece data, StringBuilder builder, Encoding encoding = null);
     }
 }

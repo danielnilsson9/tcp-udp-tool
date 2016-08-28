@@ -11,7 +11,7 @@ namespace TcpUdpTool.Model
     {
         public event Action HistoryChanged;
 
-        private LinkedList<Piece> _history;
+        private SortedSet<Piece> _history;
         private StringBuilder _cache;
         private Dictionary<Piece, int> _lengthMap;
         private IFormatter _formatter;
@@ -22,9 +22,8 @@ namespace TcpUdpTool.Model
 
         public TransmissionHistory()
         {
-            _history = new LinkedList<Piece>();
+            _history = new SortedSet<Piece>();
             _cache = new StringBuilder();
-            _formatter = new PlainTextFormatter(); // default formatter
             _lengthMap = new Dictionary<Piece, int>();
         }
 
@@ -70,37 +69,31 @@ namespace TcpUdpTool.Model
 
             lock(_lock)
             {
-               
-                if(_history.Count > 0 && msg.Timestamp < _history.Last.Value.Timestamp)
+                if(_history.Count > 0 && msg.SequenceNr < _history.Max.SequenceNr)
                 {
-                    // remove if history larger than max size
-                    while (_history.Count >= _maxSize)
+                    // wrong order, invalidate cache.
+                    while(_history.Count >= _maxSize)
                     {
-                        _lengthMap.Remove(_history.First.Value);
-                        _history.RemoveFirst();                     
+                        _lengthMap.Remove(_history.Min);
+                        _history.Remove(_history.Min);
                     }
 
-                    // wrong order, insert before last
-                    _history.AddBefore(_history.Last, msg);
-
-                    Invalidate();                       
+                    _history.Add(msg);
+                    Invalidate();
                 }
                 else
                 {
-                    // remove if history larger than max size
                     while (_history.Count >= _maxSize)
                     {
-                        Piece head = _history.First.Value;
-                        _history.RemoveFirst();
+                        Piece head = _history.Min;
+                        _history.Remove(head);
                         _cache.Remove(0, _lengthMap[head]);
                         _lengthMap.Remove(head);
                     }
 
-
-                    _history.AddLast(msg);
+                    _history.Add(msg);
                     AppendCache(msg);
                 }
-
 
                 HistoryChanged?.Invoke();
             } 

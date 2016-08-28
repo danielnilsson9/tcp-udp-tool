@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Input;
 using TcpUdpTool.Model;
 using TcpUdpTool.Model.Data;
+using TcpUdpTool.Model.Formatter;
 using TcpUdpTool.Model.Parser;
 using TcpUdpTool.Model.Util;
 using TcpUdpTool.ViewModel.Item;
@@ -39,7 +40,8 @@ namespace TcpUdpTool.ViewModel
             }
         }
 
-        private HistoryViewModel _historyViewModel = new HistoryViewModel();
+        private HistoryViewModel _historyViewModel = new HistoryViewModel(
+            new PlainTextFormatter(true, true), new HexFormatter(true, true));
         public HistoryViewModel History
         {
             get { return _historyViewModel; }
@@ -312,6 +314,7 @@ namespace TcpUdpTool.ViewModel
             }
             catch (Exception ex)
             {
+                Console.Write(ex.StackTrace);
                 DialogUtils.ShowErrorDialog(ex.Message);
             }
         }

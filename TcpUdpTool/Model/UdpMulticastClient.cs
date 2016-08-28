@@ -235,7 +235,7 @@ namespace TcpUdpTool.Model
                 throw new ArgumentException(multicastGroup + " is not a vaild multicast address.");
             }
 
-            if (port < 1 || port > 65535)
+            if (!NetworkUtils.IsValidPort(port, false))
             {
                 throw new ArgumentException(port + " is not a valid multicast port number.");
             }

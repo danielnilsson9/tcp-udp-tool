@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Input;
 using TcpUdpTool.Model;
 using TcpUdpTool.Model.Data;
+using TcpUdpTool.Model.Formatter;
 using TcpUdpTool.Model.Parser;
 using TcpUdpTool.Model.Util;
 using TcpUdpTool.ViewModel.Reusable;
@@ -23,7 +24,8 @@ namespace TcpUdpTool.ViewModel
 
         #region Public Properties
 
-        private HistoryViewModel _historyViewModel = new HistoryViewModel();
+        private HistoryViewModel _historyViewModel = new HistoryViewModel(
+            new PlainTextFormatter(false, true), new HexFormatter(false, true));
         public HistoryViewModel History
         {
             get { return _historyViewModel; }

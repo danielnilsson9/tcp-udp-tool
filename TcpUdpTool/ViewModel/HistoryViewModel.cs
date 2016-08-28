@@ -9,6 +9,9 @@ namespace TcpUdpTool.ViewModel
     public class HistoryViewModel : ObservableObject
     {
 
+        private PlainTextFormatter _plainTextFormatter;
+        private HexFormatter _hexFormatter;
+
         private TransmissionHistory _transmissionHistory;
         public TransmissionHistory Transmissions
         {
@@ -73,9 +76,12 @@ namespace TcpUdpTool.ViewModel
         }
 
 
-        public HistoryViewModel()
+        public HistoryViewModel(PlainTextFormatter plainTextFormatter, HexFormatter hexFormatter)
         {
+            _plainTextFormatter = plainTextFormatter;
+            _hexFormatter = hexFormatter;
             _transmissionHistory = new TransmissionHistory();
+            _transmissionHistory.SetFormatter(plainTextFormatter);
             _transmissionHistory.SetMaxSize(Properties.Settings.Default.HistoryEntries);
             _transmissionHistory.HistoryChanged +=
                () =>
@@ -105,11 +111,11 @@ namespace TcpUdpTool.ViewModel
         {
             if (PlainTextSelected)
             {
-                _transmissionHistory.SetFormatter(new PlainTextFormatter());
+                _transmissionHistory.SetFormatter(_plainTextFormatter);
             }
             else if (HexSelected)
             {
-                _transmissionHistory.SetFormatter(new HexFormatter());
+                _transmissionHistory.SetFormatter(_hexFormatter);
             }
         }
 

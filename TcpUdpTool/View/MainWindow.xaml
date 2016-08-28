@@ -7,8 +7,8 @@
         xmlns:viewmodel="clr-namespace:TcpUdpTool.ViewModel"
         xmlns:view="clr-namespace:TcpUdpTool.View"
         mc:Ignorable="d"
-        Title="TcpUdpTool" Height="550" Width="450"
-        MinHeight="500" MinWidth="460"
+        Title="TcpUdpTool" Height="550" Width="470"
+        MinHeight="500" MinWidth="470"
         Background="#FFE8E8E8">
     <Grid>
         <Grid.RowDefinitions>

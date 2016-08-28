@@ -8,6 +8,7 @@ using TcpUdpTool.Model.Data;
 using TcpUdpTool.Model.Formatter;
 using TcpUdpTool.Model.Parser;
 using TcpUdpTool.Model.Util;
+using TcpUdpTool.ViewModel.Helper;
 using TcpUdpTool.ViewModel.Item;
 using TcpUdpTool.ViewModel.Reusable;
 
@@ -40,7 +41,7 @@ namespace TcpUdpTool.ViewModel
         }
 
         private HistoryViewModel _historyViewModel = new HistoryViewModel(
-            new PlainTextFormatter(false, true), new HexFormatter(false, true));
+            new PlainTextFormatter(true, true), new HexFormatter(true, true));
         public HistoryViewModel History
         {
             get { return _historyViewModel; }
@@ -225,7 +226,7 @@ namespace TcpUdpTool.ViewModel
             _tcpServer.Received +=
                 (sender, arg) =>
                 {
-                    History.Transmissions.Append(arg.Message);
+                    DispatchHelper.Invoke(() => History.Transmissions.Append(arg.Message));
                 };
 
 

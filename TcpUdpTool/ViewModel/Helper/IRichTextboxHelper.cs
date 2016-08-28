@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Documents;
-using TcpUdpTool.Model.Data;
 
-namespace TcpUdpTool.Model.Formatter
+namespace TcpUdpTool.ViewModel.Helper
 {
-    public interface IFormatter
+    public interface IRichTextboxHelper
     {
-
-        Paragraph Format(Piece msg, Encoding encoding = null);
+        
+        FlowDocument Document { get; }
 
     }
 }

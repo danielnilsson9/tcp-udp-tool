@@ -96,7 +96,8 @@
 
         <local:HistoryView Grid.Column="0"
                            Grid.Row="1"
-                           Margin="10 0 10 10" />
+                           Margin="10 0 10 10" 
+                           DataContext="{Binding History}"/>
 
         <GroupBox Header="Send"
                   Grid.Column="0"

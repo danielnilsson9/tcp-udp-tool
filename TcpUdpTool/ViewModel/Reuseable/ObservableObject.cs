@@ -69,6 +69,9 @@ namespace TcpUdpTool.ViewModel.Reusable
 
         public IEnumerable GetErrors(string propertyName)
         {
+            if (propertyName == null)
+                return null;
+
             List<string> err = new List<string>();
             if (_errors.ContainsKey(propertyName))
             {

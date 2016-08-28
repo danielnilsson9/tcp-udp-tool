@@ -8,6 +8,7 @@ using TcpUdpTool.Model.Data;
 using TcpUdpTool.Model.Formatter;
 using TcpUdpTool.Model.Parser;
 using TcpUdpTool.Model.Util;
+using TcpUdpTool.ViewModel.Helper;
 using TcpUdpTool.ViewModel.Item;
 using TcpUdpTool.ViewModel.Reusable;
 using static TcpUdpTool.Model.UdpClientServerStatusEventArgs;
@@ -246,14 +247,14 @@ namespace TcpUdpTool.ViewModel
             _udpClientServer.Received +=
                 (sender, arg) =>
                 {
-                    History.Transmissions.Append(arg.Message);
+                    DispatchHelper.Invoke(() => History.Transmissions.Append(arg.Message));
                 };
 
             ListenPort = 0;
             PlainTextSendTypeSelected = true;
             History.Header = "Conversation History";
             Message = "";
-            SendIpAddress = "";
+            SendIpAddress = "localhost";
             SendPort = 0;
 
             BuildInterfaceList(Properties.Settings.Default.IPv6Support);

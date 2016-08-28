@@ -71,6 +71,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Model\Data\PieceSendResult.cs" />
+    <Compile Include="Model\Formatter\FormatterBase.cs" />
     <Compile Include="Model\Formatter\HexFormatter.cs" />
     <Compile Include="Model\Formatter\IFormatter.cs" />
     <Compile Include="Model\Formatter\PlainTextFormatter.cs" />
@@ -86,8 +87,10 @@
     <Compile Include="Model\Util\NetworkUtils.cs" />
     <Compile Include="Model\EventArg\ReceivedEventArgs.cs" />
     <Compile Include="Model\Util\SettingsUtils.cs" />
+    <Compile Include="ViewModel\Helper\DispatchHelper.cs" />
     <Compile Include="ViewModel\Item\InterfaceItem.cs" />
     <Compile Include="ViewModel\Reuseable\DelegateCommand.cs" />
+    <Compile Include="ViewModel\Helper\IRichTextboxHelper.cs" />
     <Compile Include="ViewModel\Reuseable\ObservableObject.cs" />
     <Compile Include="Model\TcpClient.cs" />
     <Compile Include="ViewModel\HistoryViewModel.cs" />

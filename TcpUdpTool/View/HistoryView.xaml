@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:TcpUdpTool.View"
              mc:Ignorable="d" >
     
-    <GroupBox Header="{Binding History.Header}">
+    <GroupBox Header="{Binding Header}">
 
         <Grid Margin="10">
             <Grid.ColumnDefinitions>
@@ -19,15 +19,13 @@
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <TextBox x:Name="HistoryTextBox"
+            <RichTextBox x:Name="HistoryTextBox"
                      Grid.Column="0"
                      Grid.Row="0"
                      Grid.ColumnSpan="4"
                      IsReadOnly="True"
                      Margin="0 0 0 10"
                      ScrollViewer.VerticalScrollBarVisibility="Visible"
-                     TextWrapping="Wrap"
-                     Text="{Binding History.Conversation}"
                      FontFamily="Courier New" />
 
             <Label Grid.Column="0"
@@ -45,13 +43,13 @@
 
                 <RadioButton Content="Text" 
                              Margin="0 0 10 0"                                                 
-                             Command="{Binding History.ViewChangedCommand}"
-                             IsChecked="{Binding History.PlainTextSelected, Mode=TwoWay}" />
+                             Command="{Binding ViewChangedCommand}"
+                             IsChecked="{Binding PlainTextSelected, Mode=TwoWay}" />
 
                 <RadioButton Content="Hex" 
                              Margin="0 0 10 0"
-                             Command="{Binding History.ViewChangedCommand}"
-                             IsChecked="{Binding History.HexSelected, Mode=TwoWay}"/>
+                             Command="{Binding ViewChangedCommand}"
+                             IsChecked="{Binding HexSelected, Mode=TwoWay}"/>
             </StackPanel>
 
             <Button Grid.Column="3"
@@ -60,7 +58,7 @@
                     Width="60"
                     Content="Clear"
                     VerticalContentAlignment="Center"
-                    Command="{Binding History.ClearCommand}"/>
+                    Command="{Binding ClearCommand}"/>
 
         </Grid>
     </GroupBox>

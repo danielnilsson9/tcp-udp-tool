@@ -8,6 +8,7 @@ using TcpUdpTool.Model.Data;
 using TcpUdpTool.Model.Formatter;
 using TcpUdpTool.Model.Parser;
 using TcpUdpTool.Model.Util;
+using TcpUdpTool.ViewModel.Helper;
 using TcpUdpTool.ViewModel.Item;
 using TcpUdpTool.ViewModel.Reusable;
 
@@ -300,7 +301,7 @@ namespace TcpUdpTool.ViewModel
             _udpClient.Received +=
                 (sender, arg) =>
                 {
-                    History.Transmissions.Append(arg.Message);
+                    DispatchHelper.Invoke(() => History.Transmissions.Append(arg.Message));
                 };
 
             _udpClient.StatusChanged += 

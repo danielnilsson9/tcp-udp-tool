@@ -128,7 +128,8 @@
 
         <local:HistoryView Grid.Column="0"
                            Grid.Row="1"
-                           Margin="10 0 10 10" />
+                           Margin="10 0 10 10"
+                           DataContext="{Binding History}"/>
 
 
         <GroupBox Header="Send"
@@ -229,8 +230,7 @@
                         Width="80"
                         Margin="10"
                         Content="Send"
-                        Command="{Binding SendCommand}"
-                        IsEnabled="{Binding IsConnected}" />
+                        Command="{Binding SendCommand}" />
 
                 <Label Grid.Column="0"
                        Grid.Row="3"

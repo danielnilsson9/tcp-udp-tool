@@ -1,65 +1,41 @@
 ﻿using System;
 using System.Text;
+using System.Windows.Documents;
 using TcpUdpTool.Model.Data;
 
 namespace TcpUdpTool.Model.Formatter
 {
-    public class HexFormatter : IFormatter
+    public class HexFormatter : FormatterBase
     {
 
-        private bool _printIP = false;
-        private bool _printTime = false;
+        private StringBuilder _builder = new StringBuilder();
 
 
-        public HexFormatter(bool printIp, bool printTime)
+        public HexFormatter(bool showTime, bool showIp) : base(showTime, showIp)
         {
-            SetPrintIP(printIp);
-            SetPrintTime(printTime);
+
         }
 
-
-        public void SetPrintIP(bool printIp)
+        protected override void OnFormatMessage(Piece msg, Encoding encoding, Paragraph target)
         {
-            _printIP = printIp;
-        }
-
-        public void SetPrintTime(bool printTime)
-        {
-            _printTime = printTime;
-        }
-
-        public void Format(Piece msg, StringBuilder builder, Encoding encoding = null)
-        {
-            if (_printTime)
-            {
-                builder.AppendFormat("[{0}]", msg.Timestamp.ToString("HH:mm:ss"));
-            }
-
-            if (_printIP)
-            {
-                builder.AppendFormat("[{0}]", msg.IsSent ? msg.Destination : msg.Origin);
-            }
-
-            builder.AppendFormat("{0}: ", msg.IsSent ? "S" : "R");
-            builder.AppendLine();
+            _builder.Clear();
 
             int count = 0;
-            foreach(byte b in msg.Data)
+            foreach (byte b in msg.Data)
             {
-                builder.Append(b.ToString("X2"));
+                _builder.Append(b.ToString("X2"));
 
-                if(++count % 16 == 0)
+                if (++count % 16 == 0)
                 {
-                    builder.AppendLine();
+                    _builder.AppendLine();
                 }
                 else
                 {
-                    builder.Append(' ');
+                    _builder.Append(' ');
                 }
             }
 
-            builder.AppendLine();
-            builder.AppendLine();
+            target.Inlines.Add(new Run(_builder.ToString()));       
         }
 
     }

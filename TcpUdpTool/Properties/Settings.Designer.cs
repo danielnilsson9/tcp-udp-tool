@@ -58,5 +58,29 @@ namespace TcpUdpTool.Properties {
                 this["HistoryEntries"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool HistoryInfoTimestamp {
+            get {
+                return ((bool)(this["HistoryInfoTimestamp"]));
+            }
+            set {
+                this["HistoryInfoTimestamp"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool HistoryInfoIpAdress {
+            get {
+                return ((bool)(this["HistoryInfoIpAdress"]));
+            }
+            set {
+                this["HistoryInfoIpAdress"] = value;
+            }
+        }
     }
 }

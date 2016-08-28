@@ -11,9 +11,6 @@ namespace TcpUdpTool.ViewModel
     public class HistoryViewModel : ObservableObject, IRichTextboxHelper
     {
 
-        private PlainTextFormatter _plainTextFormatter;
-        private HexFormatter _hexFormatter;
-
         private TransmissionHistory _transmissionHistory;
         public TransmissionHistory Transmissions
         {
@@ -82,30 +79,39 @@ namespace TcpUdpTool.ViewModel
 
        
 
-        public HistoryViewModel(PlainTextFormatter plainTextFormatter, HexFormatter hexFormatter)
+        public HistoryViewModel()
         {
-            _plainTextFormatter = plainTextFormatter;
-            _hexFormatter = hexFormatter;
             _transmissionHistory = new TransmissionHistory(Document);
-            _transmissionHistory.SetFormatter(plainTextFormatter);
+            _transmissionHistory.SetFormatter(
+                new PlainTextFormatter(
+                    Properties.Settings.Default.HistoryInfoTimestamp, 
+                    Properties.Settings.Default.HistoryInfoIpAdress
+                )
+            );
             _transmissionHistory.SetMaxSize(Properties.Settings.Default.HistoryEntries);
             _transmissionHistory.HistoryChanged +=
                () =>
                {
-                    // Trigger change event so view gets updated.
+                    // trigger, but no one is listening atm.
                     OnPropertyChanged(nameof(Document));
                };
 
             PlainTextSelected = true;
 
-            Properties.Settings.Default.SettingChanging +=
+            Properties.Settings.Default.PropertyChanged +=
                 (sender, e) =>
                 {
-                    if(e.SettingName == nameof(Properties.Settings.Default.HistoryEntries))
+                    if(e.PropertyName == nameof(Properties.Settings.Default.HistoryEntries))
                     {
-                        _transmissionHistory.SetMaxSize((int)e.NewValue);
+                        _transmissionHistory.SetMaxSize(Properties.Settings.Default.HistoryEntries);
                     }
-                };
+                    else if(e.PropertyName == nameof(Properties.Settings.Default.HistoryInfoTimestamp) ||
+                            e.PropertyName == nameof(Properties.Settings.Default.HistoryInfoIpAdress))
+                    {
+                        // reset formatter.
+                        ViewChanged();
+                    }
+                };       
         }
 
         private void Clear()
@@ -117,11 +123,21 @@ namespace TcpUdpTool.ViewModel
         {
             if (PlainTextSelected)
             {
-                _transmissionHistory.SetFormatter(_plainTextFormatter);
+                _transmissionHistory.SetFormatter(
+                     new PlainTextFormatter(
+                        Properties.Settings.Default.HistoryInfoTimestamp,
+                        Properties.Settings.Default.HistoryInfoIpAdress
+                    )
+                );
             }
             else if (HexSelected)
             {
-                _transmissionHistory.SetFormatter(_hexFormatter);
+                _transmissionHistory.SetFormatter(
+                    new HexFormatter(
+                        Properties.Settings.Default.HistoryInfoTimestamp,
+                        Properties.Settings.Default.HistoryInfoIpAdress
+                    )
+                );
             }
         }
 

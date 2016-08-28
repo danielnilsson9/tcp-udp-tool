@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Net;
 using System.Windows;
 using System.Windows.Input;
@@ -40,8 +41,7 @@ namespace TcpUdpTool.ViewModel
             }
         }
 
-        private HistoryViewModel _historyViewModel = new HistoryViewModel(
-            new PlainTextFormatter(true, true), new HexFormatter(true, true));
+        private HistoryViewModel _historyViewModel = new HistoryViewModel();
         public HistoryViewModel History
         {
             get { return _historyViewModel; }
@@ -238,12 +238,12 @@ namespace TcpUdpTool.ViewModel
             BuildInterfaceList(Properties.Settings.Default.IPv6Support);
 
 
-            Properties.Settings.Default.SettingChanging +=
+            Properties.Settings.Default.PropertyChanged +=
                 (sender, e) =>
                 {
-                    if(e.SettingName == nameof(Properties.Settings.Default.IPv6Support))
+                    if(e.PropertyName == nameof(Properties.Settings.Default.IPv6Support))
                     {
-                        BuildInterfaceList((bool)e.NewValue);
+                        BuildInterfaceList(Properties.Settings.Default.IPv6Support);
                     }
                 };
 
@@ -371,6 +371,8 @@ namespace TcpUdpTool.ViewModel
                         InterfaceItem.EInterfaceType.Specific, i.IPv6Address));
                 }
             }
+
+            SelectedInterface = LocalInterfaces.FirstOrDefault();
         }
 
         #endregion

@@ -73,6 +73,38 @@ namespace TcpUdpTool.ViewModel
             }
         }
 
+        private bool _historyInfoTimestamp;
+        public bool HistoryInfoTimestamp
+        {
+            get { return _historyInfoTimestamp; }
+
+            set
+            {
+                if(_historyInfoTimestamp != value)
+                {
+                    _historyInfoTimestamp = value;
+                    Properties.Settings.Default.HistoryInfoTimestamp = _historyInfoTimestamp;
+                    OnPropertyChanged(nameof(HistoryInfoTimestamp));
+                }
+            }
+        }
+
+        private bool _historyInfoIpAddress;
+        public bool HistoryInfoIpAddress
+        {
+            get { return _historyInfoIpAddress; }
+
+            set
+            {
+                if(_historyInfoIpAddress != value)
+                {
+                    _historyInfoIpAddress = value;
+                    Properties.Settings.Default.HistoryInfoIpAdress = _historyInfoIpAddress;
+                    OnPropertyChanged(nameof(HistoryInfoIpAddress));
+                }
+            }
+        }
+        
 
 
         public SettingsViewModel()
@@ -86,6 +118,8 @@ namespace TcpUdpTool.ViewModel
  
             IPv6SupportEnabled = Properties.Settings.Default.IPv6Support;
             HistoryEntries = Properties.Settings.Default.HistoryEntries;
+            HistoryInfoTimestamp = Properties.Settings.Default.HistoryInfoTimestamp;
+            HistoryInfoIpAddress = Properties.Settings.Default.HistoryInfoIpAdress;
 
             int selected = Properties.Settings.Default.Encoding;
             foreach(var e in Encodings)

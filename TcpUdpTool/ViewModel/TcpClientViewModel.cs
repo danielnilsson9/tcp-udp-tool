@@ -25,8 +25,7 @@ namespace TcpUdpTool.ViewModel
 
         #region Public Properties
 
-        private HistoryViewModel _historyViewModel = new HistoryViewModel(
-            new PlainTextFormatter(true, true), new HexFormatter(true, true));
+        private HistoryViewModel _historyViewModel = new HistoryViewModel();
         public HistoryViewModel History
         {
             get { return _historyViewModel; }

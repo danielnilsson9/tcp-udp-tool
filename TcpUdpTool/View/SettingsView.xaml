@@ -88,6 +88,7 @@
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
                 <Label Grid.Column="0"
@@ -104,6 +105,29 @@
                 <Label Grid.Column="2"
                        Grid.Row="0"
                        Content="entries" />
+
+                <Label Grid.Column="0"
+                       Grid.Row="1"
+                       Content="Info:"
+                       Margin="0"/>
+
+                <StackPanel Grid.Column="1"
+                            Grid.Row="1"
+                            Grid.ColumnSpan="2"
+                            Orientation="Vertical"
+                            VerticalAlignment="Center"
+                            Margin="0 6 0 0">
+
+                    <CheckBox Content="Timestamp"
+                              VerticalContentAlignment="Center"
+                              IsChecked="{Binding HistoryInfoTimestamp}" />
+
+                    <CheckBox Content="IP Address"
+                              VerticalContentAlignment="Center"
+                              Margin="0 4 0 0"
+                              IsChecked="{Binding HistoryInfoIpAddress}" />
+
+                </StackPanel>
 
             </Grid>
         </GroupBox>

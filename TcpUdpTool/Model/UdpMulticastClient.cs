@@ -19,6 +19,7 @@ namespace TcpUdpTool.Model
         public event EventHandler<UdpMulticastClientStatusEventArgs> StatusChanged;
      
         private UdpClient _udpClient;
+        private UdpClient _sendUdpClient;
 
 
         public UdpMulticastClient()
@@ -118,14 +119,19 @@ namespace TcpUdpTool.Model
         {
             Validate(groupIp, port);
 
-            UdpClient sendClient = new UdpClient(groupIp.AddressFamily);
 
-            sendClient.Client.Bind(new IPEndPoint(
-                sendClient.Client.AddressFamily == AddressFamily.InterNetworkV6 ?
-                IPAddress.IPv6Any : IPAddress.Any, 0));
+            if (_sendUdpClient == null || _sendUdpClient.Client.AddressFamily != groupIp.AddressFamily)
+            {
+                if (_sendUdpClient != null)
+                    _sendUdpClient.Close();
 
+                _sendUdpClient = new UdpClient(groupIp.AddressFamily);
+                _sendUdpClient.Client.Bind(new IPEndPoint(
+                    _sendUdpClient.Client.AddressFamily == AddressFamily.InterNetworkV6 ?
+                    IPAddress.IPv6Any : IPAddress.Any, 0));
+            }
 
-            IPEndPoint from = sendClient.Client.LocalEndPoint as IPEndPoint;
+            IPEndPoint from = _sendUdpClient.Client.LocalEndPoint as IPEndPoint;
             IPEndPoint to = new IPEndPoint(groupIp, port);
             var sendInterfaces = new List<int>();
 
@@ -154,8 +160,8 @@ namespace TcpUdpTool.Model
 
             foreach(var ifaceIndex in sendInterfaces)
             {
-                SetSendInterface(sendClient, ifaceIndex);
-                await sendClient.SendAsync(msg.Data, msg.Data.Length, to);
+                SetSendInterface(_sendUdpClient, ifaceIndex);
+                await _sendUdpClient.SendAsync(msg.Data, msg.Data.Length, to);
             }
 
             return new PieceSendResult { From = from, To = to };    

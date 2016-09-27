@@ -20,7 +20,6 @@ namespace TcpUdpTool.ViewModel
             }
         }
 
-
         private EncodingItem _selectedEncoding;
         public EncodingItem SelectedEncoding
         {
@@ -35,7 +34,6 @@ namespace TcpUdpTool.ViewModel
                 }
             }
         }
-
 
         private bool _ipv6Support;
         public bool IPv6SupportEnabled
@@ -56,7 +54,6 @@ namespace TcpUdpTool.ViewModel
         {
             get { return !IPv6SupportEnabled; }
         }
-
 
         private int _historyEntries;
         public int HistoryEntries
@@ -105,8 +102,6 @@ namespace TcpUdpTool.ViewModel
             }
         }
         
-
-
         public SettingsViewModel()
         {
             Encodings = new ObservableCollection<EncodingItem>();

@@ -95,11 +95,11 @@
 		<p>Allows for connection and direct communication with a TCP server. Any data that is received will be displayed in chunks as they are passed up by the network interface, since TCP is a streaming protocol this may not correspond to how messages are defined by the application layer protocol in use.</p>
 		
 		<div class="notes">
-			<p><b>Note:</b> The field <code>IP Address</code> can be either a regular IP address or a domain name which will be automatically resolved to an IP address.</p>
+			<p><b>Note:</b> The field <code>IP Address</code> can be either a regular IP address or a domain to be resolved into an IP address.</p>
 		</div>
 		
 		<h3>TCP Server</h3>
-		<p>Start a TCP server which a client can connect to. Only a single client is allowed to connect at a time, communication with the connected client is allowed.</h3>
+		<p>Start a TCP server and wait for a client to connect. Only a single client is allowed to connect at a time, communication with the connected client is allowed.</h3>
 		
 		<div class="notes">
 			<p><b>Note:</b> If 0 is specified as <code>port</code>, then a random port in the dynamic range will be used.</p>
@@ -111,7 +111,6 @@
 		
 		<div class="notes">
 			<p><b>Note:</b> It's possible to send broadcasts by specifying a broadcast address in the destination <code>IP Address</code> field.</p>
-			<p><b>Note:</b> The destination <code>IP Address</code> field can be either a regular IP address or a domain name which will be automatically resolved to an IP Address.</p>
 		</div>
 		
 		<h3>UDP Multicast</h3>
@@ -121,7 +120,7 @@
 			<p><b>Note:</b> If you are both listening and sending on multiple interfaces you may receive duplicated packages.</p>
 		</div>
 		
-		<h2>Esape sequences</h2>
+		<h2>Escape sequences</h2>
 		
 		<p>Escape sequences can be used when sending text messages in order to send special characters or mix binary data with text.</p>
 		
@@ -187,11 +186,12 @@
 		<h4>Example:</h4>
 		<p>Send a text message with embedded binary data at the end.</p>
 		<div class="example">
-			<code>IHEAD\xFE\x09</code>
+			<code>HEAD\xFE\x09</code>
 		</div>
 		
-		<p style="margin-top: 10px;">To send binary data only, it may be easier to use the hexadeciamal 
-		message type where data is entered as space separated hexadecimal byte values.</p>
+		<p style="margin-top: 10px;">When sending binary data only it may however be more 
+        appropriate to use the hexadeciamal message type where data is entered as space 
+        separated hexadecimal byte values.</p>
 		
 	</body>
 </html>

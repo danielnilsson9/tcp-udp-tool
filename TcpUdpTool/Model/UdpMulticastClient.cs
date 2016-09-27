@@ -45,15 +45,15 @@ namespace TcpUdpTool.Model
                 true
             );
 
-            socket.Bind(new IPEndPoint(
-                socket.AddressFamily == AddressFamily.InterNetworkV6 ? 
-                IPAddress.IPv6Any : 
-                IPAddress.Any, port)
-            );
-
+            var bindInterface = specificIface;
+            if (iface != EMulticastInterface.Specific)
+            {
+                bindInterface = (socket.AddressFamily == AddressFamily.InterNetworkV6 ? 
+                    IPAddress.IPv6Any : IPAddress.Any);
+            }
+            socket.Bind(new IPEndPoint(bindInterface, port));
 
             var joinInterfaces = new List<int>();
-
             if (iface == EMulticastInterface.All)
             {
                 foreach (var i in NetworkUtils.GetMulticastInterfaces())

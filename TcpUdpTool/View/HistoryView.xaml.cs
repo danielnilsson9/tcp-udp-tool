@@ -29,7 +29,10 @@ namespace TcpUdpTool.View
             HistoryTextBox.TextChanged += 
                 (sender, e) =>
                 {
-                    HistoryTextBox.ScrollToEnd();
+                    if(Properties.Settings.Default.ScrollToEnd)
+                    {
+                        HistoryTextBox.ScrollToEnd();
+                    }                   
                 };
         }
     }

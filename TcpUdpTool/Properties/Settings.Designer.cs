@@ -82,5 +82,17 @@ namespace TcpUdpTool.Properties {
                 this["HistoryInfoIpAdress"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool ScrollToEnd {
+            get {
+                return ((bool)(this["ScrollToEnd"]));
+            }
+            set {
+                this["ScrollToEnd"] = value;
+            }
+        }
     }
 }

@@ -55,6 +55,26 @@ namespace TcpUdpTool.ViewModel
             get { return !IPv6SupportEnabled; }
         }
 
+        private bool _scrollToEnd;
+        public bool ScrollToEndEnabled
+        {
+            get { return _scrollToEnd; }
+            set
+            {
+                if (_scrollToEnd != value)
+                {
+                    _scrollToEnd = value;
+                    Properties.Settings.Default.ScrollToEnd = _scrollToEnd;
+                    OnPropertyChanged(nameof(ScrollToEndEnabled));
+                    OnPropertyChanged(nameof(ScrollToEndDisabled));
+                }
+            }
+        }
+        public bool ScrollToEndDisabled
+        {
+            get { return !ScrollToEndEnabled; }
+        }
+
         private int _historyEntries;
         public int HistoryEntries
         {
@@ -112,10 +132,11 @@ namespace TcpUdpTool.ViewModel
                 .ForEach(o => Encodings.Add(new EncodingItem(o.GetEncoding(), false)));
  
             IPv6SupportEnabled = Properties.Settings.Default.IPv6Support;
+            ScrollToEndEnabled = Properties.Settings.Default.ScrollToEnd;
             HistoryEntries = Properties.Settings.Default.HistoryEntries;
             HistoryInfoTimestamp = Properties.Settings.Default.HistoryInfoTimestamp;
             HistoryInfoIpAddress = Properties.Settings.Default.HistoryInfoIpAdress;
-
+            
             int selected = Properties.Settings.Default.Encoding;
             foreach(var e in Encodings)
             {

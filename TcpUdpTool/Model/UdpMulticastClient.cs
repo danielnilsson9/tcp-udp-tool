@@ -115,10 +115,9 @@ namespace TcpUdpTool.Model
         }
 
         public async Task<PieceSendResult> SendAsync(Piece msg, IPAddress groupIp, int port, 
-            EMulticastInterface iface, IPAddress specificIface = null)
+            EMulticastInterface iface, IPAddress specificIface = null, int ttl = 1)
         {
             Validate(groupIp, port);
-
 
             if (_sendUdpClient == null || _sendUdpClient.Client.AddressFamily != groupIp.AddressFamily)
             {
@@ -130,6 +129,8 @@ namespace TcpUdpTool.Model
                     _sendUdpClient.Client.AddressFamily == AddressFamily.InterNetworkV6 ?
                     IPAddress.IPv6Any : IPAddress.Any, 0));
             }
+
+            SetSendTTL(_sendUdpClient, ttl);
 
             IPEndPoint from = _sendUdpClient.Client.LocalEndPoint as IPEndPoint;
             IPEndPoint to = new IPEndPoint(groupIp, port);
@@ -207,7 +208,7 @@ namespace TcpUdpTool.Model
         private void SetSendInterface(UdpClient client, int ifaceIndex)
         {
             // Set the outgoing multicast interface
-            Socket socket = client.Client;
+            var socket = client.Client;
 
             if (socket.AddressFamily == AddressFamily.InterNetwork)
             {
@@ -220,7 +221,7 @@ namespace TcpUdpTool.Model
                     IPAddress.HostToNetworkOrder(ifaceIndex)
                 );
             }
-            else
+            else if(socket.AddressFamily == AddressFamily.InterNetworkV6)
             {
                 // Interface index must be in HOST BYTE ORDER for IPv6
                 // Many wasted houers here...
@@ -230,6 +231,37 @@ namespace TcpUdpTool.Model
                     SocketOptionLevel.IPv6,
                     SocketOptionName.MulticastInterface,
                     ifaceIndex
+                );
+            }
+        }
+
+        private void SetSendTTL(UdpClient client, int ttl)
+        {
+            if(ttl < 1)
+            {
+                ttl = 1;
+            }
+            else if(ttl > 255)
+            {
+                ttl = 255;
+            }
+
+            var socket = client.Client;
+
+            if(socket.AddressFamily == AddressFamily.InterNetwork)
+            {
+                socket.SetSocketOption(
+                    SocketOptionLevel.IP, 
+                    SocketOptionName.MulticastTimeToLive, 
+                    ttl
+                );
+            }
+            else if(socket.AddressFamily == AddressFamily.InterNetworkV6)
+            {
+                socket.SetSocketOption(
+                    SocketOptionLevel.IPv6, 
+                    SocketOptionName.MulticastTimeToLive, 
+                    ttl
                 );
             }
         }

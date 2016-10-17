@@ -2,11 +2,9 @@
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net;
-using System.Windows;
 using System.Windows.Input;
 using TcpUdpTool.Model;
 using TcpUdpTool.Model.Data;
-using TcpUdpTool.Model.Formatter;
 using TcpUdpTool.Model.Parser;
 using TcpUdpTool.Model.Util;
 using TcpUdpTool.ViewModel.Helper;
@@ -203,6 +201,30 @@ namespace TcpUdpTool.ViewModel
             }
         }
 
+        private int _sendTTL;
+        public int SendTTL
+        {
+            get { return _sendTTL; }
+            set
+            {
+                if(_sendTTL != value)
+                {
+                    _sendTTL = value;
+                    
+                    if(_sendTTL < 1 || _sendTTL > 255)
+                    {
+                        AddError(nameof(SendTTL), "TTL must be between 1 and 255.");
+                    }
+                    else
+                    {
+                        RemoveError(nameof(SendTTL));
+                    }
+
+                    OnPropertyChanged(nameof(SendTTL));
+                }
+            }
+        }
+
         private InterfaceItem _selectedSendInterface;
         public InterfaceItem SelectedSendInterface
         {
@@ -324,6 +346,7 @@ namespace TcpUdpTool.ViewModel
             MulticastPort = 0;
             SendMulticastGroup = "";
             SendMulticastPort = 0;
+            SendTTL = 16;
             Message = "";
             PlainTextSendTypeSelected = true;
             _historyViewModel.Header = "Conversation History";
@@ -379,7 +402,7 @@ namespace TcpUdpTool.ViewModel
                 var res = await _udpClient.SendAsync(
                     msg, IPAddress.Parse(SendMulticastGroup),
                     SendMulticastPort.Value, ToEMulticastInterface(SelectedSendInterface.Type),
-                    SelectedSendInterface.Interface);
+                    SelectedSendInterface.Interface, SendTTL);
 
                 if (res != null)
                 {
@@ -431,6 +454,8 @@ namespace TcpUdpTool.ViewModel
                 error = GetError(nameof(SendMulticastGroup));
             else if (HasError(nameof(SendMulticastPort)))
                 error = GetError(nameof(SendMulticastPort));
+            else if (HasError(nameof(SendTTL)))
+                error = GetError(nameof(SendTTL));
 
             if (error != null)
             {

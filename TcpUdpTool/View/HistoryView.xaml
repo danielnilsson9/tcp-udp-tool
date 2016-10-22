@@ -12,6 +12,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition />
+                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
@@ -254,10 +255,40 @@
                 <RadioButton Content="Statistics"
                              Margin="0 0 10 0"
                              Command="{Binding ViewChangedCommand}"
-                             IsChecked="{Binding StatisticsSelected}" />
+                             IsChecked="{Binding StatisticsSelected, Mode=TwoWay}" />
 
             </StackPanel>
 
+            <Viewbox 
+                Grid.Column="2" 
+                Grid.Row="1" 
+                Width="16" 
+                Height="16" 
+                VerticalAlignment="Center"
+                Stretch="Uniform"
+                Margin="10 0 10 0">
+                <Viewbox.Style>
+                    <Style TargetType="{x:Type Viewbox}">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding PackageDiscardedWarning}" Value="True">
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Viewbox.Style>
+                <ContentControl 
+                    Foreground="#d37a15"
+                    Content="{StaticResource WarningIcon}">
+                </ContentControl>
+                <Viewbox.ToolTip>
+                    <StackPanel>
+                        <TextBlock FontWeight="Bold">Warning</TextBlock>
+                        <TextBlock>High data rate, packets are being discarded.<LineBreak />Try increasing history size.</TextBlock>
+                    </StackPanel>
+                </Viewbox.ToolTip>
+            </Viewbox>
+        
             <Button Grid.Column="3"
                     Grid.Row="1"
                     Height="21"

@@ -22,6 +22,7 @@ namespace TcpUdpTool.ViewModel
         private RateMonitor _rateMonitor;
         private IFormatter _formatter;
         private DispatcherTimer _updateTimer;
+        private long _lastPackageDiscarded;
 
         #endregion
 
@@ -142,6 +143,20 @@ namespace TcpUdpTool.ViewModel
             }
         }
 
+        private bool _packageDiscardedWarning;
+        public bool PackageDiscardedWarning
+        {
+            get { return _packageDiscardedWarning; }
+            set
+            {
+                if(_packageDiscardedWarning != value)
+                {
+                    _packageDiscardedWarning = value;
+                    OnPropertyChanged(nameof(PackageDiscardedWarning));
+                }
+            }
+        }
+
         #endregion
 
         #region public commands
@@ -220,7 +235,10 @@ namespace TcpUdpTool.ViewModel
                 _rateMonitor.NoteSent(msg);
             }
 
-            _incomingQueue.TryAdd(msg);
+            if(!_incomingQueue.TryAdd(msg))
+            {
+                _lastPackageDiscarded = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
+            }
         }
 
         private void Clear()
@@ -262,8 +280,10 @@ namespace TcpUdpTool.ViewModel
 
         private void OnUpdateUI()
         {
-            if(StatisticsSelected)
+            if (StatisticsSelected)
             {
+                PackageDiscardedWarning = false;
+
                 TotalReceived = StringFormatUtils.GetSizeAsString(_rateMonitor.TotalReceivedBytes);
                 RateReceive = StringFormatUtils.GetRateAsString(_rateMonitor.CurrentReceiveRate) + " (" + StringFormatUtils.GetSizeAsString(_rateMonitor.CurrentReceiveRate / 8) + "/s)";
                 TotalSent = StringFormatUtils.GetSizeAsString(_rateMonitor.TotalSentBytes);
@@ -271,10 +291,14 @@ namespace TcpUdpTool.ViewModel
 
                 // dont update conversation view if more than 100kbps 
                 // is received and view not selected.
-                if(_rateMonitor.CurrentReceiveRate > 100000)
+                if (_rateMonitor.CurrentReceiveRate > 100000)
                 {
                     return;
                 }
+            }
+            else
+            {
+                PackageDiscardedWarning = ((DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond) - _lastPackageDiscarded) < 10000;
             }
 
             _conversation.BeginBatch();

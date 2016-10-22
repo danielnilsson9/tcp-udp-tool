@@ -16,14 +16,14 @@ namespace TcpUdpTool.ViewModel
     public class UdpMulticastViewModel : ObservableObject
     {
 
-        #region Private members
+        #region private members
 
         private UdpMulticastClient _udpClient;
         private IParser _parser;
 
         #endregion
 
-        #region Public properties
+        #region public properties
 
         private ObservableCollection<InterfaceItem> _localInterfaces;
         public ObservableCollection<InterfaceItem> LocalInterfaces
@@ -280,7 +280,7 @@ namespace TcpUdpTool.ViewModel
 
         #endregion
 
-        #region Public commands
+        #region public commands
 
         public ICommand JoinLeaveCommand
         {
@@ -312,7 +312,7 @@ namespace TcpUdpTool.ViewModel
 
         #endregion
 
-        #region Constructors
+        #region constructors
 
         public UdpMulticastViewModel()
         {
@@ -323,7 +323,7 @@ namespace TcpUdpTool.ViewModel
             _udpClient.Received +=
                 (sender, arg) =>
                 {
-                    DispatchHelper.Invoke(() => History.Transmissions.Append(arg.Message));
+                    History.Append(arg.Message);
                 };
 
             _udpClient.StatusChanged += 
@@ -337,7 +337,7 @@ namespace TcpUdpTool.ViewModel
                     }
                     else
                     {
-                        _historyViewModel.Header = "Conversation History";
+                        _historyViewModel.Header = "Conversation";
                     }
                 };
 
@@ -349,7 +349,7 @@ namespace TcpUdpTool.ViewModel
             SendTTL = 16;
             Message = "";
             PlainTextSendTypeSelected = true;
-            _historyViewModel.Header = "Conversation History";
+            _historyViewModel.Header = "Conversation";
 
             BuildInterfaceList(Properties.Settings.Default.IPv6Support);
 
@@ -365,7 +365,7 @@ namespace TcpUdpTool.ViewModel
 
         #endregion
 
-        #region Private functions
+        #region private functions
 
         private void Join()
         {
@@ -399,6 +399,7 @@ namespace TcpUdpTool.ViewModel
                 var data = _parser.Parse(Message, SettingsUtils.GetEncoding());
 
                 var msg = new Piece(data, Piece.EType.Sent);
+                History.Append(msg);
                 var res = await _udpClient.SendAsync(
                     msg, IPAddress.Parse(SendMulticastGroup),
                     SendMulticastPort.Value, ToEMulticastInterface(SelectedSendInterface.Type),
@@ -407,8 +408,7 @@ namespace TcpUdpTool.ViewModel
                 if (res != null)
                 {
                     msg.Origin = res.From;
-                    msg.Destination = res.To;
-                    History.Transmissions.Append(msg);
+                    msg.Destination = res.To;                 
                     Message = "";
                 }
             }

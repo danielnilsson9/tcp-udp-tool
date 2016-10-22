@@ -104,6 +104,7 @@
                          Height="20"
                          VerticalContentAlignment="Center"
                          HorizontalAlignment="Left"
+                         Validation.ErrorTemplate="{x:Null}"
                          Text="{Binding HistoryEntries, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
                     <Label Content="entries" />

@@ -74,24 +74,27 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Model\Data\PieceSendResult.cs" />
-    <Compile Include="Model\Formatter\FormatterBase.cs" />
     <Compile Include="Model\Formatter\HexFormatter.cs" />
     <Compile Include="Model\Formatter\IFormatter.cs" />
     <Compile Include="Model\Formatter\PlainTextFormatter.cs" />
     <Compile Include="Model\Parser\HexParser.cs" />
     <Compile Include="Model\Parser\PlainTextParser.cs" />
+    <Compile Include="Model\RateMonitor.cs" />
     <Compile Include="Model\TcpServer.cs" />
     <Compile Include="Model\UdpClientServer.cs" />
     <Compile Include="Model\Parser\IParser.cs" />
-    <Compile Include="Model\TransmissionHistory.cs" />
     <Compile Include="Model\Data\Piece.cs" />
     <Compile Include="Model\UdpMulticastClient.cs" />
     <Compile Include="Model\Util\DialogUtils.cs" />
     <Compile Include="Model\Util\NetworkUtils.cs" />
     <Compile Include="Model\EventArg\ReceivedEventArgs.cs" />
     <Compile Include="Model\Util\SettingsUtils.cs" />
+    <Compile Include="Model\Util\StringFormatUtils.cs" />
     <Compile Include="ViewModel\Helper\DispatchHelper.cs" />
+    <Compile Include="ViewModel\Helper\IContentChangedHelper.cs" />
+    <Compile Include="ViewModel\Item\ConversationItemViewModel.cs" />
     <Compile Include="ViewModel\Item\InterfaceItem.cs" />
+    <Compile Include="ViewModel\Reuseable\BatchObservableCollection.cs" />
     <Compile Include="ViewModel\Reuseable\DelegateCommand.cs" />
     <Compile Include="ViewModel\Helper\IRichTextboxHelper.cs" />
     <Compile Include="ViewModel\Reuseable\ObservableObject.cs" />

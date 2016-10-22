@@ -1,25 +1,24 @@
-﻿using System;
-using System.Text;
-using System.Windows.Documents;
+﻿using System.Text;
 using TcpUdpTool.Model.Data;
 
 namespace TcpUdpTool.Model.Formatter
 {
-    public class PlainTextFormatter : FormatterBase
+    public class PlainTextFormatter : IFormatter
     {
-        public PlainTextFormatter(bool showTime, bool showIp) : base(showTime, showIp)
-        {
-        }
+        private Encoding _encoding;
 
-        protected override void OnFormatMessage(Piece msg, Encoding encoding, Paragraph target)
+        public PlainTextFormatter(Encoding encoding = null)
         {
-            if (encoding == null)
+            _encoding = encoding;
+            if (_encoding == null)
             {
-                encoding = Encoding.Default;
+                _encoding = Encoding.Default;
             }
-
-            target.Inlines.Add(new Run(encoding.GetString(msg.Data)));
         }
 
+        public string Format(Piece msg)
+        {          
+            return _encoding.GetString(msg.Data);
+        }
     }
 }

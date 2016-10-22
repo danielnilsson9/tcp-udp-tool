@@ -19,15 +19,215 @@
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <RichTextBox x:Name="HistoryTextBox"
-                     Grid.Column="0"
-                     Grid.Row="0"
-                     Grid.ColumnSpan="4"
-                     IsReadOnly="True"
-                     Margin="0 0 0 10"
-                     ScrollViewer.VerticalScrollBarVisibility="Visible"
-                     FontFamily="Courier New" />
+            <ListView 
+                x:Name="ConversationList"
+                ItemsSource="{Binding Conversation}"
+                Grid.Column="0"
+                Grid.Row="0"
+                Grid.ColumnSpan="4"
+                Margin="0 0 0 4"
+                VirtualizingPanel.ScrollUnit="Pixel">
 
+                <ListView.Style>
+                    <Style TargetType="{x:Type ListView}">
+                        <Setter Property="Visibility" Value="Visible" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding StatisticsSelected}" Value="True">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ListView.Style>
+                
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="{x:Type ListViewItem}">
+                        <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+                        <Setter Property="Focusable" Value="False" />
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="{x:Type ListViewItem}">
+                                    <ContentPresenter/>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </ListView.ItemContainerStyle>
+                
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Margin="0 4 0 4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <TextBlock 
+                                Grid.Column="0"
+                                Grid.Row="0"
+                                Foreground="#787878"
+                                FontFamily="Consolas"
+                                Text="{Binding Timestamp}">
+                                <TextBlock.Style>
+                                    <Style TargetType="{x:Type TextBlock}">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding TimestampVisible}" Value="False">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+
+                            <TextBlock
+                                Grid.Column="1"
+                                Grid.Row="0"
+                                FontFamily="Consolas"
+                                Text="{Binding Source}">
+                                <TextBlock.Style>
+                                    <Style TargetType="{x:Type TextBlock}">
+                                        <Setter Property="Foreground" Value="#C82828" />
+                                        <Setter Property="Visibility" Value="Visible" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsReceived}" Value="True">
+                                                <Setter Property="Foreground" Value="#2828C8" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding SourceVisible}" Value="False">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+
+                            <TextBlock
+                                Grid.Column="2"
+                                Grid.Row="0"
+                                FontFamily="Consolas"
+                                Margin="2 0 0 0">
+                                <TextBlock.Style>
+                                    <Style TargetType="{x:Type TextBlock}">
+                                        <Setter Property="Text" Value="S:" />
+                                        <Setter Property="Foreground" Value="#C82828" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsReceived}" Value="True">
+                                                <Setter Property="Text" Value="R:" />
+                                                <Setter Property="Foreground" Value="#2828C8" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+
+                            <TextBlock                            
+                                Grid.Column="0"
+                                Grid.Row="1"
+                                Grid.ColumnSpan="3" 
+                                FontFamily="Consolas"
+                                Text="{Binding Content}"  />
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+
+            <Border 
+                Grid.Column="0"
+                Grid.Row="0"
+                Grid.ColumnSpan="4" 
+                Margin="0 0 0 4"
+                BorderBrush="#FFB0B0B0" 
+                BorderThickness="1">
+                <Border.Style>
+                    <Style TargetType="{x:Type Border}">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding StatisticsSelected}" Value="True">
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+
+                <Grid Margin="4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock 
+                        Grid.Column="0" 
+                        Grid.Row="0"
+                        FontWeight="Bold"
+                        Text="Receive"  />
+
+                    <TextBlock
+                        Grid.Column="0"
+                        Grid.Row="1"
+                        Margin="0 0 16 0"
+                        Text="Current rate:" />
+
+                    <TextBlock
+                        Grid.Column="1"
+                        Grid.Row="1"
+                        Text="{Binding RateReceive}" />
+
+                    <TextBlock
+                        Grid.Column="0"
+                        Grid.Row="3"
+                        Margin="0 0 16 0"
+                        Text="Total:" />
+                    
+                    <TextBlock
+                        Grid.Column="1"
+                        Grid.Row="3"
+                        Text="{Binding TotalReceived}" />
+
+                    <TextBlock 
+                        Grid.Column="0" 
+                        Grid.Row="4"
+                        FontWeight="Bold"
+                        Margin="0 8 0 0"
+                        Text="Send"  />
+
+                    <TextBlock
+                        Grid.Column="0"
+                        Grid.Row="5"
+                        Margin="0 0 16 0"
+                        Text="Current rate:" />
+
+                    <TextBlock
+                        Grid.Column="1"
+                        Grid.Row="5"
+                        Text="{Binding RateSend}" />
+
+                    <TextBlock
+                        Grid.Column="0"
+                        Grid.Row="6"
+                        Margin="0 0 16 0"
+                        Text="Total:" />
+
+                    <TextBlock
+                        Grid.Column="1"
+                        Grid.Row="6"
+                        Text="{Binding TotalSent}" />
+
+                </Grid>
+            </Border>
+            
             <Label Grid.Column="0"
                    Grid.Row="1"
                    Content="View:"
@@ -50,6 +250,12 @@
                              Margin="0 0 10 0"
                              Command="{Binding ViewChangedCommand}"
                              IsChecked="{Binding HexSelected, Mode=TwoWay}"/>
+
+                <RadioButton Content="Statistics"
+                             Margin="0 0 10 0"
+                             Command="{Binding ViewChangedCommand}"
+                             IsChecked="{Binding StatisticsSelected}" />
+
             </StackPanel>
 
             <Button Grid.Column="3"
@@ -59,6 +265,7 @@
                     Content="Clear"
                     VerticalContentAlignment="Center"
                     Command="{Binding ClearCommand}"/>
+            <Viewbox Grid.Column="1" HorizontalAlignment="Left" Height="26" Margin="46,137,0,-142" Grid.Row="1" VerticalAlignment="Top" Width="100"/>
 
         </Grid>
     </GroupBox>

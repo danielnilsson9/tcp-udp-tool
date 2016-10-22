@@ -1,14 +1,9 @@
 ﻿using System;
-using System.Collections;
-using System.ComponentModel;
-using System.Windows;
 using System.Windows.Input;
 using TcpUdpTool.Model;
 using TcpUdpTool.Model.Data;
-using TcpUdpTool.Model.Formatter;
 using TcpUdpTool.Model.Parser;
 using TcpUdpTool.Model.Util;
-using TcpUdpTool.ViewModel.Helper;
 using TcpUdpTool.ViewModel.Reusable;
 
 namespace TcpUdpTool.ViewModel
@@ -16,14 +11,14 @@ namespace TcpUdpTool.ViewModel
     public class TcpClientViewModel : ObservableObject
     {
 
-        #region Private Members
+        #region private Members
 
         private IParser _parser;
         private TcpClient _tcpClient;
 
         #endregion
 
-        #region Public Properties
+        #region public Properties
 
         private HistoryViewModel _historyViewModel = new HistoryViewModel();
         public HistoryViewModel History
@@ -142,7 +137,7 @@ namespace TcpUdpTool.ViewModel
 
         #endregion
 
-        #region Public Commands
+        #region public Commands
 
         public ICommand ConnectDisconnectCommand
         {
@@ -175,7 +170,7 @@ namespace TcpUdpTool.ViewModel
 
         #endregion
 
-        #region Constructors
+        #region constructors
 
         public TcpClientViewModel()
         {
@@ -194,7 +189,7 @@ namespace TcpUdpTool.ViewModel
                     }
                     else
                     {
-                        History.Header = "Conversation History";
+                        History.Header = "Conversation";
                     }
                   
                 };
@@ -202,20 +197,20 @@ namespace TcpUdpTool.ViewModel
             _tcpClient.Received += 
                 (sender, arg) =>
                 {
-                    DispatchHelper.Invoke(() => History.Transmissions.Append(arg.Message));                  
+                    History.Append(arg.Message);                  
                 };
 
 
             IpAddress = "localhost";
             Port = 0;
             PlainTextSendTypeSelected = true;
-            History.Header = "Conversation History";
+            History.Header = "Conversation";
             Message = "";
         }
 
         #endregion
 
-        #region Private Functions
+        #region private Functions
 
         private async void Connect()
         {
@@ -253,16 +248,14 @@ namespace TcpUdpTool.ViewModel
             try
             {
                 Piece msg = new Piece(data, Piece.EType.Sent);
-
+                History.Append(msg);
                 PieceSendResult res = await _tcpClient.SendAsync(msg);
                 if (res != null)
                 {
                     msg.Origin = res.From;
                     msg.Destination = res.To;
-                    History.Transmissions.Append(msg);
-                }
-
-                Message = "";
+                    Message = "";
+                }        
             }
             catch(Exception ex)
             {

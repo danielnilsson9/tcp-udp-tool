@@ -2,14 +2,11 @@
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net;
-using System.Windows;
 using System.Windows.Input;
 using TcpUdpTool.Model;
 using TcpUdpTool.Model.Data;
-using TcpUdpTool.Model.Formatter;
 using TcpUdpTool.Model.Parser;
 using TcpUdpTool.Model.Util;
-using TcpUdpTool.ViewModel.Helper;
 using TcpUdpTool.ViewModel.Item;
 using TcpUdpTool.ViewModel.Reusable;
 using static TcpUdpTool.Model.UdpClientServerStatusEventArgs;
@@ -19,14 +16,14 @@ namespace TcpUdpTool.ViewModel
     public class UdpViewModel : ObservableObject
     {
 
-        #region Private members
+        #region private members
 
         private UdpClientServer _udpClientServer;
         private IParser _parser;
 
         #endregion
 
-        #region Public properties
+        #region public properties
 
         private ObservableCollection<InterfaceItem> _localInterfaces;
         public ObservableCollection<InterfaceItem> LocalInterfaces
@@ -189,7 +186,7 @@ namespace TcpUdpTool.ViewModel
 
         #endregion
 
-        #region Public commands
+        #region public commands
 
         public ICommand StartStopCommand
         {
@@ -221,7 +218,7 @@ namespace TcpUdpTool.ViewModel
 
         #endregion
 
-        #region Constructors
+        #region constructors
 
         public UdpViewModel()
         {
@@ -240,19 +237,19 @@ namespace TcpUdpTool.ViewModel
                     }
                     else
                     {
-                        History.Header = "Conversation History";
+                        History.Header = "Conversation";
                     }
                 };
 
             _udpClientServer.Received +=
                 (sender, arg) =>
                 {
-                    DispatchHelper.Invoke(() => History.Transmissions.Append(arg.Message));
+                    History.Append(arg.Message);
                 };
 
             ListenPort = 0;
             PlainTextSendTypeSelected = true;
-            History.Header = "Conversation History";
+            History.Header = "Conversation";
             Message = "";
             SendIpAddress = "localhost";
             SendPort = 0;
@@ -271,7 +268,7 @@ namespace TcpUdpTool.ViewModel
 
         #endregion
 
-        #region Private functions
+        #region private functions
 
         private void Start()
         {
@@ -303,13 +300,12 @@ namespace TcpUdpTool.ViewModel
                 var data = _parser.Parse(Message, SettingsUtils.GetEncoding());
 
                 var msg = new Piece(data, Piece.EType.Sent);
+                History.Append(msg);
                 var res = await _udpClientServer.SendAsync(SendIpAddress, SendPort.Value, msg);
                 if (res != null)
                 {
                     msg.Origin = res.From;
                     msg.Destination = res.To;
-
-                    History.Transmissions.Append(msg);
                     Message = "";
                 }
             }

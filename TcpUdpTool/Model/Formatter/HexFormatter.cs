@@ -1,22 +1,13 @@
-﻿using System;
-using System.Text;
-using System.Windows.Documents;
+﻿using System.Text;
 using TcpUdpTool.Model.Data;
 
 namespace TcpUdpTool.Model.Formatter
 {
-    public class HexFormatter : FormatterBase
+    public class HexFormatter : IFormatter
     {
-
         private StringBuilder _builder = new StringBuilder();
 
-
-        public HexFormatter(bool showTime, bool showIp) : base(showTime, showIp)
-        {
-
-        }
-
-        protected override void OnFormatMessage(Piece msg, Encoding encoding, Paragraph target)
+        public string Format(Piece msg)
         {
             _builder.Clear();
 
@@ -35,8 +26,7 @@ namespace TcpUdpTool.Model.Formatter
                 }
             }
 
-            target.Inlines.Add(new Run(_builder.ToString()));       
+            return _builder.ToString();
         }
-
     }
 }

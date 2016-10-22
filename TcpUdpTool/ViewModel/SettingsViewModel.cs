@@ -84,6 +84,15 @@ namespace TcpUdpTool.ViewModel
                 if(_historyEntries != value)
                 {
                     _historyEntries = value;
+                    if(_historyEntries < 1)
+                    {
+                        _historyEntries = 1;
+                    }
+                    else if(_historyEntries > 1000)
+                    {
+                        _historyEntries = 1000;
+                    }
+
                     Properties.Settings.Default.HistoryEntries = _historyEntries;
                     OnPropertyChanged(nameof(HistoryEntries));
                 }

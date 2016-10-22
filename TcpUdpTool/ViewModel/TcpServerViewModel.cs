@@ -2,14 +2,11 @@
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net;
-using System.Windows;
 using System.Windows.Input;
 using TcpUdpTool.Model;
 using TcpUdpTool.Model.Data;
-using TcpUdpTool.Model.Formatter;
 using TcpUdpTool.Model.Parser;
 using TcpUdpTool.Model.Util;
-using TcpUdpTool.ViewModel.Helper;
 using TcpUdpTool.ViewModel.Item;
 using TcpUdpTool.ViewModel.Reusable;
 
@@ -18,14 +15,14 @@ namespace TcpUdpTool.ViewModel
     public class TcpServerViewModel : ObservableObject
     {
 
-        #region Private members
+        #region private members
 
         private TcpServer _tcpServer;
         private IParser _parser;
 
         #endregion
 
-        #region Public propterties
+        #region public propterties
 
         private ObservableCollection<InterfaceItem> _localInterfaces;
         public ObservableCollection<InterfaceItem> LocalInterfaces
@@ -153,7 +150,7 @@ namespace TcpUdpTool.ViewModel
 
         #endregion
 
-        #region Public commands
+        #region public commands
 
         public ICommand StartStopCommand
         {
@@ -190,7 +187,7 @@ namespace TcpUdpTool.ViewModel
 
         #endregion
 
-        #region Constructors
+        #region constructors
 
         public TcpServerViewModel()
         {
@@ -208,7 +205,7 @@ namespace TcpUdpTool.ViewModel
                     }
                     else if(arg.Status == TcpServerStatusEventArgs.EServerStatus.Stopped)
                     {
-                        History.Header = "Conversation History";
+                        History.Header = "Conversation";
                         IsStarted = false;
                     }
                     else if(arg.Status == TcpServerStatusEventArgs.EServerStatus.ClientConnected)
@@ -226,13 +223,13 @@ namespace TcpUdpTool.ViewModel
             _tcpServer.Received +=
                 (sender, arg) =>
                 {
-                    DispatchHelper.Invoke(() => History.Transmissions.Append(arg.Message));
+                    History.Append(arg.Message);
                 };
 
 
             Port = 0;
             PlainTextSendTypeSelected = true;
-            History.Header = "Conversation History";
+            History.Header = "Conversation";
             Message = "";
 
             BuildInterfaceList(Properties.Settings.Default.IPv6Support);
@@ -251,7 +248,7 @@ namespace TcpUdpTool.ViewModel
 
         #endregion
 
-        #region Private functions
+        #region private functions
 
         private void Start()
         {
@@ -299,16 +296,14 @@ namespace TcpUdpTool.ViewModel
             try
             {
                 Piece msg = new Piece(data, Piece.EType.Sent);
-
+                History.Append(msg);
                 PieceSendResult res = await _tcpServer.SendAsync(msg);
                 if (res != null)
                 {
                     msg.Origin = res.From;
                     msg.Destination = res.To;
-                    History.Transmissions.Append(msg);
+                    Message = "";
                 }
-
-                Message = "";
             }
             catch(Exception ex)
             {

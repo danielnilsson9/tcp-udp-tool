@@ -1,5 +1,9 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Concurrent;
+using System.IO;
+using System.Text;
+using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
 using TcpUdpTool.Model;
@@ -171,6 +175,16 @@ namespace TcpUdpTool.ViewModel
             get { return new DelegateCommand(ViewChanged); }
         }
 
+        public ICommand CopyCommand
+        {
+            get { return new DelegateCommand(Copy); }
+        }
+
+        public ICommand SaveCommand
+        {
+            get { return new DelegateCommand(Save); }
+        }
+
         #endregion
 
         #region public events
@@ -269,6 +283,57 @@ namespace TcpUdpTool.ViewModel
         #endregion
 
         #region private functions
+
+        private void Copy()
+        {
+            Clipboard.SetText(GetSelectedItemsAsString());
+        }
+
+        private void Save()
+        {
+            string data = GetSelectedItemsAsString();
+
+            var dialog = new SaveFileDialog();
+            dialog.Filter = "Text file (*.txt)|*.txt";
+            
+            if(dialog.ShowDialog().GetValueOrDefault())
+            {
+                try
+                {
+                    File.WriteAllText(dialog.FileName, data);
+                }
+                catch(Exception ex)
+                {
+                    DialogUtils.ShowErrorDialog("Failed to save file. " + ex.Message);
+                }
+            }
+        }
+
+        private string GetSelectedItemsAsString()
+        {
+            var sb = new StringBuilder();
+            foreach(var item in _conversation)
+            {
+                if(item.IsSelected)
+                {
+                    if(item.TimestampVisible)
+                    {
+                        sb.Append(item.Timestamp);
+                    }
+
+                    if(item.SourceVisible)
+                    {
+                        sb.Append(item.Source);
+                    }
+
+                    sb.Append(item.IsReceived ? "R:" : "S:");
+                    sb.AppendLine();
+                    sb.AppendLine(item.Content);
+                }
+            }
+
+            return sb.ToString();
+        }
 
         private void ApplyFormatter(IFormatter formatter)
         {

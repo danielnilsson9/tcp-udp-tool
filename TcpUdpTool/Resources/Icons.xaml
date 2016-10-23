@@ -6,8 +6,7 @@
         <Canvas.RenderTransform>
             <TranslateTransform X="0" Y="0"/>
         </Canvas.RenderTransform>
-        <Canvas.Resources/>
-
+        
         <Path>
             <Path.Data>
                 <PathGeometry Figures="M0 0h24v24H0z" FillRule="NonZero"/>
@@ -16,6 +15,40 @@
         <Path Fill="{Binding Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContentControl}}">
             <Path.Data>
                 <PathGeometry Figures="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" FillRule="NonZero"/>
+            </Path.Data>
+        </Path>
+    </Canvas>
+
+    <Canvas x:Key="CopyIcon" x:Shared="false" Width="24" Height="24">
+        <Canvas.RenderTransform>
+            <TranslateTransform X="0" Y="0"/>
+        </Canvas.RenderTransform>
+
+        <Path>
+            <Path.Data>
+                <PathGeometry Figures="M0 0h24v24H0z" FillRule="NonZero"/>
+            </Path.Data>
+        </Path>
+        <Path Fill="{Binding Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContentControl}}">
+            <Path.Data>
+                <PathGeometry Figures="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" FillRule="NonZero"/>
+            </Path.Data>
+        </Path>
+    </Canvas>
+
+    <Canvas x:Key="SaveIcon"  Width="24" Height="24">
+        <Canvas.RenderTransform>
+            <TranslateTransform X="0" Y="0"/>
+        </Canvas.RenderTransform>
+
+        <Path>
+            <Path.Data>
+                <PathGeometry Figures="M0 0h24v24H0z" FillRule="NonZero"/>
+            </Path.Data>
+        </Path>
+        <Path Fill="{Binding Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContentControl}}">
+            <Path.Data>
+                <PathGeometry Figures="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z" FillRule="NonZero"/>
             </Path.Data>
         </Path>
     </Canvas>

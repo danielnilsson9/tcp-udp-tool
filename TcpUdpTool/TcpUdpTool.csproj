@@ -96,7 +96,6 @@
     <Compile Include="ViewModel\Item\InterfaceItem.cs" />
     <Compile Include="ViewModel\Reuseable\BatchObservableCollection.cs" />
     <Compile Include="ViewModel\Reuseable\DelegateCommand.cs" />
-    <Compile Include="ViewModel\Helper\IRichTextboxHelper.cs" />
     <Compile Include="ViewModel\Reuseable\ObservableObject.cs" />
     <Compile Include="Model\TcpClient.cs" />
     <Compile Include="ViewModel\HistoryViewModel.cs" />
@@ -127,6 +126,10 @@
       <DependentUpon>UdpView.xaml</DependentUpon>
     </Compile>
     <Page Include="Resources\Icons.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Resources\Styles.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

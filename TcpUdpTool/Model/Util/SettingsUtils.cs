@@ -4,7 +4,6 @@ namespace TcpUdpTool.Model.Util
 {
     class SettingsUtils
     {
-
         public static Encoding GetEncoding()
         {
             int codePage = Properties.Settings.Default.Encoding;

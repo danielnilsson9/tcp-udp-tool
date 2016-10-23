@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:TcpUdpTool.View"
              mc:Ignorable="d" >
-    
+
     <GroupBox Header="{Binding Header}">
 
         <Grid Margin="10">
@@ -29,6 +29,35 @@
                 Margin="0 0 0 4"
                 VirtualizingPanel.ScrollUnit="Pixel">
 
+                <ListView.InputBindings>
+                    <KeyBinding 
+                        Key="C"
+                        Modifiers="Ctrl"
+                        Command="{Binding CopyCommand}" />
+                </ListView.InputBindings>
+                
+                <ListView.Resources>
+                    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#F6F6F6"/>
+                    <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="Transparent" />
+
+                    <ContextMenu x:Key="ItemContextMenu">
+                        <MenuItem Header="Copy" Command="{Binding DataContext.CopyCommand, RelativeSource={RelativeSource AncestorType={x:Type ListView}}}">
+                            <MenuItem.Icon>
+                                <Viewbox Width="16" Height="16">
+                                    <ContentControl Foreground="#FF575757" Content="{StaticResource CopyIcon}" />
+                                </Viewbox>
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem Header="Save As" Command="{Binding DataContext.SaveCommand, RelativeSource={RelativeSource AncestorType={x:Type ListView}}}">
+                            <MenuItem.Icon>
+                                <Viewbox Width="16" Height="16">
+                                    <ContentControl Foreground="#FF575757" Content="{StaticResource SaveIcon}" />
+                                </Viewbox>
+                            </MenuItem.Icon>
+                        </MenuItem>
+                    </ContextMenu>
+                </ListView.Resources>
+
                 <ListView.Style>
                     <Style TargetType="{x:Type ListView}">
                         <Setter Property="Visibility" Value="Visible" />
@@ -39,21 +68,14 @@
                         </Style.Triggers>
                     </Style>
                 </ListView.Style>
-                
+
                 <ListView.ItemContainerStyle>
-                    <Style TargetType="{x:Type ListViewItem}">
+                    <Style TargetType="{x:Type ListViewItem}" BasedOn="{StaticResource ConversationListItemStyle}">
                         <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
-                        <Setter Property="Focusable" Value="False" />
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="{x:Type ListViewItem}">
-                                    <ContentPresenter/>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
+                        <Setter Property="ContextMenu" Value="{StaticResource ItemContextMenu}" />
                     </Style>
                 </ListView.ItemContainerStyle>
-                
+
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <Grid Margin="0 4 0 4">
@@ -129,6 +151,8 @@
                                 Grid.Column="0"
                                 Grid.Row="1"
                                 Grid.ColumnSpan="3" 
+                                Margin="0 2 0 0"
+                                Foreground="Black"
                                 FontFamily="Consolas"
                                 Text="{Binding Content}"  />
                         </Grid>
@@ -141,7 +165,8 @@
                 Grid.Row="0"
                 Grid.ColumnSpan="4" 
                 Margin="0 0 0 4"
-                BorderBrush="#FFB0B0B0" 
+                Background="{DynamicResource {x:Static SystemColors.ControlLightLightBrushKey}}"
+                BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkDarkBrushKey}}" 
                 BorderThickness="1">
                 <Border.Style>
                     <Style TargetType="{x:Type Border}">
@@ -191,7 +216,7 @@
                         Grid.Row="3"
                         Margin="0 0 16 0"
                         Text="Total:" />
-                    
+
                     <TextBlock
                         Grid.Column="1"
                         Grid.Row="3"
@@ -228,7 +253,7 @@
 
                 </Grid>
             </Border>
-            
+
             <Label Grid.Column="0"
                    Grid.Row="1"
                    Content="View:"
@@ -288,7 +313,7 @@
                     </StackPanel>
                 </Viewbox.ToolTip>
             </Viewbox>
-        
+
             <Button Grid.Column="3"
                     Grid.Row="1"
                     Height="21"

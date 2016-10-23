@@ -7,7 +7,6 @@ using TcpUdpTool.Model;
 using TcpUdpTool.Model.Data;
 using TcpUdpTool.Model.Parser;
 using TcpUdpTool.Model.Util;
-using TcpUdpTool.ViewModel.Helper;
 using TcpUdpTool.ViewModel.Item;
 using TcpUdpTool.ViewModel.Reusable;
 

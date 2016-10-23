@@ -59,14 +59,5 @@ namespace TcpUdpTool.Properties {
                 resourceCulture = value;
             }
         }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to .
-        /// </summary>
-        internal static string help {
-            get {
-                return ResourceManager.GetString("help", resourceCulture);
-            }
-        }
     }
 }

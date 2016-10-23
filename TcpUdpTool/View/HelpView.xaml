@@ -5,18 +5,246 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:TcpUdpTool.View"
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300">
+             d:DesignHeight="500" d:DesignWidth="500">
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition />
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition />
-        </Grid.RowDefinitions>
+        <FlowDocumentScrollViewer>
+            <FlowDocument FontFamily="Segoe UI" FontSize="13" PagePadding="16" TextAlignment="Left">
+                <Paragraph Margin="0">
+                    <Floater Width="100" >
+                        <BlockUIContainer>
+                            <Image Source="pack://application:,,,/Resources/icon.ico" />
+                        </BlockUIContainer>
+                    </Floater>
+                </Paragraph>
+                <Paragraph Margin="0">
+                    <Run FontSize="26" FontWeight="Bold">TcpUdpTool</Run>
+                </Paragraph>
+                <Paragraph Margin="0 16 0 0">
+                    <Run FontWeight="Bold">Version:</Run> 1.0
+                    <LineBreak />
+                    <Run FontWeight="Bold">Author:</Run> Daniel Nilsson
+                </Paragraph>
+             
+                <Section>
+                    <Paragraph FontWeight="Bold" FontSize="17" Margin="0 16 0 8">
+                        Information
+                    </Paragraph>
+                    <Paragraph Margin="0">
+                        TcpUdpTool is an application that aims to be useful during development of network applications by quickly letting you test and debug network communication.
+                    </Paragraph>
+                </Section>
 
-        <WebBrowser x:Name="HelpBrowser"
-                    Grid.Column="0"
-                    Grid.Row="0" />
+                <Section>
+                    <Paragraph FontWeight="Bold" FontSize="15" Margin="0 16 0 8">
+                        TCP Client
+                    </Paragraph>
+                    <Paragraph Margin="0">
+                        Allows for connection and direct communication with a TCP server. 
+                        Any data that is received will be displayed in chunks as they are 
+                        passed up by the network interface, since TCP is a streaming protocol 
+                        this may not correspond to how messages are defined by the application 
+                        layer protocol in use.
+                    </Paragraph>
+                    <Paragraph Margin="0 8 0 0">
+                        <Run FontWeight="Bold">Note:</Run> The field
+                        <Run FontFamily="Consolas">IP Address</Run> can be either a regular IP address 
+                        or a domain to be resolved into an IP address.
+                    </Paragraph>
+                </Section>
+                
+                <Section>
+                    <Paragraph FontWeight="Bold" FontSize="15" Margin="0 16 0 8">
+                        TCP Server
+                    </Paragraph>
+                    <Paragraph Margin="0">
+                        Start a TCP server and wait for a client to connect. Only a single 
+                        client is allowed to connect at a time, communication with the 
+                        connected client is allowed.
+                    </Paragraph>
+                    <Paragraph Margin="0 8 0 0">
+                        <Run FontWeight="Bold">Note:</Run> If 0 is specified as
+                        <Run FontFamily="Consolas">Port</Run>, then a random port 
+                        in the dynamic range will be used.
+                    </Paragraph>
+                </Section>
 
+                <Section>
+                    <Paragraph FontWeight="Bold" FontSize="15" Margin="0 16 0 8">
+                        UDP
+                    </Paragraph>
+                    <Paragraph Margin="0">
+                        Send and/or receive UDP packets.
+                    </Paragraph>
+                    <Paragraph Margin="0 8 0 0">
+                        <Run FontWeight="Bold">Note:</Run> It's possible to send 
+                        broadcasts by specifying a broadcast address in the destination
+                        <Run FontFamily="Consolas">IP Address</Run> field.
+                    </Paragraph>
+                </Section>
+
+                <Section>
+                    <Paragraph FontWeight="Bold" FontSize="15" Margin="0 16 0 8">
+                        UDP Multicast
+                    </Paragraph>
+                    <Paragraph Margin="0">
+                        Participate in communication in UDP multicast groups. 
+                        Multicast traffic is if nothing else is specified only received 
+                        on the default network interface. You may select which interface 
+                        to listen on in the interface list. You can listen to all interfaces 
+                        simultainiously by selecting
+                        <Run FontFamily="Consolas">All</Run>. The same is true when 
+                        sending multicast packets.
+                    </Paragraph>
+                    <Paragraph Margin="0 8 0 0">
+                        <Run FontWeight="Bold">Note:</Run> If you are both listening and 
+                        sending on multiple interfaces you may receive duplicated packages.
+                    </Paragraph>
+                </Section>
+
+                <Section>
+                    <Paragraph FontWeight="Bold" FontSize="17" Margin="0 16 0 8">
+                        Escape sequences
+                    </Paragraph>
+                    <Paragraph Margin="0">
+                        Escape sequences can be used when sending text messages in 
+                        order to send special characters or mix binary data with text.
+                    </Paragraph>
+                    <Paragraph FontWeight="Bold" FontSize="15" Margin="0 8 0 0">
+                        General
+                    </Paragraph>
+                    <Table CellSpacing="5" Margin="0 8 0 0">
+                        <Table.Columns>
+                            <TableColumn Width="40" />
+                            <TableColumn Width="Auto" />
+                        </Table.Columns>
+                        <TableRowGroup>
+                            <TableRow>
+                                <TableCell>
+                                    <Paragraph FontWeight="Bold">\0</Paragraph>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph>NULL</Paragraph>
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>
+                                    <Paragraph FontWeight="Bold">\a</Paragraph>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph>Bell (alert)</Paragraph>
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>
+                                    <Paragraph FontWeight="Bold">\b</Paragraph>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph>Backspace</Paragraph>
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>
+                                    <Paragraph FontWeight="Bold">\f</Paragraph>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph>Formfeed</Paragraph>
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>
+                                    <Paragraph FontWeight="Bold">\n</Paragraph>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph>New line</Paragraph>
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>
+                                    <Paragraph FontWeight="Bold">\r</Paragraph>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph>Carriage return</Paragraph>
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>
+                                    <Paragraph FontWeight="Bold">\t</Paragraph>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph>Horizontal tab</Paragraph>
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>
+                                    <Paragraph FontWeight="Bold">\v</Paragraph>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph>Vertical tab</Paragraph>
+                                </TableCell>
+                            </TableRow>
+                        </TableRowGroup>
+                    </Table>
+
+                    <Paragraph Margin="0 8 0 0" FontWeight="Bold">
+                        Example:
+                    </Paragraph>
+                    <Paragraph Margin="0 2 0 0">
+                        Send a line of text followed by a line break:
+                    </Paragraph>
+                    <Paragraph Background="#ECECEC" FontFamily="Consolas" Margin="0 2 0 0">
+                        Hello World!\r\n
+                    </Paragraph>
+
+                    <Paragraph Margin="0 16 0 8" FontSize="15" FontWeight="Bold">
+                        Unicode
+                    </Paragraph>
+                    <Paragraph Margin="0">
+                        Unicode characters can be sent by using the
+                        <Run FontWeight="Bold">\uXXXX</Run> escape sequence. 
+                        To be able to send unicode characters you must select an 
+                        appropriate encoding under Settings, e.g. utf-8.
+                        <Run FontWeight="Bold">XXXX</Run> should be replaced by the character's 
+                        hexadecimal unicode code point.
+                    </Paragraph>
+
+                    <Paragraph Margin="0 8 0 0" FontWeight="Bold">
+                        Example:
+                    </Paragraph>
+                    <Paragraph Margin="0 2 0 0">
+                        Send the greek letter omega (Ω).
+                    </Paragraph>
+                    <Paragraph Background="#ECECEC" FontFamily="Consolas" Margin="0 2 0 0">
+                        \u03A9
+                    </Paragraph>
+
+                    <Paragraph Margin="0 16 0 8" FontSize="15" FontWeight="Bold">
+                        Binary
+                    </Paragraph>
+                    <Paragraph Margin="0">
+                        Binary data can be inserted into any text message by using the
+                        <Run FontWeight="Bold">\xXX</Run> escape sequnce. The binary data 
+                        is inserted independent of the currently selected text encoding.
+                        <Run FontWeight="Bold">XX</Run> should be replaced by the hexadeciamal 
+                        byte value to insert.
+                    </Paragraph>
+
+                    <Paragraph Margin="0 8 0 0" FontWeight="Bold">
+                        Example:
+                    </Paragraph>
+                    <Paragraph Margin="0 2 0 0">
+                        Send a text message with embedded binary data at the end.
+                    </Paragraph>
+                    <Paragraph Background="#ECECEC" FontFamily="Consolas" Margin="0 2 0 0">
+                        HEAD\xFE\x09
+                    </Paragraph>
+
+                    <Paragraph Margin="0 8 0 8">
+                        When sending binary data only it may however be more appropriate 
+                        to use the hexadeciamal message type where data is entered as 
+                        space separated hexadecimal byte values.
+                    </Paragraph>
+                </Section>
+            </FlowDocument>
+        </FlowDocumentScrollViewer>
     </Grid>
 </UserControl>

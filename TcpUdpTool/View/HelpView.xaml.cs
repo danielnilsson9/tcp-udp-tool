@@ -10,7 +10,6 @@ namespace TcpUdpTool.View
         public HelpView()
         {
             InitializeComponent();
-            HelpBrowser.NavigateToString(Properties.Resources.help);
         }
     }
 }

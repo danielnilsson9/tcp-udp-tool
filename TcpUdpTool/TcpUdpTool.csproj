@@ -99,6 +99,7 @@
     <Compile Include="ViewModel\Reuseable\ObservableObject.cs" />
     <Compile Include="Model\TcpClient.cs" />
     <Compile Include="ViewModel\HistoryViewModel.cs" />
+    <Compile Include="ViewModel\SendViewModel.cs" />
     <Compile Include="ViewModel\SettingsViewModel.cs" />
     <Compile Include="ViewModel\TcpClientViewModel.cs" />
     <Compile Include="ViewModel\TcpServerViewModel.cs" />

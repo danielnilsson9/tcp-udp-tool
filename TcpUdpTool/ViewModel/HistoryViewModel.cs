@@ -17,7 +17,7 @@ using TcpUdpTool.ViewModel.Reuseable;
 
 namespace TcpUdpTool.ViewModel
 {
-    public class HistoryViewModel : ObservableObject, IContentChangedHelper
+    public class HistoryViewModel : ObservableObject, IContentChangedHelper, IDisposable
     {
 
         #region private members
@@ -368,7 +368,7 @@ namespace TcpUdpTool.ViewModel
 
             _conversation.BeginBatch();
 
-            Piece msg = null;
+            Piece msg;
             while(_incomingQueue.TryTake(out msg))
             {
                 _conversation.Add(new ConversationItemViewModel(msg, _formatter));
@@ -380,6 +380,12 @@ namespace TcpUdpTool.ViewModel
             }
 
             _conversation.EndBatch();
+        }
+
+        public void Dispose()
+        {
+            _incomingQueue?.Dispose();
+            _rateMonitor?.Dispose();
         }
 
         #endregion

@@ -12,7 +12,7 @@ using TcpUdpTool.ViewModel.Reusable;
 
 namespace TcpUdpTool.ViewModel
 {
-    public class UdpMulticastViewModel : ObservableObject
+    public class UdpMulticastViewModel : ObservableObject, IDisposable
     {
 
         #region private members
@@ -506,6 +506,12 @@ namespace TcpUdpTool.ViewModel
 
             SelectedListenInterface = LocalInterfaces.FirstOrDefault();
             SelectedSendInterface = LocalInterfaces.FirstOrDefault();
+        }
+
+        public void Dispose()
+        {
+            _udpClient?.Dispose();
+            _historyViewModel?.Dispose();
         }
 
         #endregion

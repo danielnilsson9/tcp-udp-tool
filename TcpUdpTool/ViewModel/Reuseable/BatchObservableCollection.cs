@@ -6,7 +6,7 @@ using System.ComponentModel;
 
 namespace TcpUdpTool.ViewModel.Reuseable
 {
-    public partial class BatchObservableCollection<T> : Collection<T>, INotifyCollectionChanged, INotifyPropertyChanged
+    public class BatchObservableCollection<T> : Collection<T>, INotifyCollectionChanged, INotifyPropertyChanged
     {
         private int _batchOperationCount;
         private bool _changedDuringBatchOperation;

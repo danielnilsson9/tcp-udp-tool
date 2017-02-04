@@ -8,7 +8,7 @@ using TcpUdpTool.Model.EventArg;
 namespace TcpUdpTool.Model
 {
 
-    class TcpServer
+    public class TcpServer : IDisposable
     {
         public event EventHandler<ReceivedEventArgs> Received;
         public event EventHandler<TcpServerStatusEventArgs> StatusChanged;
@@ -76,7 +76,6 @@ namespace TcpUdpTool.Model
             // close client connection.
             if(_connectedClient != null)
             {
-                EndPoint info = _connectedClient.Client.RemoteEndPoint;
                 _connectedClient.Close();
                 _connectedClient = null;
                 OnStatusChanged(TcpServerStatusEventArgs.EServerStatus.ClientDisconnected);
@@ -162,6 +161,13 @@ namespace TcpUdpTool.Model
                 _connectedClient?.Client.RemoteEndPoint as IPEndPoint));
         }
 
+        public void Dispose()
+        {
+            _tcpServer?.Stop();
+            _tcpServer = null;
+            _connectedClient?.Close();
+            _connectedClient = null;
+        }
     }
 
     public class TcpServerStatusEventArgs : EventArgs

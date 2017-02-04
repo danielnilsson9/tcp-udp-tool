@@ -10,7 +10,7 @@ using static TcpUdpTool.Model.UdpMulticastClient;
 
 namespace TcpUdpTool.Model
 {
-    public class UdpMulticastClient
+    public class UdpMulticastClient : IDisposable
     {
 
         public enum EMulticastInterface { Default, All, Specific };
@@ -279,6 +279,13 @@ namespace TcpUdpTool.Model
             }
         }
 
+        public void Dispose()
+        {
+            _udpClient?.Close();
+            _udpClient = null;
+            _sendUdpClient?.Close();
+            _sendUdpClient = null;
+        }
     }
 
     public class UdpMulticastClientStatusEventArgs : EventArgs

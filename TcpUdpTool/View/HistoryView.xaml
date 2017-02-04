@@ -3,7 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:TcpUdpTool.View"
+             xmlns:ext="clr-namespace:TcpUdpTool.ViewModel.Extension"
+             xmlns:properties="clr-namespace:TcpUdpTool.Properties"
              mc:Ignorable="d" >
 
     <GroupBox Header="{Binding Header}">
@@ -27,7 +28,8 @@
                 Grid.Row="0"
                 Grid.ColumnSpan="4"
                 Margin="0 0 0 4"
-                VirtualizingPanel.ScrollUnit="Pixel">
+                VirtualizingPanel.ScrollUnit="Pixel"
+                ext:ListViewExtension.AutoScrollToEnd="{Binding Source={x:Static properties:Settings.Default}, Path=ScrollToEnd}">
 
                 <ListView.InputBindings>
                     <KeyBinding 

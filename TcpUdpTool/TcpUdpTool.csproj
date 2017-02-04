@@ -90,10 +90,13 @@
     <Compile Include="Model\EventArg\ReceivedEventArgs.cs" />
     <Compile Include="Model\Util\SettingsUtils.cs" />
     <Compile Include="Model\Util\StringFormatUtils.cs" />
+    <Compile Include="ViewModel\Extension\ListViewExtension.cs" />
+    <Compile Include="ViewModel\Extension\WindowExtension.cs" />
     <Compile Include="ViewModel\Helper\DispatchHelper.cs" />
     <Compile Include="ViewModel\Helper\IContentChangedHelper.cs" />
     <Compile Include="ViewModel\Item\ConversationItemViewModel.cs" />
     <Compile Include="ViewModel\Item\InterfaceItem.cs" />
+    <Compile Include="ViewModel\MainViewModel.cs" />
     <Compile Include="ViewModel\Reuseable\BatchObservableCollection.cs" />
     <Compile Include="ViewModel\Reuseable\DelegateCommand.cs" />
     <Compile Include="ViewModel\Reuseable\ObservableObject.cs" />
@@ -215,9 +218,7 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Model\Exception\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Resource Include="Resources\icon.ico" />
   </ItemGroup>

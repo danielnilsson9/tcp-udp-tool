@@ -114,6 +114,7 @@ namespace TcpUdpTool.ViewModel
         {
             PlainTextSelected = true;
             Message = "";
+            _parser = new PlainTextParser();
         }
 
         #endregion

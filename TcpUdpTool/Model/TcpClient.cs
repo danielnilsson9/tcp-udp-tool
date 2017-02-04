@@ -7,7 +7,7 @@ using TcpUdpTool.Model.Util;
 
 namespace TcpUdpTool.Model
 {
-    public class TcpClient
+    public class TcpClient : IDisposable
     {
       
         public event EventHandler<ReceivedEventArgs> Received;
@@ -121,6 +121,12 @@ namespace TcpUdpTool.Model
                 _tcpClient.Client.RemoteEndPoint as IPEndPoint : null;
 
             StatusChanged?.Invoke(false, new TcpClientStatusEventArgs(status, ep));
+        }
+
+        public void Dispose()
+        {
+            _tcpClient?.Close();
+            _tcpClient = null;
         }
 
     }

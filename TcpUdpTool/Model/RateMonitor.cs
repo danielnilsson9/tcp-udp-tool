@@ -1,11 +1,11 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Threading;
-using System.Threading.Tasks;
 using TcpUdpTool.Model.Data;
 
 namespace TcpUdpTool.Model
 {
-    public class RateMonitor
+    public class RateMonitor : IDisposable
     {
 
         #region private members
@@ -116,6 +116,11 @@ namespace TcpUdpTool.Model
                 _stopwatch.Reset();
                 _stopwatch.Start();
             }
+        }
+
+        public void Dispose()
+        {
+            _updateTimer?.Dispose();
         }
 
         #endregion

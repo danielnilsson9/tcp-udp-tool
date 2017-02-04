@@ -3,47 +3,49 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:TcpUdpTool"
         xmlns:viewmodel="clr-namespace:TcpUdpTool.ViewModel"
+        xmlns:ext="clr-namespace:TcpUdpTool.ViewModel.Extension"
         xmlns:view="clr-namespace:TcpUdpTool.View"
         mc:Ignorable="d"
         Title="TcpUdpTool" Height="600" Width="480"
         MinHeight="500" MinWidth="470"
-        Background="#FFE8E8E8">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition />
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition />
-        </Grid.ColumnDefinitions>
+        Background="#FFE8E8E8"
+        ext:WindowExtension.CloseCommand="{Binding CloseCommand}">
 
-        <TabControl Margin="10">
+    <Window.DataContext>
+        <viewmodel:MainViewModel />
+    </Window.DataContext>
+    
+    <TabControl Margin="10">
 
-            <TabItem Header="TCP Client">
-                <view:TcpClientView  />
-            </TabItem>
+        <TabItem Header="TCP Client">
+            <view:TcpClientView 
+                DataContext="{Binding TcpClientViewModel}" />
+        </TabItem>
 
-            <TabItem Header="TCP Server">
-                <view:TcpServerView />
-            </TabItem>
+        <TabItem Header="TCP Server">
+            <view:TcpServerView
+                DataContext="{Binding TcpServerViewModel}" />
+        </TabItem>
 
-            <TabItem Header="UDP">
-                <view:UdpView />
-            </TabItem>
+        <TabItem Header="UDP">
+            <view:UdpView
+                DataContext="{Binding UdpViewModel}" />
+        </TabItem>
 
-            <TabItem Header="UDP Multicast">
-                <view:UdpMulticastView />
-            </TabItem>
+        <TabItem Header="UDP Multicast">
+            <view:UdpMulticastView
+                DataContext="{Binding UdpMulticastViewModel}" />
+        </TabItem>
 
-            <TabItem Header="Settings">
-                <view:SettingsView />
-            </TabItem>
-            
-            <TabItem Header="Help">
-                <view:HelpView />
-            </TabItem>
-        </TabControl>
-            
-    </Grid>
+        <TabItem Header="Settings">
+            <view:SettingsView
+                DataContext="{Binding SettingsViewModel}" />
+        </TabItem>
+
+        <TabItem Header="Help">
+            <view:HelpView />
+        </TabItem>
+    </TabControl>
+
 </Window>

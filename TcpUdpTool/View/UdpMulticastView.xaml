@@ -6,13 +6,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:TcpUdpTool.View"
              xmlns:system="clr-namespace:System;assembly=mscorlib"
-             xmlns:viewmodel="clr-namespace:TcpUdpTool.ViewModel"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
-
-    <UserControl.DataContext>
-        <viewmodel:UdpMulticastViewModel />
-    </UserControl.DataContext>
 
     <UserControl.Resources>
         <CollectionViewSource x:Key="SortedListenInterfaces" Source="{Binding LocalInterfaces}">
@@ -28,9 +23,6 @@
     </UserControl.Resources>
 
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition />
-        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition />
@@ -40,9 +32,7 @@
         <GroupBox Header="Join"
                   Margin="10">
 
-            <Grid Grid.Row="0"
-                  Grid.Column="0"
-                  Margin="10 10 10 0">
+            <Grid Margin="10 10 10 0">
 
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
@@ -138,8 +128,7 @@
                   Margin="10 0 10 10"
                   Padding="0 0 0 10">
 
-            <Grid Grid.Column="0"
-                  Grid.Row="1">
+            <Grid>
 
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />

@@ -12,7 +12,7 @@ using TcpUdpTool.ViewModel.Reusable;
 
 namespace TcpUdpTool.ViewModel
 {
-    public class TcpServerViewModel : ObservableObject
+    public class TcpServerViewModel : ObservableObject, IDisposable
     {
 
         #region private members
@@ -368,6 +368,12 @@ namespace TcpUdpTool.ViewModel
             }
 
             SelectedInterface = LocalInterfaces.FirstOrDefault();
+        }
+
+        public void Dispose()
+        {
+            _tcpServer?.Dispose();
+            _historyViewModel?.Dispose();
         }
 
         #endregion

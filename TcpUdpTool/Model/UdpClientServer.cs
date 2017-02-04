@@ -8,7 +8,7 @@ using TcpUdpTool.Model.Util;
 
 namespace TcpUdpTool.Model
 {
-    public class UdpClientServer
+    public class UdpClientServer : IDisposable
     {
         private UdpClient _udpClient;
 
@@ -134,6 +134,11 @@ namespace TcpUdpTool.Model
             });
         }
 
+        public void Dispose()
+        {
+            _udpClient?.Close();
+            _udpClient = null;
+        }
     }
 
     public class UdpClientServerStatusEventArgs : EventArgs

@@ -13,7 +13,7 @@ using static TcpUdpTool.Model.UdpClientServerStatusEventArgs;
 
 namespace TcpUdpTool.ViewModel
 {
-    public class UdpViewModel : ObservableObject
+    public class UdpViewModel : ObservableObject, IDisposable
     {
 
         #region private members
@@ -385,6 +385,12 @@ namespace TcpUdpTool.ViewModel
             }
 
             SelectedInterface = LocalInterfaces.FirstOrDefault();
+        }
+
+        public void Dispose()
+        {
+            _udpClientServer?.Dispose();
+            _historyViewModel?.Dispose();
         }
 
         #endregion

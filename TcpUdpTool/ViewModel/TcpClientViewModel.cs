@@ -8,7 +8,7 @@ using TcpUdpTool.ViewModel.Reusable;
 
 namespace TcpUdpTool.ViewModel
 {
-    public class TcpClientViewModel : ObservableObject
+    public class TcpClientViewModel : ObservableObject, IDisposable
     {
 
         #region private Members
@@ -223,6 +223,12 @@ namespace TcpUdpTool.ViewModel
             }
            
             return true;
+        }
+
+        public void Dispose()
+        {
+            _tcpClient?.Dispose();
+            _historyViewModel?.Dispose();
         }
 
         #endregion

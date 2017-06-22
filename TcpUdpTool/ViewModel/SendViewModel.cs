@@ -1,9 +1,12 @@
 ﻿using Microsoft.Win32;
 using System;
+using System.Collections.ObjectModel;
 using System.IO;
+using System.Net;
 using System.Windows.Input;
 using TcpUdpTool.Model.Parser;
 using TcpUdpTool.Model.Util;
+using TcpUdpTool.ViewModel.Item;
 using TcpUdpTool.ViewModel.Reusable;
 
 namespace TcpUdpTool.ViewModel
@@ -18,6 +21,148 @@ namespace TcpUdpTool.ViewModel
         #endregion
 
         #region public properties
+
+        private string _ipAddress;
+        public string IpAddress
+        {
+            get { return _ipAddress; }
+            set
+            {
+                if (_ipAddress != value)
+                {
+                    _ipAddress = value;
+
+                    if (String.IsNullOrWhiteSpace(_ipAddress))
+                    {
+                        AddError(nameof(IpAddress), "IP address cannot be empty.");
+                    }
+                    else
+                    {
+                        RemoveError(nameof(IpAddress));
+                    }
+
+                    OnPropertyChanged(nameof(IpAddress));
+                }
+            }
+        }
+
+        private int? _port;
+        public int? Port
+        {
+            get { return _port; }
+            set
+            {
+                if (_port != value)
+                {
+                    _port = value;
+
+                    if (!NetworkUtils.IsValidPort(_port.HasValue ? _port.Value : -1, false))
+                    {
+                        AddError(nameof(Port), "Port must be between 1 and 65535.");
+                    }
+                    else
+                    {
+                        RemoveError(nameof(Port));
+                    }
+
+                    OnPropertyChanged(nameof(Port));
+                }
+            }
+        }
+
+        private string _multicastGroup;
+        public string MulticastGroup
+        {
+            get { return _multicastGroup; }
+            set
+            {
+                if (_multicastGroup != value)
+                {
+                    _multicastGroup = value;
+
+                    try
+                    {
+                        var addr = IPAddress.Parse(_multicastGroup);
+
+                        if (!NetworkUtils.IsMulticast(addr))
+                        {
+                            throw new Exception();
+                        }
+                        else
+                        {
+                            RemoveError(nameof(MulticastGroup));
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        if (String.IsNullOrWhiteSpace(_multicastGroup))
+                        {
+                            AddError(nameof(MulticastGroup), "Multicast address cannot be empty.");
+                        }
+                        else
+                        {
+                            AddError(nameof(MulticastGroup),
+                                String.Format("\"{0}\" is not a valid multicast address.", _multicastGroup));
+                        }
+                    }
+
+                    OnPropertyChanged(nameof(MulticastGroup));
+                }
+            }
+        }
+
+        private int _multicastTtl;
+        public int MulticastTtl
+        {
+            get { return _multicastTtl; }
+            set
+            {
+                if (_multicastTtl != value)
+                {
+                    _multicastTtl = value;
+
+                    if (_multicastTtl < 1 || _multicastTtl > 255)
+                    {
+                        AddError(nameof(MulticastTtl), "TTL must be between 1 and 255.");
+                    }
+                    else
+                    {
+                        RemoveError(nameof(MulticastTtl));
+                    }
+
+                    OnPropertyChanged(nameof(MulticastTtl));
+                }
+            }
+        }
+
+        private ObservableCollection<InterfaceItem> _interfaces;
+        public ObservableCollection<InterfaceItem> Interfaces
+        {
+            get { return _interfaces; }
+            set
+            {
+                if (_interfaces != value)
+                {
+                    _interfaces = value;
+                    OnPropertyChanged(nameof(Interfaces));
+                }
+            }
+        }
+
+        private InterfaceItem _selectedInterface;
+        public InterfaceItem SelectedInterface
+        {
+            get { return _selectedInterface; }
+            set
+            {
+                if (_selectedInterface != value)
+                {
+                    _selectedInterface = value;
+                    OnPropertyChanged(nameof(SelectedInterface));
+                }
+            }
+        }
+
 
         private string _message;
         public string Message

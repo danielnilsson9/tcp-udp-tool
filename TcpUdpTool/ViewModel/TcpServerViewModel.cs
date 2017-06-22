@@ -18,7 +18,6 @@ namespace TcpUdpTool.ViewModel
         #region private members
 
         private TcpServer _tcpServer;
-        private IParser _parser;
 
         #endregion
 
@@ -42,6 +41,12 @@ namespace TcpUdpTool.ViewModel
         public HistoryViewModel History
         {
             get { return _historyViewModel; }
+        }
+
+        private SendViewModel _sendViewModel = new SendViewModel();
+        public SendViewModel Send
+        {
+            get { return _sendViewModel; }
         }
 
 
@@ -81,7 +86,6 @@ namespace TcpUdpTool.ViewModel
             }
         }
 
-
         private int? _port;
         public int? Port
         {
@@ -102,48 +106,6 @@ namespace TcpUdpTool.ViewModel
                     }
 
                     OnPropertyChanged(nameof(Port));
-                }
-            }
-        }
-
-        private string _message;
-        public string Message
-        {
-            get { return _message; }
-            set
-            {
-                if(_message != value)
-                {
-                    _message = value;
-                    OnPropertyChanged(nameof(Message));
-                }                
-            }
-        }
-
-        private bool _plainTextSendTypeSelected;
-        public bool PlainTextSendTypeSelected
-        {
-            get { return _plainTextSendTypeSelected; }
-            set
-            {
-                if (_plainTextSendTypeSelected != value)
-                {
-                    _plainTextSendTypeSelected = value;
-                    OnPropertyChanged(nameof(PlainTextSendTypeSelected));
-                }
-            }
-        }
-
-        private bool _hexSendTypeSelected;
-        public bool HexSendTypeSelected
-        {
-            get { return _hexSendTypeSelected; }
-            set
-            {
-                if (_hexSendTypeSelected != value)
-                {
-                    _hexSendTypeSelected = value;
-                    OnPropertyChanged(nameof(HexSendTypeSelected));
                 }
             }
         }
@@ -170,19 +132,9 @@ namespace TcpUdpTool.ViewModel
             }
         }
 
-        public ICommand SendCommand
-        {
-            get { return new DelegateCommand(Send); }
-        }
-
         public ICommand DisconnectCommand
         {
             get { return new DelegateCommand(Disconnect); }
-        }
-
-        public ICommand SendTypeChangedCommand
-        {
-            get { return new DelegateCommand(SendTypeChanged); }
         }
 
         #endregion
@@ -192,9 +144,9 @@ namespace TcpUdpTool.ViewModel
         public TcpServerViewModel()
         {
             _tcpServer = new TcpServer();
-            _parser = new PlainTextParser();
             LocalInterfaces = new ObservableCollection<InterfaceItem>();
 
+            _sendViewModel.SendData += OnSend;
             _tcpServer.StatusChanged +=
                 (sender, arg) =>
                 {
@@ -226,14 +178,10 @@ namespace TcpUdpTool.ViewModel
                     History.Append(arg.Message);
                 };
 
-
             Port = 0;
-            PlainTextSendTypeSelected = true;
             History.Header = "Conversation";
-            Message = "";
 
             BuildInterfaceList(Properties.Settings.Default.IPv6Support);
-
 
             Properties.Settings.Default.PropertyChanged +=
                 (sender, e) =>
@@ -243,7 +191,6 @@ namespace TcpUdpTool.ViewModel
                         BuildInterfaceList(Properties.Settings.Default.IPv6Support);
                     }
                 };
-
         }
 
         #endregion
@@ -280,19 +227,8 @@ namespace TcpUdpTool.ViewModel
             _tcpServer.Stop();
         }
 
-        private async void Send()
+        private async void OnSend(byte[] data)
         {
-            byte[] data = new byte[0];
-            try
-            {
-                data = _parser.Parse(Message, SettingsUtils.GetEncoding());
-            }
-            catch (FormatException ex)
-            {
-                DialogUtils.ShowErrorDialog(ex.Message);
-                return;
-            }
-
             try
             {
                 Piece msg = new Piece(data, Piece.EType.Sent);
@@ -302,7 +238,7 @@ namespace TcpUdpTool.ViewModel
                 {
                     msg.Origin = res.From;
                     msg.Destination = res.To;
-                    Message = "";
+                    Send.Message = "";
                 }
             }
             catch(Exception ex)
@@ -314,18 +250,6 @@ namespace TcpUdpTool.ViewModel
         private void Disconnect()
         {
             _tcpServer.Disconnect();
-        }
-
-        private void SendTypeChanged()
-        {
-            if (PlainTextSendTypeSelected)
-            {
-                _parser = new PlainTextParser();
-            }
-            else
-            {
-                _parser = new HexParser();
-            }
         }
 
         private bool ValidateStart()

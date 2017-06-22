@@ -19,7 +19,6 @@ namespace TcpUdpTool.ViewModel
         #region private members
 
         private UdpClientServer _udpClientServer;
-        private IParser _parser;
 
         #endregion
 
@@ -43,6 +42,12 @@ namespace TcpUdpTool.ViewModel
         public HistoryViewModel History
         {
             get { return _historyViewModel; }
+        }
+
+        private SendViewModel _sendViewModel = new SendViewModel();
+        public SendViewModel Send
+        {
+            get { return _sendViewModel; }
         }
 
         private bool _isServerStarted;
@@ -97,93 +102,6 @@ namespace TcpUdpTool.ViewModel
             }
         }
 
-        private string _sendIpAddress;
-        public string SendIpAddress
-        {
-            get { return _sendIpAddress; }
-            set
-            {
-                if(_sendIpAddress != value)
-                {
-                    _sendIpAddress = value;
-
-                    if(String.IsNullOrWhiteSpace(_sendIpAddress))
-                    {
-                        AddError(nameof(SendIpAddress), "IP address cannot be empty.");
-                    }
-                    else
-                    {
-                        RemoveError(nameof(SendIpAddress));
-                    }
-
-                    OnPropertyChanged(nameof(SendIpAddress));
-                }
-            }
-        }
-
-        private int? _sendPort;
-        public int? SendPort
-        {
-            get { return _sendPort; }
-            set
-            {
-                if(_sendPort != value)
-                {
-                    _sendPort = value;
-
-                    if(!NetworkUtils.IsValidPort(_sendPort.HasValue ? _sendPort.Value : -1, false))
-                    {
-                        AddError(nameof(SendPort), "Port must be between 1 and 65535.");
-                    }
-                    else
-                    {
-                        RemoveError(nameof(SendPort));
-                    }
-
-                    OnPropertyChanged(nameof(SendPort));
-                }        
-            }
-        }
-
-        private string _message;
-        public string Message
-        {
-            get { return _message; }
-            set
-            {
-                _message = value;
-                OnPropertyChanged("Message");
-            }
-        }
-
-        private bool _plainTextSendTypeSelected;
-        public bool PlainTextSendTypeSelected
-        {
-            get { return _plainTextSendTypeSelected; }
-            set
-            {
-                if (value != _plainTextSendTypeSelected)
-                {
-                    _plainTextSendTypeSelected = value;
-                    OnPropertyChanged("PlainTextSendTypeSelected");
-                }
-            }
-        }
-
-        private bool _hexSendTypeSelected;
-        public bool HexSendTypeSelected
-        {
-            get { return _hexSendTypeSelected; }
-            set
-            {
-                if (value != _hexSendTypeSelected)
-                {
-                    _hexSendTypeSelected = value;
-                    OnPropertyChanged("HexSendTypeSelected");
-                }
-            }
-        }
-
         #endregion
 
         #region public commands
@@ -206,16 +124,6 @@ namespace TcpUdpTool.ViewModel
             }
         }
 
-        public ICommand SendCommand
-        {
-            get { return new DelegateCommand(Send); }
-        }
-
-        public ICommand SendTypeChangedCommand
-        {
-            get { return new DelegateCommand(SendTypeChanged); }
-        }
-
         #endregion
 
         #region constructors
@@ -223,9 +131,9 @@ namespace TcpUdpTool.ViewModel
         public UdpViewModel()
         {
             _udpClientServer = new UdpClientServer();
-            _parser = new PlainTextParser();
             LocalInterfaces = new ObservableCollection<InterfaceItem>();
 
+            _sendViewModel.SendData += OnSend;
             _udpClientServer.StatusChanged +=
                 (sender, arg) =>
                 {
@@ -248,11 +156,9 @@ namespace TcpUdpTool.ViewModel
                 };
 
             ListenPort = 0;
-            PlainTextSendTypeSelected = true;
             History.Header = "Conversation";
-            Message = "";
-            SendIpAddress = "localhost";
-            SendPort = 0;
+            Send.IpAddress = "localhost";
+            Send.Port = 0;
 
             BuildInterfaceList(Properties.Settings.Default.IPv6Support);
 
@@ -290,23 +196,21 @@ namespace TcpUdpTool.ViewModel
             _udpClientServer.Stop();
         }
 
-        private async void Send()
+        private async void OnSend(byte[] data)
         {
             if (!ValidateSend())
                 return;
 
             try
             {
-                var data = _parser.Parse(Message, SettingsUtils.GetEncoding());
-
                 var msg = new Piece(data, Piece.EType.Sent);
                 History.Append(msg);
-                var res = await _udpClientServer.SendAsync(SendIpAddress, SendPort.Value, msg);
+                var res = await _udpClientServer.SendAsync(Send.IpAddress, Send.Port.Value, msg);
                 if (res != null)
                 {
                     msg.Origin = res.From;
                     msg.Destination = res.To;
-                    Message = "";
+                    Send.Message = "";
                 }
             }
             catch (Exception ex)
@@ -315,19 +219,6 @@ namespace TcpUdpTool.ViewModel
                 DialogUtils.ShowErrorDialog(ex.Message);
             }
         }
-
-        private void SendTypeChanged()
-        {
-            if (PlainTextSendTypeSelected)
-            {
-                _parser = new PlainTextParser();
-            }
-            else
-            {
-                _parser = new HexParser();
-            }
-        }
-
 
         private bool ValidateStart()
         {
@@ -347,10 +238,10 @@ namespace TcpUdpTool.ViewModel
         private bool ValidateSend()
         {
             string error = null;
-            if (HasError(nameof(SendIpAddress)))
-                error = GetError(nameof(SendIpAddress));
-            else if (HasError(nameof(SendPort)))
-                error = GetError(nameof(SendPort));
+            if (Send.HasError(nameof(Send.IpAddress)))
+                error = Send.GetError(nameof(Send.IpAddress));
+            else if (Send.HasError(nameof(Send.Port)))
+                error = Send.GetError(nameof(Send.Port));
 
             if (error != null)
             {

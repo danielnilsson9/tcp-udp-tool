@@ -110,19 +110,31 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition />
-                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition />
                     <RowDefinition />
                 </Grid.RowDefinitions>
 
-                <Label Grid.Column="0"
-                       Grid.Row="0"
-                       Content="Message:"
-                       Margin="10"
-                       Padding="0"
-                       VerticalAlignment="Center"/>
+                <TextBlock 
+                    Grid.Column="0"
+                    Grid.Row="0"
+                    Margin="10"
+                    Padding="0"
+                    VerticalAlignment="Center">
+                    <TextBlock.Style>
+                        <Style TargetType="{x:Type TextBlock}">
+                            <Setter Property="Text" Value="Message:" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Send.FileSelected}" Value="true">
+                                    <Setter Property="Text" Value="File:" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
 
                 <TextBox Grid.Column="1"
                          Grid.Row="0"
@@ -132,17 +144,39 @@
                          VerticalContentAlignment="Center"
                          AcceptsReturn="True"
                          ScrollViewer.VerticalScrollBarVisibility="Auto"
-                         Text="{Binding Message, UpdateSourceTrigger=PropertyChanged}" />
+                         Text="{Binding Send.Message, UpdateSourceTrigger=PropertyChanged}" />
 
                 <Button Grid.Column="2"
                         Grid.Row="0"
                         Height="21"
                         Width="80"
+                        Margin="10 10 0 10"
+                        Content="Browse"
+                        VerticalContentAlignment="Center"
+                        IsEnabled="{Binding IsConnected}"
+                        Command="{Binding Send.BrowseCommand}">
+
+                    <Button.Style>
+                        <Style TargetType="{x:Type Button}">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Send.FileSelected}" Value="true">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+                
+                <Button Grid.Column="3"
+                        Grid.Row="0"
+                        Height="21"
+                        Width="80"
                         Margin="10"
                         Content="Send"
-                        Command="{Binding SendCommand}"
+                        Command="{Binding Send.SendCommand}"
                         IsEnabled="{Binding IsClientConnected}" />
-
+                
                 <Label Grid.Column="0"
                        Grid.Row="1"
                        Height="21"
@@ -153,21 +187,28 @@
 
                 <StackPanel Grid.Column="1"
                             Grid.Row="1"
+                            Grid.ColumnSpan="2"
                             Orientation="Horizontal"
                             VerticalAlignment="Center">
 
                     <RadioButton Content="Text"
                                  Margin="0 0 10 0"
-                                 Command="{Binding SendTypeChangedCommand}"
-                                 IsChecked="{Binding PlainTextSendTypeSelected, Mode=TwoWay}"/>
+                                 Command="{Binding Send.TypeChangedCommand}"
+                                 IsChecked="{Binding Send.PlainTextSelected, Mode=TwoWay}"/>
 
                     <RadioButton Content="Hex"
                                  Margin="0 0 10 0"
-                                 Command="{Binding SendTypeChangedCommand}"
-                                 IsChecked="{Binding HexSendTypeSelected, Mode=TwoWay}"/>
+                                 Command="{Binding Send.TypeChangedCommand}"
+                                 IsChecked="{Binding Send.HexSelected, Mode=TwoWay}"/>
+                    
+                    <RadioButton Content="File"
+                                 Margin="0 0 10 0"
+                                 Command="{Binding Send.TypeChangedCommand}"
+                                 IsChecked="{Binding Send.FileSelected, Mode=TwoWay}" />
+
                 </StackPanel>
 
-                <Button Grid.Column="2"
+                <Button Grid.Column="3"
                         Grid.Row="1"
                         Width="80"
                         Height="21"

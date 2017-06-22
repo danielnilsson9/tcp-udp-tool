@@ -13,7 +13,6 @@ namespace TcpUdpTool.ViewModel
 
         #region private Members
 
-        private IParser _parser;
         private TcpClient _tcpClient;
      
         #endregion
@@ -132,7 +131,6 @@ namespace TcpUdpTool.ViewModel
         public TcpClientViewModel()
         {
             _tcpClient = new TcpClient();
-            _parser = new PlainTextParser();
 
             _sendViewModel.SendData += OnSend;
             _tcpClient.StatusChanged += 

@@ -15,7 +15,7 @@
                 <scm:SortDescription PropertyName="" Direction="Ascending" />
             </CollectionViewSource.SortDescriptions>
         </CollectionViewSource>
-        <CollectionViewSource x:Key="SortedSendInterfaces" Source="{Binding LocalInterfaces}">
+        <CollectionViewSource x:Key="SortedSendInterfaces" Source="{Binding Send.Interfaces}">
             <CollectionViewSource.SortDescriptions>
                 <scm:SortDescription PropertyName="" Direction="Ascending" />
             </CollectionViewSource.SortDescriptions>
@@ -158,7 +158,7 @@
                          VerticalAlignment="Center"
                          VerticalContentAlignment="Center"
                          Validation.ErrorTemplate="{x:Null}"
-                         Text="{Binding SendMulticastGroup, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                         Text="{Binding Send.MulticastGroup, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
                 <Label Grid.Column="2"
                        Grid.Row="0"
@@ -174,7 +174,7 @@
                          VerticalContentAlignment="Center"
                          Margin="10" 
                          Validation.ErrorTemplate="{x:Null}"
-                         Text="{Binding SendMulticastPort, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                         Text="{Binding Send.Port, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
                 <Label Grid.Column="0"
                        Grid.Row="1"
@@ -192,7 +192,7 @@
                           IsEditable="True"
                           IsReadOnly="True"
                           ItemsSource="{Binding Source={StaticResource SortedSendInterfaces}}"
-                          SelectedItem="{Binding SelectedSendInterface}" />
+                          SelectedItem="{Binding Send.SelectedInterface}" />
 
                 <Label Grid.Column="2"
                        Grid.Row="1"
@@ -209,33 +209,76 @@
                          VerticalContentAlignment="Center"
                          Margin="10 0 10 0"
                          Validation.ErrorTemplate="{x:Null}"
-                         Text="{Binding SendTTL, UpdateSourceTrigger=PropertyChanged}"/>
+                         Text="{Binding Send.MulticastTtl, UpdateSourceTrigger=PropertyChanged}"/>
 
-                <Label Grid.Column="0"
+                <TextBlock Grid.Column="0"
                        Grid.Row="2"
-                       Content="Message:"
                        Margin="10"
                        Padding="0"
-                       VerticalAlignment="Center"/>
+                       VerticalAlignment="Center">
 
-                <TextBox Grid.Column="1"
-                         Grid.Row="2"
-                         Grid.ColumnSpan="2"
+                    <TextBlock.Style>
+                        <Style TargetType="{x:Type TextBlock}">
+                            <Setter Property="Text" Value="Message:" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Send.FileSelected}" Value="true">
+                                    <Setter Property="Text" Value="File:" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+
+                <Grid
+                    Grid.Row="2"
+                    Grid.Column="1"
+                    Grid.ColumnSpan="2">
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    
+                    <TextBox Grid.Column="0"
+                         Grid.Row="0"
                          MinHeight="21"
                          MaxHeight="50"
                          VerticalAlignment="Center"
                          VerticalContentAlignment="Center"
                          AcceptsReturn="True"
                          ScrollViewer.VerticalScrollBarVisibility="Auto"
-                         Text="{Binding Message, UpdateSourceTrigger=PropertyChanged}" />
+                         Text="{Binding Send.Message, UpdateSourceTrigger=PropertyChanged}" />
+                    
+                    <Button Grid.Column="1"
+                        Grid.Row="0"
+                        Height="21"
+                        Width="80"
+                        Margin="10 10 0 10"
+                        Content="Browse"
+                        VerticalContentAlignment="Center"
+                        Command="{Binding Send.BrowseCommand}">
 
+                        <Button.Style>
+                            <Style TargetType="{x:Type Button}">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Send.FileSelected}" Value="true">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+
+                </Grid>
+                
                 <Button Grid.Column="3"
                         Grid.Row="2"                       
                         Height="21"
                         Width="80"
                         Margin="10"
                         Content="Send"
-                        Command="{Binding SendCommand}" />
+                        Command="{Binding Send.SendCommand}" />
 
                 <Label Grid.Column="0"
                        Grid.Row="3"
@@ -247,18 +290,25 @@
 
                 <StackPanel Grid.Column="1"
                             Grid.Row="3"
+                            Grid.ColumnSpan="2"
                             Orientation="Horizontal"
                             VerticalAlignment="Center">
 
                     <RadioButton Content="Text"
                                  Margin="0 0 10 0" 
-                                 Command="{Binding SendTypeChangedCommand}"
-                                 IsChecked="{Binding PlainTextSendTypeSelected, Mode=TwoWay}" />
+                                 Command="{Binding Send.TypeChangedCommand}"
+                                 IsChecked="{Binding Send.PlainTextSelected, Mode=TwoWay}" />
 
                     <RadioButton Content="Hex"
                                  Margin="0 0 10 0"
-                                 Command="{Binding SendTypeChangedCommand}"
-                                 IsChecked="{Binding HexSendTypeSelected, Mode=TwoWay}" />
+                                 Command="{Binding Send.TypeChangedCommand}"
+                                 IsChecked="{Binding Send.HexSelected, Mode=TwoWay}" />
+
+                    <RadioButton Content="File"
+                                 Margin="0 0 10 0"
+                                 Command="{Binding Send.TypeChangedCommand}"
+                                 IsChecked="{Binding Send.FileSelected, Mode=TwoWay}" />
+
                 </StackPanel>
 
             </Grid>

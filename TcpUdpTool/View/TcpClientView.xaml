@@ -144,7 +144,6 @@
                         Margin="0 10 10 10"
                         Content="Browse"
                         VerticalContentAlignment="Center"
-                        IsEnabled="{Binding IsConnected}"
                         Command="{Binding Send.BrowseCommand}">
 
                     <Button.Style>

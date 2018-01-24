@@ -1,12 +1,12 @@
 ﻿using TcpUdpTool.Model.Data;
 using TcpUdpTool.Model.Formatter;
-using TcpUdpTool.ViewModel.Reusable;
+using TcpUdpTool.ViewModel.Base;
 
 namespace TcpUdpTool.ViewModel.Item
 {
     public class ConversationItemViewModel : ObservableObject
     {
-        private Piece _message;
+        private Transmission _message;
         private IFormatter _formatter;
         private string _contentCache;
 
@@ -42,7 +42,7 @@ namespace TcpUdpTool.ViewModel.Item
 
         public bool IsSelected { get; set; }
 
-        public ConversationItemViewModel(Piece message, IFormatter formatter)
+        public ConversationItemViewModel(Transmission message, IFormatter formatter)
         {
             _message = message;
             _formatter = formatter;

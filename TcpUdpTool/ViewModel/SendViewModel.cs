@@ -7,7 +7,7 @@ using System.Windows.Input;
 using TcpUdpTool.Model.Parser;
 using TcpUdpTool.Model.Util;
 using TcpUdpTool.ViewModel.Item;
-using TcpUdpTool.ViewModel.Reusable;
+using TcpUdpTool.ViewModel.Base;
 
 namespace TcpUdpTool.ViewModel
 {
@@ -135,8 +135,8 @@ namespace TcpUdpTool.ViewModel
             }
         }
 
-        private ObservableCollection<InterfaceItem> _interfaces;
-        public ObservableCollection<InterfaceItem> Interfaces
+        private ObservableCollection<InterfaceAddress> _interfaces;
+        public ObservableCollection<InterfaceAddress> Interfaces
         {
             get { return _interfaces; }
             set
@@ -149,8 +149,8 @@ namespace TcpUdpTool.ViewModel
             }
         }
 
-        private InterfaceItem _selectedInterface;
-        public InterfaceItem SelectedInterface
+        private InterfaceAddress _selectedInterface;
+        public InterfaceAddress SelectedInterface
         {
             get { return _selectedInterface; }
             set

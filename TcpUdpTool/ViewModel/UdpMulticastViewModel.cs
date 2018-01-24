@@ -7,7 +7,7 @@ using TcpUdpTool.Model;
 using TcpUdpTool.Model.Data;
 using TcpUdpTool.Model.Util;
 using TcpUdpTool.ViewModel.Item;
-using TcpUdpTool.ViewModel.Reusable;
+using TcpUdpTool.ViewModel.Base;
 
 namespace TcpUdpTool.ViewModel
 {
@@ -22,8 +22,8 @@ namespace TcpUdpTool.ViewModel
 
         #region public properties
 
-        private ObservableCollection<InterfaceItem> _localInterfaces;
-        public ObservableCollection<InterfaceItem> LocalInterfaces
+        private ObservableCollection<InterfaceAddress> _localInterfaces;
+        public ObservableCollection<InterfaceAddress> LocalInterfaces
         {
             get { return _localInterfaces; }
             set
@@ -124,8 +124,8 @@ namespace TcpUdpTool.ViewModel
             }
         }
 
-        private InterfaceItem _selectedListenInterface;
-        public InterfaceItem SelectedListenInterface
+        private InterfaceAddress _selectedListenInterface;
+        public InterfaceAddress SelectedListenInterface
         {
             get { return _selectedListenInterface; }
             set
@@ -167,7 +167,7 @@ namespace TcpUdpTool.ViewModel
         public UdpMulticastViewModel()
         {
             _udpClient = new UdpMulticastClient();
-            LocalInterfaces = new ObservableCollection<InterfaceItem>();
+            LocalInterfaces = new ObservableCollection<InterfaceAddress>();
 
             _sendViewModel.SendData += OnSend;
             _udpClient.Received +=
@@ -224,7 +224,7 @@ namespace TcpUdpTool.ViewModel
             {
                 _udpClient.Join(IPAddress.Parse(MulticastGroup), MulticastPort.Value,
                                 ToEMulticastInterface(SelectedListenInterface.Type),
-                                SelectedListenInterface.Interface);
+                                SelectedListenInterface.Address);
             }
             catch(Exception ex)
             {
@@ -244,12 +244,12 @@ namespace TcpUdpTool.ViewModel
 
             try
             {
-                var msg = new Piece(data, Piece.EType.Sent);
+                var msg = new Transmission(data, Transmission.EType.Sent);
                 History.Append(msg);
                 var res = await _udpClient.SendAsync(
                     msg, IPAddress.Parse(Send.MulticastGroup),
                     Send.Port.Value, ToEMulticastInterface(Send.SelectedInterface.Type),
-                    Send.SelectedInterface.Interface, Send.MulticastTtl);
+                    Send.SelectedInterface.Address, Send.MulticastTtl);
 
                 if (res != null)
                 {
@@ -300,15 +300,15 @@ namespace TcpUdpTool.ViewModel
             return true;
         }
 
-        private UdpMulticastClient.EMulticastInterface ToEMulticastInterface(InterfaceItem.EInterfaceType type)
+        private UdpMulticastClient.EMulticastInterface ToEMulticastInterface(InterfaceAddress.EInterfaceType type)
         {
             UdpMulticastClient.EMulticastInterface res;
             switch (type)
             {
-                case InterfaceItem.EInterfaceType.Default:
+                case InterfaceAddress.EInterfaceType.Default:
                     res = UdpMulticastClient.EMulticastInterface.Default;
                     break;
-                case InterfaceItem.EInterfaceType.All:
+                case InterfaceAddress.EInterfaceType.All:
                     res = UdpMulticastClient.EMulticastInterface.All;
                     break;
                 default:
@@ -323,19 +323,23 @@ namespace TcpUdpTool.ViewModel
         {
             LocalInterfaces.Clear();
             // build interface list
-            LocalInterfaces.Add(new InterfaceItem(InterfaceItem.EInterfaceType.Default));
-            LocalInterfaces.Add(new InterfaceItem(InterfaceItem.EInterfaceType.All));
-            foreach (var i in NetworkUtils.GetActiveInterfaces())
+            LocalInterfaces.Add(new InterfaceAddress(InterfaceAddress.EInterfaceType.Default, null));
+            LocalInterfaces.Add(new InterfaceAddress(InterfaceAddress.EInterfaceType.All, null));
+            foreach (var nic in NetworkUtils.GetActiveInterfaces())
             {
-                if (i.IPv4Address != null)
+                foreach (var ip in nic.IPv4.Addresses)
                 {
-                    LocalInterfaces.Add(new InterfaceItem(
-                        InterfaceItem.EInterfaceType.Specific, i.IPv4Address));
+                    LocalInterfaces.Add(new InterfaceAddress(
+                        InterfaceAddress.EInterfaceType.Specific, nic, ip));
                 }
 
-                if (i.IPv6Address != null && ipv6)
+                if (ipv6)
                 {
-                    LocalInterfaces.Add(new InterfaceItem(InterfaceItem.EInterfaceType.Specific, i.IPv6Address));
+                    foreach (var ip in nic.IPv6.Addresses)
+                    {
+                        LocalInterfaces.Add(new InterfaceAddress(
+                           InterfaceAddress.EInterfaceType.Specific, nic, ip));
+                    }
                 }
             }
 

@@ -1,6 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Text;
-using TcpUdpTool.ViewModel.Reusable;
+using TcpUdpTool.ViewModel.Base;
 using System.Linq;
 
 namespace TcpUdpTool.ViewModel

@@ -2,7 +2,7 @@
 
 namespace TcpUdpTool.Model.Data
 {
-    public class PieceSendResult
+    public class TransmissionResult
     {
         public IPEndPoint From { get; set; }
         public IPEndPoint To { get; set; }

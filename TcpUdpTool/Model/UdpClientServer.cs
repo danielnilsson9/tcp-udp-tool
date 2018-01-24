@@ -56,7 +56,7 @@ namespace TcpUdpTool.Model
             }
         }
         
-        public async Task<PieceSendResult> SendAsync(string host, int port, Piece msg)
+        public async Task<TransmissionResult> SendAsync(string host, int port, Transmission msg)
         { 
             // resolve, prefer ipv6 if currently in use.
             IPAddress addr = await NetworkUtils.DnsResolveAsync(host, _udpClient != null && 
@@ -94,7 +94,7 @@ namespace TcpUdpTool.Model
                 }
             }
 
-            return new PieceSendResult() { From = from, To = to };            
+            return new TransmissionResult() { From = from, To = to };            
         }
 
 
@@ -108,7 +108,7 @@ namespace TcpUdpTool.Model
                     {
                         UdpReceiveResult res = await _udpClient.ReceiveAsync();
 
-                        Piece msg = new Piece(res.Buffer, Piece.EType.Received);
+                        Transmission msg = new Transmission(res.Buffer, Transmission.EType.Received);
                         msg.Origin = res.RemoteEndPoint;
                         msg.Destination = _udpClient.Client.LocalEndPoint as IPEndPoint;
 

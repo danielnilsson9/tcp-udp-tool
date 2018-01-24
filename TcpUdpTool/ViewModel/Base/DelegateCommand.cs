@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Input;
 
-namespace TcpUdpTool.ViewModel.Reusable
+namespace TcpUdpTool.ViewModel.Base
 {
     public class DelegateCommand : ICommand
     {      

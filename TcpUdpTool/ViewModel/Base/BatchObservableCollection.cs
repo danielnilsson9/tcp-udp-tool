@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 
-namespace TcpUdpTool.ViewModel.Reuseable
+namespace TcpUdpTool.ViewModel.Base
 {
     public class BatchObservableCollection<T> : Collection<T>, INotifyCollectionChanged, INotifyPropertyChanged
     {

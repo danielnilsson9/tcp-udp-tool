@@ -56,9 +56,10 @@ namespace TcpUdpTool.Model
             var joinInterfaces = new List<int>();
             if (iface == EMulticastInterface.All)
             {
-                foreach (var i in NetworkUtils.GetMulticastInterfaces())
+                foreach (var ni in NetworkUtils.GetActiveInterfaces())
                 {
-                    joinInterfaces.Add(i.Index);
+                    joinInterfaces.Add(socket.AddressFamily == AddressFamily.InterNetworkV6 
+                        ? ni.IPv6.Index : ni.IPv4.Index);
                 }    
             }
             else if(iface == EMulticastInterface.Specific)
@@ -114,7 +115,7 @@ namespace TcpUdpTool.Model
             }
         }
 
-        public async Task<PieceSendResult> SendAsync(Piece msg, IPAddress groupIp, int port, 
+        public async Task<TransmissionResult> SendAsync(Transmission msg, IPAddress groupIp, int port, 
             EMulticastInterface iface, IPAddress specificIface = null, int ttl = 1)
         {
             Validate(groupIp, port);
@@ -138,9 +139,10 @@ namespace TcpUdpTool.Model
 
             if(iface == EMulticastInterface.All)
             {
-                foreach(var i in NetworkUtils.GetMulticastInterfaces())
+                foreach(var ni in NetworkUtils.GetActiveInterfaces())
                 {
-                    sendInterfaces.Add(i.Index);
+                    sendInterfaces.Add(_sendUdpClient.Client.AddressFamily == AddressFamily.InterNetworkV6 
+                        ? ni.IPv6.Index : ni.IPv4.Index);
                 }
             }
             else if(iface == EMulticastInterface.Specific)
@@ -165,7 +167,7 @@ namespace TcpUdpTool.Model
                 await _sendUdpClient.SendAsync(msg.Data, msg.Data.Length, to);
             }
 
-            return new PieceSendResult { From = from, To = to };    
+            return new TransmissionResult { From = from, To = to };    
         }
 
         
@@ -179,7 +181,7 @@ namespace TcpUdpTool.Model
                     {
                         UdpReceiveResult res = await _udpClient.ReceiveAsync();
 
-                        Piece msg = new Piece(res.Buffer, Piece.EType.Received);
+                        Transmission msg = new Transmission(res.Buffer, Transmission.EType.Received);
                         msg.Origin = res.RemoteEndPoint;
                         msg.Destination = _udpClient.Client.LocalEndPoint as IPEndPoint;
 

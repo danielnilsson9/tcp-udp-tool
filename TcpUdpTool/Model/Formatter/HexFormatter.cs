@@ -7,7 +7,7 @@ namespace TcpUdpTool.Model.Formatter
     {
         private StringBuilder _builder = new StringBuilder();
 
-        public string Format(Piece msg)
+        public string Format(Transmission msg)
         {
             _builder.Clear();
 

@@ -7,7 +7,7 @@ using TcpUdpTool.Model;
 using TcpUdpTool.Model.Data;
 using TcpUdpTool.Model.Util;
 using TcpUdpTool.ViewModel.Item;
-using TcpUdpTool.ViewModel.Reusable;
+using TcpUdpTool.ViewModel.Base;
 using static TcpUdpTool.Model.UdpClientServerStatusEventArgs;
 
 namespace TcpUdpTool.ViewModel
@@ -23,8 +23,8 @@ namespace TcpUdpTool.ViewModel
 
         #region public properties
 
-        private ObservableCollection<InterfaceItem> _localInterfaces;
-        public ObservableCollection<InterfaceItem> LocalInterfaces
+        private ObservableCollection<InterfaceAddress> _localInterfaces;
+        public ObservableCollection<InterfaceAddress> LocalInterfaces
         {
             get { return _localInterfaces; }
             set
@@ -63,8 +63,8 @@ namespace TcpUdpTool.ViewModel
             }
         }
 
-        private InterfaceItem _selectedInterface;
-        public InterfaceItem SelectedInterface
+        private InterfaceAddress _selectedInterface;
+        public InterfaceAddress SelectedInterface
         {
             get { return _selectedInterface; }
             set
@@ -130,7 +130,7 @@ namespace TcpUdpTool.ViewModel
         public UdpViewModel()
         {
             _udpClientServer = new UdpClientServer();
-            LocalInterfaces = new ObservableCollection<InterfaceItem>();
+            LocalInterfaces = new ObservableCollection<InterfaceAddress>();
 
             _sendViewModel.SendData += OnSend;
             _udpClientServer.StatusChanged +=
@@ -182,7 +182,7 @@ namespace TcpUdpTool.ViewModel
 
             try
             {
-                _udpClientServer.Start(SelectedInterface.Interface, ListenPort.Value);
+                _udpClientServer.Start(SelectedInterface.Address, ListenPort.Value);
             }
             catch(Exception ex)
             {
@@ -202,7 +202,7 @@ namespace TcpUdpTool.ViewModel
 
             try
             {
-                var msg = new Piece(data, Piece.EType.Sent);
+                var msg = new Transmission(data, Transmission.EType.Sent);
                 History.Append(msg);
                 var res = await _udpClientServer.SendAsync(Send.IpAddress, Send.Port.Value, msg);
                 if (res != null)
@@ -256,22 +256,24 @@ namespace TcpUdpTool.ViewModel
             LocalInterfaces.Clear();
 
             // build interface list
-            LocalInterfaces.Add(new InterfaceItem(InterfaceItem.EInterfaceType.Any, IPAddress.Any));
-            if(ipv6) LocalInterfaces.Add(new InterfaceItem(InterfaceItem.EInterfaceType.Any, IPAddress.IPv6Any));
-            foreach (var i in NetworkUtils.GetActiveInterfaces())
+            LocalInterfaces.Add(new InterfaceAddress(InterfaceAddress.EInterfaceType.Any, null, IPAddress.Any));
+            if(ipv6) LocalInterfaces.Add(new InterfaceAddress(InterfaceAddress.EInterfaceType.Any, null, IPAddress.IPv6Any));
+            foreach (var nic in NetworkUtils.GetActiveInterfaces())
             {
-
-                if (i.IPv4Address != null)
+                foreach (var ip in nic.IPv4.Addresses)
                 {
-                    LocalInterfaces.Add(new InterfaceItem(
-                        InterfaceItem.EInterfaceType.Specific, i.IPv4Address));
+                    LocalInterfaces.Add(new InterfaceAddress(
+                        InterfaceAddress.EInterfaceType.Specific, nic, ip));
                 }
 
-                if (i.IPv6Address != null && ipv6)
+                if (ipv6)
                 {
-                    LocalInterfaces.Add(new InterfaceItem(
-                        InterfaceItem.EInterfaceType.Specific, i.IPv6Address));
-                }
+                    foreach (var ip in nic.IPv6.Addresses)
+                    {
+                        LocalInterfaces.Add(new InterfaceAddress(
+                           InterfaceAddress.EInterfaceType.Specific, nic, ip));
+                    }
+                }            
             }
 
             SelectedInterface = LocalInterfaces.FirstOrDefault();

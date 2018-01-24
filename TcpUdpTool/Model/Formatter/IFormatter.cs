@@ -5,6 +5,6 @@ namespace TcpUdpTool.Model.Formatter
 {
     public interface IFormatter
     {
-        string Format(Piece msg);
+        string Format(Transmission msg);
     }
 }

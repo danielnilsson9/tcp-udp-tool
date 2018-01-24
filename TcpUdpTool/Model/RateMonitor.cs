@@ -76,7 +76,7 @@ namespace TcpUdpTool.Model
             }       
         }
 
-        public void NoteReceived(Piece data)
+        public void NoteReceived(Transmission data)
         {
             lock(this)
             {
@@ -85,7 +85,7 @@ namespace TcpUdpTool.Model
             }
         }
 
-        public void NoteSent(Piece data)
+        public void NoteSent(Transmission data)
         {
             lock(this)
             {

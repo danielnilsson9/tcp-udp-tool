@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
+             xmlns:dat="clr-namespace:System.Windows.Data;assembly=PresentationFramework"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:system="clr-namespace:System;assembly=mscorlib"
              xmlns:local="clr-namespace:TcpUdpTool.View"
@@ -13,6 +14,9 @@
             <CollectionViewSource.SortDescriptions>
                 <scm:SortDescription PropertyName="" Direction="Ascending" />
             </CollectionViewSource.SortDescriptions>
+            <CollectionViewSource.GroupDescriptions>
+                <dat:PropertyGroupDescription PropertyName="GroupName" />
+            </CollectionViewSource.GroupDescriptions>
         </CollectionViewSource>
     </UserControl.Resources>
 
@@ -44,16 +48,23 @@
                        Padding="0"
                        Margin="0 0 10 0"/>
 
-                <ComboBox Grid.Row="0"
-                         Grid.Column="1"           
-                         Grid.ColumnSpan="2"
-                         Height="21"
-                         VerticalAlignment="Center"
-                         IsEditable="True"
-                         IsReadOnly="True"
-                         VerticalContentAlignment="Center"
-                         SelectedItem="{Binding SelectedInterface}"
-                         ItemsSource="{Binding Source={StaticResource SortedLocalInterfaces}}"/>
+                <ComboBox 
+                    Style="{StaticResource InterfaceListStyle}"
+                    Grid.Row="0"
+                    Grid.Column="1"           
+                    Grid.ColumnSpan="2"
+                    Height="21"
+                    VerticalAlignment="Center"
+                    VerticalContentAlignment="Center"
+                    SelectedItem="{Binding SelectedInterface}"
+                    ItemsSource="{Binding Source={StaticResource SortedLocalInterfaces}}">
+                    
+                    <ComboBox.GroupStyle>
+                        <GroupStyle 
+                            HeaderTemplate="{StaticResource InterfaceListGroupStyleHeaderTemplate}" 
+                            ContainerStyle="{StaticResource InterfaceListGroupStyleContianerStyle}" />
+                    </ComboBox.GroupStyle>
+                </ComboBox>
 
                 <Label Grid.Row="1"
                        Grid.Column="0"

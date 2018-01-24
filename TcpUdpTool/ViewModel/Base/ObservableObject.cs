@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 
-namespace TcpUdpTool.ViewModel.Reusable
+namespace TcpUdpTool.ViewModel.Base
 {
     public class ObservableObject : INotifyPropertyChanged, INotifyDataErrorInfo
     {

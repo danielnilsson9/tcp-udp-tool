@@ -2,9 +2,8 @@
 using System.Windows.Input;
 using TcpUdpTool.Model;
 using TcpUdpTool.Model.Data;
-using TcpUdpTool.Model.Parser;
 using TcpUdpTool.Model.Util;
-using TcpUdpTool.ViewModel.Reusable;
+using TcpUdpTool.ViewModel.Base;
 
 namespace TcpUdpTool.ViewModel
 {
@@ -190,9 +189,9 @@ namespace TcpUdpTool.ViewModel
         {
             try
             {
-                Piece msg = new Piece(data, Piece.EType.Sent);
+                Transmission msg = new Transmission(data, Transmission.EType.Sent);
                 History.Append(msg);
-                PieceSendResult res = await _tcpClient.SendAsync(msg);
+                TransmissionResult res = await _tcpClient.SendAsync(msg);
                 if (res != null)
                 {
                     msg.Origin = res.From;

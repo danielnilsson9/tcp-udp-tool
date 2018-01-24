@@ -16,7 +16,7 @@ namespace TcpUdpTool.Model.Formatter
             }
         }
 
-        public string Format(Piece msg)
+        public string Format(Transmission msg)
         {          
             return _encoding.GetString(msg.Data);
         }

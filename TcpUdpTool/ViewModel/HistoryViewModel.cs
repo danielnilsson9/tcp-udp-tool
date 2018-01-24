@@ -12,8 +12,7 @@ using TcpUdpTool.Model.Formatter;
 using TcpUdpTool.Model.Util;
 using TcpUdpTool.ViewModel.Helper;
 using TcpUdpTool.ViewModel.Item;
-using TcpUdpTool.ViewModel.Reusable;
-using TcpUdpTool.ViewModel.Reuseable;
+using TcpUdpTool.ViewModel.Base;
 
 namespace TcpUdpTool.ViewModel
 {
@@ -22,7 +21,7 @@ namespace TcpUdpTool.ViewModel
 
         #region private members
 
-        private BlockingCollection<Piece> _incomingQueue;
+        private BlockingCollection<Transmission> _incomingQueue;
         private RateMonitor _rateMonitor;
         private IFormatter _formatter;
         private DispatcherTimer _updateTimer;
@@ -198,7 +197,7 @@ namespace TcpUdpTool.ViewModel
         public HistoryViewModel()
         {
             _rateMonitor = new RateMonitor();
-            _incomingQueue = new BlockingCollection<Piece>(100);
+            _incomingQueue = new BlockingCollection<Transmission>(100);
             _conversation = new BatchObservableCollection<ConversationItemViewModel>();
             _conversation.CollectionChanged += (sender, e) => ContentChanged?.Invoke();
             _formatter = new PlainTextFormatter();
@@ -218,7 +217,7 @@ namespace TcpUdpTool.ViewModel
                     if (e.PropertyName == nameof(Properties.Settings.Default.HistoryEntries))
                     {
                         // just switch out the queue, don't care about potentially lost items.
-                        _incomingQueue = new BlockingCollection<Piece>(Properties.Settings.Default.HistoryEntries);
+                        _incomingQueue = new BlockingCollection<Transmission>(Properties.Settings.Default.HistoryEntries);
                     }
                     else if(e.PropertyName == nameof(Properties.Settings.Default.Encoding))
                     {
@@ -238,7 +237,7 @@ namespace TcpUdpTool.ViewModel
 
         #region public functions
 
-        public void Append(Piece msg)
+        public void Append(Transmission msg)
         {
             if(msg.IsReceived)
             {
@@ -368,7 +367,7 @@ namespace TcpUdpTool.ViewModel
 
             _conversation.BeginBatch();
 
-            Piece msg;
+            Transmission msg;
             while(_incomingQueue.TryTake(out msg))
             {
                 _conversation.Add(new ConversationItemViewModel(msg, _formatter));

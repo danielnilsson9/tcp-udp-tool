@@ -73,7 +73,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Model\Data\PieceSendResult.cs" />
+    <Compile Include="Model\Data\TransmissionResult.cs" />
     <Compile Include="Model\Formatter\HexFormatter.cs" />
     <Compile Include="Model\Formatter\IFormatter.cs" />
     <Compile Include="Model\Formatter\PlainTextFormatter.cs" />
@@ -83,7 +83,7 @@
     <Compile Include="Model\TcpServer.cs" />
     <Compile Include="Model\UdpClientServer.cs" />
     <Compile Include="Model\Parser\IParser.cs" />
-    <Compile Include="Model\Data\Piece.cs" />
+    <Compile Include="Model\Data\Transmission.cs" />
     <Compile Include="Model\UdpMulticastClient.cs" />
     <Compile Include="Model\Util\DialogUtils.cs" />
     <Compile Include="Model\Util\NetworkUtils.cs" />
@@ -95,11 +95,11 @@
     <Compile Include="ViewModel\Helper\DispatchHelper.cs" />
     <Compile Include="ViewModel\Helper\IContentChangedHelper.cs" />
     <Compile Include="ViewModel\Item\ConversationItemViewModel.cs" />
-    <Compile Include="ViewModel\Item\InterfaceItem.cs" />
+    <Compile Include="ViewModel\Item\InterfaceAddress.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
-    <Compile Include="ViewModel\Reuseable\BatchObservableCollection.cs" />
-    <Compile Include="ViewModel\Reuseable\DelegateCommand.cs" />
-    <Compile Include="ViewModel\Reuseable\ObservableObject.cs" />
+    <Compile Include="ViewModel\Base\BatchObservableCollection.cs" />
+    <Compile Include="ViewModel\Base\DelegateCommand.cs" />
+    <Compile Include="ViewModel\Base\ObservableObject.cs" />
     <Compile Include="Model\TcpClient.cs" />
     <Compile Include="ViewModel\HistoryViewModel.cs" />
     <Compile Include="ViewModel\SendViewModel.cs" />

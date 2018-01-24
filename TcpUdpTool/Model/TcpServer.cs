@@ -56,7 +56,7 @@ namespace TcpUdpTool.Model
             }            
         }
 
-        public async Task<PieceSendResult> SendAsync(Piece msg)
+        public async Task<TransmissionResult> SendAsync(Transmission msg)
         {
             if(_connectedClient == null)
             {
@@ -68,7 +68,7 @@ namespace TcpUdpTool.Model
 
             await _connectedClient.GetStream().WriteAsync(msg.Data, 0, msg.Length);
 
-            return new PieceSendResult() { From = from, To = to };
+            return new TransmissionResult() { From = from, To = to };
         }
 
         public void Disconnect()
@@ -131,7 +131,7 @@ namespace TcpUdpTool.Model
                             Array.Copy(_buffer, data, read);
 
 
-                            Piece msg = new Piece(data, Piece.EType.Received);
+                            Transmission msg = new Transmission(data, Transmission.EType.Received);
                             msg.Destination = _connectedClient.Client.LocalEndPoint as IPEndPoint;
                             msg.Origin = _connectedClient.Client.RemoteEndPoint as IPEndPoint;
 

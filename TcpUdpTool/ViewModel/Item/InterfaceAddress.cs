@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
-using TcpUdpTool.ViewModel.Reusable;
+using TcpUdpTool.Model.Util;
+using TcpUdpTool.ViewModel.Base;
 
 namespace TcpUdpTool.ViewModel.Item
 {
-    public class InterfaceItem : ObservableObject, IComparable
+    public class InterfaceAddress : ObservableObject, IComparable
     {
         public enum EInterfaceType { Default, All, Any, Specific }
 
@@ -17,34 +18,36 @@ namespace TcpUdpTool.ViewModel.Item
             private set { _type = value; }
         }
 
-
-        private IPAddress _interface;
-        public IPAddress Interface
+        private IPAddress _address;
+        public IPAddress Address
         {
-            get { return _interface; }
-            private set { _interface = value; }
+            get { return _address; }
+            private set { _address = value; }
+        }
+
+        public string Name
+        {
+            get { return ToString(); }
+        }
+
+        public NetworkInterface Nic { get; private set; }
+
+        public string GroupName
+        {
+            get { return Nic == null ? "Network Interface" : Nic.Name; }
         }
 
 
-        public InterfaceItem(EInterfaceType type, IPAddress localInterface = null)
+        public InterfaceAddress(EInterfaceType type, NetworkInterface nic, IPAddress address = null)
         {
             Type = type;
-            Interface = localInterface;
+            Address = address;
+            Nic = nic;
 
-            if(Interface == null && 
-                (Type == EInterfaceType.Any || Type == EInterfaceType.Specific))
+            if(Address == null && (Type == EInterfaceType.Any || Type == EInterfaceType.Specific))
             {
                 throw new ArgumentNullException(
-                    "localInterface cannot be null for types: [Specific, Any]");
-            }
-
-            if(localInterface != null)
-            {
-                if(localInterface.AddressFamily != AddressFamily.InterNetwork && 
-                   localInterface.AddressFamily != AddressFamily.InterNetworkV6)
-                {
-                    throw new ArgumentException("localInterface is of unsupported AdressFamily.");
-                }
+                    "address cannot be null for types: [Specific, Any]");
             }
         }
 
@@ -60,7 +63,7 @@ namespace TcpUdpTool.ViewModel.Item
             }
             else if (Type == EInterfaceType.Any)
             {
-                if (Interface.AddressFamily == AddressFamily.InterNetwork)
+                if (Address.AddressFamily == AddressFamily.InterNetwork)
                 {
                     return "Any IPv4 (0.0.0.0)";
                 }
@@ -71,13 +74,13 @@ namespace TcpUdpTool.ViewModel.Item
             }
             else
             {
-                return Interface.ToString();
+                return Address.ToString();
             }
         }
 
         public int CompareTo(object other)
         {
-            InterfaceItem o = other as InterfaceItem;
+            InterfaceAddress o = other as InterfaceAddress;
 
             if (o == null)
             {

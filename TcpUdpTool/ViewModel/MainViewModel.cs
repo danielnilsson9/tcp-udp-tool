@@ -1,6 +1,6 @@
 ﻿using System.Windows.Input;
 using TcpUdpTool.Properties;
-using TcpUdpTool.ViewModel.Reusable;
+using TcpUdpTool.ViewModel.Base;
 
 namespace TcpUdpTool.ViewModel
 {

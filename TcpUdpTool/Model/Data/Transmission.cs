@@ -3,7 +3,7 @@ using System.Net;
 
 namespace TcpUdpTool.Model.Data
 {
-    public class Piece : IEquatable<Piece>, IComparable<Piece>
+    public class Transmission : IEquatable<Transmission>, IComparable<Transmission>
     {
         private static ulong _counter = 0;
         private static object _lock = new object();
@@ -68,7 +68,7 @@ namespace TcpUdpTool.Model.Data
         }
 
 
-        public Piece(byte[] data, EType type)
+        public Transmission(byte[] data, EType type)
         {
             lock(_lock)
             {
@@ -80,7 +80,7 @@ namespace TcpUdpTool.Model.Data
             _timestamp = DateTime.Now;
         }
 
-        public bool Equals(Piece other)
+        public bool Equals(Transmission other)
         {
             if(other != null)
             {
@@ -92,7 +92,7 @@ namespace TcpUdpTool.Model.Data
 
         public override bool Equals(object obj)
         {
-            return Equals(obj as Piece);
+            return Equals(obj as Transmission);
         }
 
         public override int GetHashCode()
@@ -100,7 +100,7 @@ namespace TcpUdpTool.Model.Data
             return (int)SequenceNr;
         }
 
-        public int CompareTo(Piece other)
+        public int CompareTo(Transmission other)
         {
             if(SequenceNr > other.SequenceNr)
             {

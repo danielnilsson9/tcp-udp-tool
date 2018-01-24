@@ -10,75 +10,49 @@ namespace TcpUdpTool.Model.Util
     public static class NetworkUtils
     {
 
-        public static List<LocalInterface> GetActiveInterfaces()
+        public static List<NetworkInterface> GetActiveInterfaces()
         {
-            var result = new List<LocalInterface>();
+            var result = new List<NetworkInterface>();
 
-            foreach (var adapter in NetworkInterface.GetAllNetworkInterfaces())
+            foreach (var adapter in System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces())
             {
-                if (!adapter.Supports(NetworkInterfaceComponent.IPv4) ||
+                if ((!adapter.Supports(NetworkInterfaceComponent.IPv4) && 
+                    !adapter.Supports(NetworkInterfaceComponent.IPv6)) ||
                     adapter.OperationalStatus != OperationalStatus.Up)
+                {
                     continue;
+                }
+   
+                var ni = new NetworkInterface();
+                ni.Id = adapter.Id;
+                ni.Name = adapter.Name;
+                ni.Description = adapter.Description;
 
-                IPInterfaceProperties aip = adapter.GetIPProperties();
-                IPv4InterfaceProperties ipv4p = aip.GetIPv4Properties();
+                var aip = adapter.GetIPProperties();
 
-                LocalInterface li = new LocalInterface(ipv4p.Index);
-                UnicastIPAddressInformationCollection uips = aip.UnicastAddresses;
+                if (adapter.Supports(NetworkInterfaceComponent.IPv4))
+                {
+                    ni.IPv4.Index = aip.GetIPv4Properties().Index;
+                }
 
-                foreach (var uip in uips)
+                if (adapter.Supports(NetworkInterfaceComponent.IPv6))
+                {
+                    ni.IPv6.Index = aip.GetIPv6Properties().Index;
+                }
+
+                foreach (var uip in aip.UnicastAddresses)
                 {
                     if (uip.Address.AddressFamily == AddressFamily.InterNetwork)
                     {
-                        li.IPv4Address = uip.Address;
+                        ni.IPv4.Addresses.Add(uip.Address);
                     }
                     else if (uip.Address.AddressFamily == AddressFamily.InterNetworkV6)
                     {
-                        li.IPv6Address = uip.Address;
+                        ni.IPv6.Addresses.Add(uip.Address);
                     }
                 }
 
-                result.Add(li);
-            }
-
-            return result;
-        }
-
-        public static List<LocalInterface> GetMulticastInterfaces()
-        {
-            var result = new List<LocalInterface>();
-
-            foreach (var adapter in NetworkInterface.GetAllNetworkInterfaces())
-            {
-                if (!adapter.Supports(NetworkInterfaceComponent.IPv4) || 
-                    adapter.OperationalStatus != OperationalStatus.Up)               
-                    continue;
-
-                if (!adapter.SupportsMulticast)
-                    continue;
-
-                IPInterfaceProperties aip = adapter.GetIPProperties();
-                IPv4InterfaceProperties ipv4p = aip.GetIPv4Properties();
-
-                if (!aip.MulticastAddresses.Any())
-                    continue;
-
-                LocalInterface li = new LocalInterface(ipv4p.Index);
-                UnicastIPAddressInformationCollection uips = aip.UnicastAddresses;
-
-                foreach (var uip in uips)
-                {
-                    if (uip.Address.AddressFamily == AddressFamily.InterNetwork)
-                    {
-                        li.IPv4Address = uip.Address;
-                    }
-                    else if(uip.Address.AddressFamily == AddressFamily.InterNetworkV6)
-                    {
-                        li.IPv6Address = uip.Address;
-                    }
-                }
-
-                result.Add(li);
+                result.Add(ni);
             }
 
             return result;
@@ -86,16 +60,22 @@ namespace TcpUdpTool.Model.Util
 
         public static int GetBestMulticastInterfaceIndex(IPAddress localInterface)
         {
-            var interfaces = GetMulticastInterfaces();
+            var interfaces = GetActiveInterfaces();
             foreach(var intf in interfaces)
             {
-                if(intf.IPv4Address != null && intf.IPv4Address.Equals(localInterface))
+                if (localInterface.AddressFamily == AddressFamily.InterNetwork)
                 {
-                    return intf.Index;
+                    if (intf.IPv4.Addresses.Contains(localInterface))
+                    {
+                        return intf.IPv4.Index;
+                    }
                 }
-                else if(intf.IPv6Address != null && intf.IPv6Address.Equals(localInterface))
+                else if (localInterface.AddressFamily == AddressFamily.InterNetworkV6)
                 {
-                    return intf.Index;
+                    if (intf.IPv6.Addresses.Contains(localInterface))
+                    {
+                        return intf.IPv6.Index;
+                    }
                 }
             }
            
@@ -137,16 +117,36 @@ namespace TcpUdpTool.Model.Util
   
     }
 
-    public class LocalInterface
+    public class NetworkInterface
     {
-        public int Index { get; set; }
-        public IPAddress IPv4Address { get; set; }
-        public IPAddress IPv6Address { get; set; }
-
-        public LocalInterface(int index)
+        public class IPInterface
         {
-            Index = index;
+            public IPInterface()
+            {
+                Index = -1;
+                Addresses = new List<IPAddress>();
+            }
+
+            public int Index { get; set; }
+            public List<IPAddress> Addresses { get; }
         }
+
+        public NetworkInterface()
+        {
+            IPv4 = new IPInterface();
+            IPv6 = new IPInterface();
+        }
+
+        public string Id { get; set; }
+
+        public string Name { get; set; }
+
+        public string Description { get; set; }
+
+        public IPInterface IPv4 { get; private set; }
+
+        public IPInterface IPv6 { get; private set; }
+
     }
 
 }

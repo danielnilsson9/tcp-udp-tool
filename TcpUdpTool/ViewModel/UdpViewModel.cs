@@ -9,6 +9,7 @@ using TcpUdpTool.Model.Util;
 using TcpUdpTool.ViewModel.Item;
 using TcpUdpTool.ViewModel.Base;
 using static TcpUdpTool.Model.UdpClientServerStatusEventArgs;
+using System.Windows;
 
 namespace TcpUdpTool.ViewModel
 {
@@ -159,16 +160,20 @@ namespace TcpUdpTool.ViewModel
             Send.IpAddress = "localhost";
             Send.Port = 0;
 
-            BuildInterfaceList(Properties.Settings.Default.IPv6Support);
+            RebuildInterfaceList();
 
-            Properties.Settings.Default.PropertyChanged +=
-                (sender, e) =>
+            Properties.Settings.Default.PropertyChanged += (sender, e) =>
+            {
+                if(e.PropertyName == nameof(Properties.Settings.Default.IPv6Support))
                 {
-                    if(e.PropertyName == nameof(Properties.Settings.Default.IPv6Support))
-                    {
-                        BuildInterfaceList(Properties.Settings.Default.IPv6Support);
-                    }                
-                };           
+                    RebuildInterfaceList();
+                }                
+            };
+
+            NetworkUtils.NetworkInterfaceChange += () =>
+            {
+                Application.Current.Dispatcher.Invoke(RebuildInterfaceList);
+            };
         }
 
         #endregion
@@ -251,13 +256,17 @@ namespace TcpUdpTool.ViewModel
             return true;
         }
 
-        private void BuildInterfaceList(bool ipv6)
+        private void RebuildInterfaceList()
         {
             LocalInterfaces.Clear();
 
             // build interface list
             LocalInterfaces.Add(new InterfaceAddress(InterfaceAddress.EInterfaceType.Any, null, IPAddress.Any));
-            if(ipv6) LocalInterfaces.Add(new InterfaceAddress(InterfaceAddress.EInterfaceType.Any, null, IPAddress.IPv6Any));
+            if (Properties.Settings.Default.IPv6Support)
+            {
+                LocalInterfaces.Add(new InterfaceAddress(InterfaceAddress.EInterfaceType.Any, null, IPAddress.IPv6Any));
+            }
+
             foreach (var nic in NetworkUtils.GetActiveInterfaces())
             {
                 foreach (var ip in nic.IPv4.Addresses)
@@ -266,7 +275,7 @@ namespace TcpUdpTool.ViewModel
                         InterfaceAddress.EInterfaceType.Specific, nic, ip));
                 }
 
-                if (ipv6)
+                if (Properties.Settings.Default.IPv6Support)
                 {
                     foreach (var ip in nic.IPv6.Addresses)
                     {

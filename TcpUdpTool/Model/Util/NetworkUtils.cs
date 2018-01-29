@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
@@ -7,8 +8,17 @@ using System.Threading.Tasks;
 
 namespace TcpUdpTool.Model.Util
 {
+
     public static class NetworkUtils
     {
+
+        public static event Action NetworkInterfaceChange;
+
+        static NetworkUtils()
+        {
+            NetworkChange.NetworkAddressChanged += (s, e) => NetworkInterfaceChange?.Invoke();
+            NetworkChange.NetworkAvailabilityChanged += (s, e) => NetworkInterfaceChange?.Invoke();
+        }
 
         public static List<NetworkInterface> GetActiveInterfaces()
         {
@@ -84,7 +94,7 @@ namespace TcpUdpTool.Model.Util
 
         public static bool IsMulticast(IPAddress ipAddress)
         {
-            bool isMulticast;
+            bool isMulticast = false;
 
             if (ipAddress.AddressFamily == AddressFamily.InterNetworkV6)
             {
@@ -92,7 +102,7 @@ namespace TcpUdpTool.Model.Util
                 byte[] ipv6Bytes = ipAddress.GetAddressBytes();
                 isMulticast = (ipv6Bytes[0] == 0xff);
             }
-            else // IPv4
+            else if (ipAddress.AddressFamily == AddressFamily.InterNetwork)
             {
                 // In IPv4 Multicast addresses first byte is between 224 and 239
                 byte[] addressBytes = ipAddress.GetAddressBytes();

@@ -24,9 +24,7 @@ namespace TcpUdpTool.Model
 
         public UdpMulticastClient()
         {
-
         }
-
 
         public void Join(IPAddress groupIp, int port, 
             EMulticastInterface iface, IPAddress specificIface = null)
@@ -214,7 +212,7 @@ namespace TcpUdpTool.Model
 
             if (socket.AddressFamily == AddressFamily.InterNetwork)
             {
-                // Interface index must be in network byte order for IPv4
+                // Interface index must be in NETWORK BYTE ORDER for IPv4
                 // https://msdn.microsoft.com/en-us/library/windows/desktop/ms738586(v=vs.85).aspx
 
                 socket.SetSocketOption(
@@ -226,7 +224,6 @@ namespace TcpUdpTool.Model
             else if(socket.AddressFamily == AddressFamily.InterNetworkV6)
             {
                 // Interface index must be in HOST BYTE ORDER for IPv6
-                // Many wasted houers here...
                 // https://msdn.microsoft.com/en-us/library/windows/desktop/ms738574(v=vs.85).aspx
 
                 socket.SetSocketOption(

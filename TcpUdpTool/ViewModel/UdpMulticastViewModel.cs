@@ -8,6 +8,7 @@ using TcpUdpTool.Model.Data;
 using TcpUdpTool.Model.Util;
 using TcpUdpTool.ViewModel.Item;
 using TcpUdpTool.ViewModel.Base;
+using System.Windows;
 
 namespace TcpUdpTool.ViewModel
 {
@@ -199,16 +200,20 @@ namespace TcpUdpTool.ViewModel
             Send.MulticastTtl = 16;
             _historyViewModel.Header = "Conversation";
 
-            BuildInterfaceList(Properties.Settings.Default.IPv6Support);
+            RebuildInterfaceList();
 
-            Properties.Settings.Default.PropertyChanged +=
-                (sender, e) =>
+            Properties.Settings.Default.PropertyChanged += (sender, e) =>
+            {
+                if(e.PropertyName == nameof(Properties.Settings.Default.IPv6Support))
                 {
-                    if(e.PropertyName == nameof(Properties.Settings.Default.IPv6Support))
-                    {
-                        BuildInterfaceList(Properties.Settings.Default.IPv6Support);
-                    }
-                };
+                    RebuildInterfaceList();
+                }
+            };
+
+            NetworkUtils.NetworkInterfaceChange += () =>
+            {
+                Application.Current.Dispatcher.Invoke(RebuildInterfaceList);
+            };
         }
 
         #endregion
@@ -319,7 +324,7 @@ namespace TcpUdpTool.ViewModel
             return res;
         }
 
-        private void BuildInterfaceList(bool ipv6)
+        private void RebuildInterfaceList()
         {
             LocalInterfaces.Clear();
             // build interface list
@@ -333,7 +338,7 @@ namespace TcpUdpTool.ViewModel
                         InterfaceAddress.EInterfaceType.Specific, nic, ip));
                 }
 
-                if (ipv6)
+                if (Properties.Settings.Default.IPv6Support)
                 {
                     foreach (var ip in nic.IPv6.Addresses)
                     {

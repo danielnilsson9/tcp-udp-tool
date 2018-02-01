@@ -106,7 +106,8 @@
     <Compile Include="ViewModel\SettingsViewModel.cs" />
     <Compile Include="ViewModel\TcpClientViewModel.cs" />
     <Compile Include="ViewModel\TcpServerViewModel.cs" />
-    <Compile Include="ViewModel\UdpMulticastViewModel.cs" />
+    <Compile Include="ViewModel\UdpAsmViewModel.cs" />
+    <Compile Include="ViewModel\UdpSsmViewModel.cs" />
     <Compile Include="ViewModel\UdpViewModel.cs" />
     <Compile Include="View\HelpView.xaml.cs">
       <DependentUpon>HelpView.xaml</DependentUpon>
@@ -123,8 +124,11 @@
     <Compile Include="View\TcpServerView.xaml.cs">
       <DependentUpon>TcpServerView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\UdpMulticastView.xaml.cs">
-      <DependentUpon>UdpMulticastView.xaml</DependentUpon>
+    <Compile Include="View\UdpSsmView.xaml.cs">
+      <DependentUpon>UdpSsmView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\UdpAsmView.xaml.cs">
+      <DependentUpon>UdpAsmView.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\UdpView.xaml.cs">
       <DependentUpon>UdpView.xaml</DependentUpon>
@@ -169,7 +173,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\UdpMulticastView.xaml">
+    <Page Include="View\UdpSsmView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\UdpAsmView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

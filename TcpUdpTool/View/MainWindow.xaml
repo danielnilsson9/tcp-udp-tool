@@ -33,9 +33,14 @@
                 DataContext="{Binding UdpViewModel}" />
         </TabItem>
 
-        <TabItem Header="UDP Multicast">
-            <view:UdpMulticastView
-                DataContext="{Binding UdpMulticastViewModel}" />
+        <TabItem Header="UDP ASM">
+            <view:UdpAsmView
+                DataContext="{Binding UdpAsmViewModel}" />
+        </TabItem>
+
+        <TabItem Header="UDP SSM">
+            <view:UdpSsmView
+                DataContext="{Binding UdpSsmViewModel}" />
         </TabItem>
 
         <TabItem Header="Settings">

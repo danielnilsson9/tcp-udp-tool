@@ -7,15 +7,17 @@ namespace TcpUdpTool.ViewModel
     public class MainViewModel : ObservableObject
     {
 
-        public TcpClientViewModel TcpClientViewModel { get; set; }
+        public TcpClientViewModel TcpClientViewModel { get; private set; }
 
-        public TcpServerViewModel TcpServerViewModel { get; set; }
+        public TcpServerViewModel TcpServerViewModel { get; private set; }
 
-        public UdpViewModel UdpViewModel { get; set; }
+        public UdpViewModel UdpViewModel { get; private set; }
 
-        public UdpMulticastViewModel UdpMulticastViewModel { get; set; }
+        public UdpAsmViewModel UdpAsmViewModel { get; private set; }
 
-        public SettingsViewModel SettingsViewModel { get; set; }
+        public UdpSsmViewModel UdpSsmViewModel { get; private set; }
+
+        public SettingsViewModel SettingsViewModel { get; private set; }
 
       
         public ICommand CloseCommand
@@ -29,7 +31,8 @@ namespace TcpUdpTool.ViewModel
             TcpClientViewModel = new TcpClientViewModel();
             TcpServerViewModel = new TcpServerViewModel();
             UdpViewModel = new UdpViewModel();
-            UdpMulticastViewModel = new UdpMulticastViewModel();
+            UdpAsmViewModel = new UdpAsmViewModel();
+            UdpSsmViewModel = new UdpSsmViewModel();
             SettingsViewModel = new SettingsViewModel();
         }
 
@@ -40,7 +43,7 @@ namespace TcpUdpTool.ViewModel
             TcpClientViewModel?.Dispose();
             TcpServerViewModel?.Dispose();
             UdpViewModel?.Dispose();
-            UdpMulticastViewModel?.Dispose();
+            UdpAsmViewModel?.Dispose();
         }
 
     }

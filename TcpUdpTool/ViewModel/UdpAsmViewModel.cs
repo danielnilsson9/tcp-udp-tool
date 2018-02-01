@@ -12,7 +12,7 @@ using System.Windows;
 
 namespace TcpUdpTool.ViewModel
 {
-    public class UdpMulticastViewModel : ObservableObject, IDisposable
+    public class UdpAsmViewModel : ObservableObject, IDisposable
     {
 
         #region private members
@@ -165,7 +165,7 @@ namespace TcpUdpTool.ViewModel
 
         #region constructors
 
-        public UdpMulticastViewModel()
+        public UdpAsmViewModel()
         {
             _udpClient = new UdpMulticastClient();
             LocalInterfaces = new ObservableCollection<InterfaceAddress>();
@@ -227,7 +227,7 @@ namespace TcpUdpTool.ViewModel
 
             try
             {
-                _udpClient.Join(IPAddress.Parse(MulticastGroup), MulticastPort.Value,
+                _udpClient.JoinASM(IPAddress.Parse(MulticastGroup), MulticastPort.Value,
                                 ToEMulticastInterface(SelectedListenInterface.Type),
                                 SelectedListenInterface.Address);
             }

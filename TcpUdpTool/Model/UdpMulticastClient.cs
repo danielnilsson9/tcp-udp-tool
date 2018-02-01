@@ -10,6 +10,7 @@ using static TcpUdpTool.Model.UdpMulticastClient;
 
 namespace TcpUdpTool.Model
 {
+
     public class UdpMulticastClient : IDisposable
     {
 
@@ -26,10 +27,10 @@ namespace TcpUdpTool.Model
         {
         }
 
-        public void Join(IPAddress groupIp, int port, 
+        public void JoinASM(IPAddress groupIp, int port, 
             EMulticastInterface iface, IPAddress specificIface = null)
         {
-            Validate(groupIp, port);
+            ValidateASM(groupIp, port);
 
             if (_udpClient != null)
                 return; // already started.
@@ -103,6 +104,83 @@ namespace TcpUdpTool.Model
             StartReceive();
         }
 
+        public void JoinSSM(IPAddress groupIp, IPAddress sourceIp, int port, 
+            EMulticastInterface iface, IPAddress specificIface = null)
+        {
+            ValidateSSM(groupIp, sourceIp, port);
+
+            if (_udpClient != null)
+                return; // already started.
+
+            _udpClient = new UdpClient(groupIp.AddressFamily);
+            Socket socket = _udpClient.Client;
+
+            socket.SetSocketOption(
+                SocketOptionLevel.Socket,
+                SocketOptionName.ReuseAddress,
+                true
+            );
+
+            var bindInterface = specificIface;
+            if (iface != EMulticastInterface.Specific)
+            {
+                bindInterface = (socket.AddressFamily == AddressFamily.InterNetworkV6 ?
+                    IPAddress.IPv6Any : IPAddress.Any);
+            }
+            socket.Bind(new IPEndPoint(bindInterface, port));
+
+            var joinInterfaces = new List<int>();
+            if (iface == EMulticastInterface.All)
+            {
+                foreach (var ni in NetworkUtils.GetActiveInterfaces())
+                {
+                    joinInterfaces.Add(socket.AddressFamily == AddressFamily.InterNetworkV6
+                        ? ni.IPv6.Index : ni.IPv4.Index);
+                }
+            }
+            else if (iface == EMulticastInterface.Specific)
+            {
+                int best = NetworkUtils.GetBestMulticastInterfaceIndex(specificIface);
+                if (best == -1) best = 0;
+                joinInterfaces.Add(best);
+            }
+            else if (iface == EMulticastInterface.Default)
+            {
+                joinInterfaces.Add(0); // 0 = default.
+            }
+
+            foreach (int ifaceIndex in joinInterfaces)
+            {
+                if (socket.AddressFamily == AddressFamily.InterNetwork)
+                {
+                    var bin = new byte[12];
+                    Buffer.BlockCopy(groupIp.GetAddressBytes(), 0, bin, 0, 4);
+                    Buffer.BlockCopy(sourceIp.GetAddressBytes(), 0, bin, 4, 4);
+                    Buffer.BlockCopy(BitConverter.GetBytes(IPAddress.HostToNetworkOrder(ifaceIndex)), 0, bin, 8, 4);
+
+                    socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.AddSourceMembership, bin);
+                }
+                else if (socket.AddressFamily == AddressFamily.InterNetworkV6)
+                {
+                    // fill data as in GROUP_SOURCE_REQ struct
+                    var bin = CreateGroupSourceReg(sourceIp, groupIp, ifaceIndex);
+
+                    socket.SetSocketOption(SocketOptionLevel.IPv6, (SocketOptionName)45, bin);
+                }
+            }
+
+            StatusChanged?.Invoke(this,
+                new UdpMulticastClientStatusEventArgs(true)
+                {
+                    MulticastGroup = new IPEndPoint(groupIp, port),
+                    MulticastInterface = iface,
+                    SpecificInterface = specificIface
+                }
+            );
+
+            StartReceive();
+        }
+
         public void Leave()
         {
             if(_udpClient != null)
@@ -116,7 +194,7 @@ namespace TcpUdpTool.Model
         public async Task<TransmissionResult> SendAsync(Transmission msg, IPAddress groupIp, int port, 
             EMulticastInterface iface, IPAddress specificIface = null, int ttl = 1)
         {
-            Validate(groupIp, port);
+            ValidateASM(groupIp, port);
 
             if (_sendUdpClient == null || _sendUdpClient.Client.AddressFamily != groupIp.AddressFamily)
             {
@@ -265,11 +343,29 @@ namespace TcpUdpTool.Model
             }
         }
 
-        private void Validate(IPAddress multicastGroup, int port)
+        private void ValidateASM(IPAddress multicastGroup, int port)
         {
             if (!NetworkUtils.IsMulticast(multicastGroup))
             {
                 throw new ArgumentException(multicastGroup + " is not a vaild multicast address.");
+            }
+
+            if (!NetworkUtils.IsValidPort(port, false))
+            {
+                throw new ArgumentException(port + " is not a valid multicast port number.");
+            }
+        }
+
+        private void ValidateSSM(IPAddress ssmGroup, IPAddress source, int port)
+        {
+            if (ssmGroup.AddressFamily != source.AddressFamily)
+            {
+                throw new ArgumentException("Source address and multicast group is not of same address family.");
+            }
+
+            if (!NetworkUtils.IsSourceSpecificMulticast(ssmGroup))
+            {
+                throw new ArgumentException(ssmGroup + " is not a vaild multicast address.");
             }
 
             if (!NetworkUtils.IsValidPort(port, false))
@@ -285,6 +381,78 @@ namespace TcpUdpTool.Model
             _sendUdpClient?.Close();
             _sendUdpClient = null;
         }
+
+
+        private static byte[] CreateGroupSourceReg(IPAddress source, IPAddress group, int ifaceIndex)
+        {
+            /*
+             * struct group_source_reg
+             * {
+             *    ULONG              gsr_interface;     4 + (4 padding after)
+             *    SOCKADDR_STORAGE   gsr_group;         128
+             *    SOCKADDR_STORAGE   gsr_source;        128
+             * }
+             */
+            var bin = new byte[264];
+
+            int offset = 0;
+            Buffer.BlockCopy(BitConverter.GetBytes((ulong)ifaceIndex), 0, bin, offset, 4);
+            offset += 4;
+            offset += 4; // skip padding
+            FillSockAddrStorage(bin, offset, group);
+            offset += 128;
+            FillSockAddrStorage(bin, offset, source);
+
+            return bin;
+        }
+
+        private static void FillSockAddrStorage(byte[] dst, int offset, IPAddress address)
+        {
+            /*
+             * struct sockaddr_storage
+             * {
+             *     short ss_family;
+             *     char pad1[6];
+             *     int64 align;
+             *     char pad2[112]
+             * }
+             * 
+             * struct sockaddr_in
+             * {
+             *     short sin_familiy;
+             *     ushort sin_port;
+             *     byte[4] sin_addr;
+             *     char sin_zero[8]
+             * }
+             * 
+             * struct sockaddr_in6
+             * {
+             *     short sin6_family;
+             *     ushort sin6_port;
+             *     ulong sin6_flowinfo;
+             *     byte[16] sin6_addr
+             *     ulong sin6_scope_id;
+             * }
+             * 
+             */
+            Buffer.BlockCopy(BitConverter.GetBytes((short)AddressFamily.InterNetworkV6), 0, dst, offset, 2);
+            offset += 2;
+
+            if (address.AddressFamily == AddressFamily.InterNetwork)
+            {
+                offset += 2; // skip port, 2 bytes
+                Buffer.BlockCopy(address.GetAddressBytes(), 0, dst, offset, 4);
+                offset += 8; // skip zeros, 8 bytes
+            }
+            else if (address.AddressFamily == AddressFamily.InterNetworkV6)
+            {
+                offset += 2; // skip port, 2 bytes
+                offset += 4; // skip flowinfo, 4 bytes
+                Buffer.BlockCopy(address.GetAddressBytes(), 0, dst, offset, 16);
+                offset += 4; // skip scope id, 4 bytes
+            }
+        }
+
     }
 
     public class UdpMulticastClientStatusEventArgs : EventArgs

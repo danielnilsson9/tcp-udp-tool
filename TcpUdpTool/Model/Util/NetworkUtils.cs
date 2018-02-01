@@ -99,17 +99,37 @@ namespace TcpUdpTool.Model.Util
             if (ipAddress.AddressFamily == AddressFamily.InterNetworkV6)
             {
                 // In IPv6 Multicast addresses first byte is 0xFF
-                byte[] ipv6Bytes = ipAddress.GetAddressBytes();
-                isMulticast = (ipv6Bytes[0] == 0xff);
+                byte[] bytes = ipAddress.GetAddressBytes();
+                isMulticast = (bytes[0] == 0xff);
             }
             else if (ipAddress.AddressFamily == AddressFamily.InterNetwork)
             {
                 // In IPv4 Multicast addresses first byte is between 224 and 239
-                byte[] addressBytes = ipAddress.GetAddressBytes();
-                isMulticast = (addressBytes[0] >= 224) && (addressBytes[0] <= 239);
+                byte[] bytes = ipAddress.GetAddressBytes();
+                isMulticast = (bytes[0] >= 224) && (bytes[0] <= 239);
             }
 
             return isMulticast;
+        }
+
+        public static bool IsSourceSpecificMulticast(IPAddress ipAddress)
+        {
+            bool isSSM = false;
+
+            if (ipAddress.AddressFamily == AddressFamily.InterNetworkV6)
+            {
+                // In IPv6 SSM first byte is 0xFF and second byte is 0x3X
+                byte[] bytes = ipAddress.GetAddressBytes();
+                isSSM = (bytes[0] == 0xff && (bytes[1] >> 4) == 0x03);
+            }
+            else if (ipAddress.AddressFamily == AddressFamily.InterNetwork)
+            {
+                // In IPv4 SSM first byte is 232
+                byte[] addressBytes = ipAddress.GetAddressBytes();
+                isSSM = addressBytes[0] == 232;
+            }
+
+            return isSSM;
         }
 
         public static bool IsValidPort(int port, bool allowZero = false)

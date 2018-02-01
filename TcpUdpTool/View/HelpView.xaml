@@ -84,10 +84,10 @@
 
                 <Section>
                     <Paragraph FontWeight="Bold" FontSize="15" Margin="0 16 0 8">
-                        UDP Multicast
+                        UDP ASM
                     </Paragraph>
                     <Paragraph Margin="0">
-                        Participate in communication in UDP multicast groups. 
+                        Participate in communication in UDP any source multicast groups. 
                         Multicast traffic is if nothing else is specified only received 
                         on the default network interface. You may select which interface 
                         to listen on in the interface list. You can listen to all interfaces 
@@ -98,6 +98,22 @@
                     <Paragraph Margin="0 8 0 0">
                         <Run FontWeight="Bold">Note:</Run> If you are both listening and 
                         sending on multiple interfaces you may receive duplicated packages.
+                    </Paragraph>
+                </Section>
+
+                <Section>
+                    <Paragraph FontWeight="Bold" FontSize="15" Margin="0 16 0 8">
+                        UDP SSM
+                    </Paragraph>
+                    <Paragraph Margin="0">
+                        Receive packets from specific source multicast groups. 
+                        Multicast traffic is if nothing else is specified only received 
+                        on the default network interface. You may select which interface 
+                        to listen on in the interface list. You can listen to all interfaces 
+                        simultainiously by selecting
+                        <Run FontFamily="Consolas">All</Run>.
+                        Source specific multicast is filtered and packets will only be received 
+                        from the specified source ip address.
                     </Paragraph>
                 </Section>
 

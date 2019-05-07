@@ -66,8 +66,7 @@ namespace TcpUdpTool.ViewModel
                     try
                     {
                         var addr = IPAddress.Parse(_multicastGroup);
-
-                        if (!NetworkUtils.IsSourceSpecificMulticast(addr))
+                        if (!NetworkUtils.IsMulticast(addr))
                         {
                             throw new Exception();
                         }

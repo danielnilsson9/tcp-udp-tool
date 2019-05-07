@@ -30,7 +30,7 @@ namespace TcpUdpTool.Model
         public void JoinASM(IPAddress groupIp, int port, 
             EMulticastInterface iface, IPAddress specificIface = null)
         {
-            ValidateASM(groupIp, port);
+            Validate(groupIp, port);
 
             if (_udpClient != null)
                 return; // already started.
@@ -107,7 +107,7 @@ namespace TcpUdpTool.Model
         public void JoinSSM(IPAddress groupIp, IPAddress sourceIp, int port, 
             EMulticastInterface iface, IPAddress specificIface = null)
         {
-            ValidateSSM(groupIp, sourceIp, port);
+            Validate(groupIp, port);
 
             if (_udpClient != null)
                 return; // already started.
@@ -194,7 +194,7 @@ namespace TcpUdpTool.Model
         public async Task<TransmissionResult> SendAsync(Transmission msg, IPAddress groupIp, int port, 
             EMulticastInterface iface, IPAddress specificIface = null, int ttl = 1)
         {
-            ValidateASM(groupIp, port);
+            Validate(groupIp, port);
 
             if (_sendUdpClient == null || _sendUdpClient.Client.AddressFamily != groupIp.AddressFamily)
             {
@@ -343,29 +343,11 @@ namespace TcpUdpTool.Model
             }
         }
 
-        private void ValidateASM(IPAddress multicastGroup, int port)
+        private void Validate(IPAddress multicastGroup, int port)
         {
             if (!NetworkUtils.IsMulticast(multicastGroup))
             {
                 throw new ArgumentException(multicastGroup + " is not a vaild multicast address.");
-            }
-
-            if (!NetworkUtils.IsValidPort(port, false))
-            {
-                throw new ArgumentException(port + " is not a valid multicast port number.");
-            }
-        }
-
-        private void ValidateSSM(IPAddress ssmGroup, IPAddress source, int port)
-        {
-            if (ssmGroup.AddressFamily != source.AddressFamily)
-            {
-                throw new ArgumentException("Source address and multicast group is not of same address family.");
-            }
-
-            if (!NetworkUtils.IsSourceSpecificMulticast(ssmGroup))
-            {
-                throw new ArgumentException(ssmGroup + " is not a vaild multicast address.");
             }
 
             if (!NetworkUtils.IsValidPort(port, false))

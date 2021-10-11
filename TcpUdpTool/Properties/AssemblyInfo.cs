@@ -12,7 +12,7 @@ using System.Windows;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Daniel Nilsson")]
 [assembly: AssemblyProduct("TcpUdpTool")]
-[assembly: AssemblyCopyright("Copyright ©  2016")]
+[assembly: AssemblyCopyright("Copyright © 2021 Daniel Nilsson")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

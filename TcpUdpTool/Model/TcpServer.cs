@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
@@ -13,23 +15,37 @@ namespace TcpUdpTool.Model
         public event EventHandler<ReceivedEventArgs> Received;
         public event EventHandler<TcpServerStatusEventArgs> StatusChanged;
 
-
         private TcpListener _tcpServer;
-        private System.Net.Sockets.TcpClient _connectedClient;
+        private List<System.Net.Sockets.TcpClient> _connectedClients;
         private byte[] _buffer;
+
+
+        public int NumConnectedClients
+		{
+            get 
+            {
+                int count = 0;
+                lock(_connectedClients)
+				{
+                    count = _connectedClients.Count;
+				}
+
+                return count;
+            }
+		}
 
 
         public TcpServer()
         {
+            _connectedClients = new List<System.Net.Sockets.TcpClient>();
             _buffer = new byte[8192];
         }
-
 
         public void Start(IPAddress ip, int port)
         {
             if(_tcpServer != null)
                 return;
-                  
+            
             try
             {
                 _tcpServer = new TcpListener(new IPEndPoint(ip, port));
@@ -56,30 +72,56 @@ namespace TcpUdpTool.Model
             }            
         }
 
-        public async Task<TransmissionResult> SendAsync(Transmission msg)
+        public async Task<List<TransmissionResult>> SendAsync(Transmission msg)
         {
-            if(_connectedClient == null)
-            {
-                return null;
+            var result = new List<TransmissionResult>();
+
+            List<System.Net.Sockets.TcpClient> copy;
+            lock (_connectedClients)
+			{
+                copy = _connectedClients.ToList();
             }
 
-            IPEndPoint from = _connectedClient.Client.LocalEndPoint as IPEndPoint;
-            IPEndPoint to = _connectedClient.Client.RemoteEndPoint as IPEndPoint;
+            foreach (var c in copy)
+            {
+                IPEndPoint from = c.Client.LocalEndPoint as IPEndPoint;
+                IPEndPoint to = c.Client.RemoteEndPoint as IPEndPoint;
 
-            await _connectedClient.GetStream().WriteAsync(msg.Data, 0, msg.Length);
+				try
+				{
+                    await c.GetStream().WriteAsync(msg.Data, 0, msg.Length);
+                    result.Add(new TransmissionResult { From = from, To = to });
+                }
+                catch(Exception)
+				{
+                    DisconnectClient(c);
+				}
+            }
 
-            return new TransmissionResult() { From = from, To = to };
+            return result;
         }
 
         public void Disconnect()
         {
             // close client connection.
-            if(_connectedClient != null)
-            {
-                _connectedClient.Close();
-                _connectedClient = null;
-                OnStatusChanged(TcpServerStatusEventArgs.EServerStatus.ClientDisconnected);
-            }  
+
+            List<System.Net.Sockets.TcpClient> copy;
+            lock(_connectedClients)
+			{
+                copy = _connectedClients.ToList();
+			}
+
+            foreach(var c in copy)
+			{
+                OnClientStatusChanged(TcpServerStatusEventArgs.EServerStatus.ClientDisconnected, c);
+                c.Close();
+                c.Dispose();
+            }
+
+            lock(_connectedClients)
+			{
+                _connectedClients.Clear();
+            }       
         }
 
 
@@ -91,19 +133,13 @@ namespace TcpUdpTool.Model
                 {
                     try
                     {
-                        System.Net.Sockets.TcpClient client = await _tcpServer.AcceptTcpClientAsync();
-
-                        if (_connectedClient == null)
-                        {
-                            _connectedClient = client;
-                            OnStatusChanged(TcpServerStatusEventArgs.EServerStatus.ClientConnected);
-                            StartReceive();
-                        }
-                        else
-                        {
-                            // only one connection allowed, close this request.
-                            client.Close();
-                        }
+                        var client = await _tcpServer.AcceptTcpClientAsync();
+                        lock(_connectedClients)
+						{
+                            _connectedClients.Add(client);
+                        }                    
+                        OnClientStatusChanged(TcpServerStatusEventArgs.EServerStatus.ClientConnected, client);
+                        StartReceive(client);
                     }
                     catch(Exception ex)
                     when(ex is SocketException || ex is ObjectDisposedException)
@@ -115,40 +151,40 @@ namespace TcpUdpTool.Model
             });
         }
 
-        private void StartReceive()
+        private void StartReceive(System.Net.Sockets.TcpClient client)
         {
             Task.Run(async () =>
             {
-                while (_connectedClient != null)
-                {
+                bool stop = false;
+                while (!stop)
+				{
                     try
                     {
-                        int read = await _connectedClient.GetStream().ReadAsync(_buffer, 0, _buffer.Length);
+                        int read = await client.GetStream().ReadAsync(_buffer, 0, _buffer.Length);
 
                         if (read > 0)
                         {
                             byte[] data = new byte[read];
                             Array.Copy(_buffer, data, read);
 
-
                             Transmission msg = new Transmission(data, Transmission.EType.Received);
-                            msg.Destination = _connectedClient.Client.LocalEndPoint as IPEndPoint;
-                            msg.Origin = _connectedClient.Client.RemoteEndPoint as IPEndPoint;
+                            msg.Destination = client.Client.LocalEndPoint as IPEndPoint;
+                            msg.Origin = client.Client.RemoteEndPoint as IPEndPoint;
 
                             Received?.Invoke(this, new ReceivedEventArgs(msg));
                         }
                         else
                         {
                             // server closed connection.
-                            Disconnect();
-                            break;
+                            DisconnectClient(client);
+                            stop = true;
                         }
                     }
                     catch (Exception e)
                     when (e is ObjectDisposedException || e is InvalidOperationException)
                     {
-                        Disconnect();
-                        break;
+                        DisconnectClient(client);
+                        stop = true;
                     }
                 }
             });    
@@ -157,16 +193,42 @@ namespace TcpUdpTool.Model
         private void OnStatusChanged(TcpServerStatusEventArgs.EServerStatus status)
         {        
             StatusChanged?.Invoke(this, new TcpServerStatusEventArgs(status, 
-                _tcpServer?.LocalEndpoint as IPEndPoint, 
-                _connectedClient?.Client.RemoteEndPoint as IPEndPoint));
+                _tcpServer?.LocalEndpoint as IPEndPoint, null));
+        }
+
+        private void OnClientStatusChanged(TcpServerStatusEventArgs.EServerStatus status, System.Net.Sockets.TcpClient client)
+		{
+            StatusChanged?.Invoke(this, new TcpServerStatusEventArgs(status,
+                _tcpServer?.LocalEndpoint as IPEndPoint, client.Client.RemoteEndPoint as IPEndPoint));
+        }
+
+        private void DisconnectClient(System.Net.Sockets.TcpClient client)
+		{
+            lock(_connectedClients)
+            {
+                _connectedClients.Remove(client);
+            }
+
+            OnClientStatusChanged(TcpServerStatusEventArgs.EServerStatus.ClientDisconnected, client);
+            client.Close();
+            client.Dispose();
         }
 
         public void Dispose()
         {
+            lock (_connectedClients)
+            {
+                foreach (var c in _connectedClients)
+                {
+                    c.Close();
+                    c.Dispose();
+                }
+
+                _connectedClients.Clear();
+            }
+
             _tcpServer?.Stop();
             _tcpServer = null;
-            _connectedClient?.Close();
-            _connectedClient = null;
         }
     }
 

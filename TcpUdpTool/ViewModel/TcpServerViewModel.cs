@@ -9,6 +9,7 @@ using TcpUdpTool.Model.Util;
 using TcpUdpTool.ViewModel.Item;
 using TcpUdpTool.ViewModel.Base;
 using System.Windows;
+using System.Collections.Generic;
 
 namespace TcpUdpTool.ViewModel
 {
@@ -159,17 +160,23 @@ namespace TcpUdpTool.ViewModel
                     {
                         History.Header = "Conversation";
                         IsStarted = false;
-                    }
-                    else if(arg.Status == TcpServerStatusEventArgs.EServerStatus.ClientConnected)
-                    {
-                        History.Header = "Connected client: < " + arg.ClientInfo.ToString() + " >";
-                        IsClientConnected = true;
-                    }
-                    else if(arg.Status == TcpServerStatusEventArgs.EServerStatus.ClientDisconnected)
-                    {
-                        History.Header = "Listening on: < " + arg.ServerInfo.ToString() + " >";
                         IsClientConnected = false;
-                    }               
+                    }
+                    else if(arg.Status == TcpServerStatusEventArgs.EServerStatus.ClientConnected || 
+                            arg.Status == TcpServerStatusEventArgs.EServerStatus.ClientDisconnected)
+                    {
+                        IsClientConnected = _tcpServer.NumConnectedClients > 0;
+
+                        if (IsClientConnected)
+						{
+                            History.Header = "Connected client(s): < " + (_tcpServer.NumConnectedClients > 1
+                            ? _tcpServer.NumConnectedClients.ToString() : arg.ClientInfo.ToString()) + " >";
+                        }
+						else
+						{
+                            History.Header = "Listening on: < " + arg.ServerInfo.ToString() + " >";
+                        }
+                    }             
                 };
 
             _tcpServer.Received +=
@@ -236,13 +243,17 @@ namespace TcpUdpTool.ViewModel
             try
             {
                 Transmission msg = new Transmission(data, Transmission.EType.Sent);
-                History.Append(msg);
-                TransmissionResult res = await _tcpServer.SendAsync(msg);
+                List<TransmissionResult> res = await _tcpServer.SendAsync(msg);
                 if (res != null)
                 {
-                    msg.Origin = res.From;
-                    msg.Destination = res.To;
-                    Send.Message = "";
+                    foreach (var sendResult in res)
+					{
+                        Transmission entry = new Transmission(data, Transmission.EType.Sent);
+                        msg.Origin = sendResult.From;
+                        msg.Destination = sendResult.To;
+                        Send.Message = "";
+                        History.Append(msg);
+                    }
                 }
             }
             catch(Exception ex)
